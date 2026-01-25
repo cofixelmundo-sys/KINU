@@ -14,124 +14,100 @@
         
         .phone { width: 360px; height: 740px; background: var(--fondo); border-radius: 45px; border: 12px solid #000; overflow: hidden; position: relative; display: flex; flex-direction: column; }
         
-        /* POPUPS GENÉRICOS */
+        /* POPUPS */
         .kinu-popup { 
             display: none; position: absolute; top: 50%; left: 50%; 
             transform: translate(-50%, -50%); width: 260px; background: white; 
             border-radius: 30px; padding: 25px; text-align: center; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 3000; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 4000; 
         }
         @keyframes fadeInUp {
             from { opacity: 0; transform: translate(-50%, -40%); }
             to { opacity: 1; transform: translate(-50%, -50%); }
         }
 
-        /* ESTILOS DE BOTONES EN POPUP */
         .btn-confirmar-borrar { background: var(--rojo); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%; }
         .btn-cancelar { background: #eee; color: #666; border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
 
-        /* MODAL IA */
-        #modal-ia { display: none; position: absolute; inset: 0; background: white; z-index: 2000; flex-direction: column; }
+        /* HEADER Y NAVEGACIÓN (CAPAS SUPERIORES) */
+        header { 
+            padding: 10px 20px 15px; background: white; 
+            display: flex; flex-direction: column; align-items: center; 
+            flex-shrink: 0; z-index: 1000; box-shadow: 0 2px 15px rgba(0,0,0,0.04); 
+        }
+        
+        nav { 
+            height: 85px; background: white; border-top: 1px solid #eee; 
+            display: flex; justify-content: space-around; align-items: center; 
+            padding-bottom: 15px; z-index: 1000; position: relative; /* Asegura que tape la ropa */
+        }
+
+        /* CONTENIDO Y SCROLL */
+        #main-app { display: none; flex-direction: column; height: 100%; position: relative; }
+        .content { 
+            flex-grow: 1; 
+            padding: 15px; 
+            overflow-y: auto; 
+            z-index: 1; /* Por debajo de header y nav */
+            margin-bottom: 0;
+        }
+
+        /* ESTILOS RESTANTES */
+        #modal-ia { display: none; position: absolute; inset: 0; background: white; z-index: 3000; flex-direction: column; }
         .modal-header { background: var(--verde); color: white; padding: 15px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         #iframe-ia { width: 100%; flex-grow: 1; border: none; }
 
-        /* LOGIN / HEADER */
-        #auth-screen { position: absolute; inset: 0; background: var(--verde); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
-        .logo-welcome { width: 180px; height: auto; margin-bottom: 10px; }
-        .brand-text-welcome { font-family: Arial, sans-serif; font-weight: bold; color: white; font-size: 28px; letter-spacing: 8px; margin-bottom: 40px; text-indent: 8px; }
-        header { padding: 10px 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; z-index: 100; box-shadow: 0 2px 15px rgba(0,0,0,0.04); }
-        .logo-header { width: 80px; height: auto; margin-bottom: 5px; }
-        .brand-text-header { font-family: Arial, sans-serif; font-weight: bold; color: var(--verde); font-size: 16px; letter-spacing: 4px; text-indent: 4px; }
-        
-        #main-app { display: none; flex-direction: column; height: 100%; position: relative; }
-        .content { flex-grow: 1; padding: 15px; overflow-y: auto; }
-        .screen { display: none; flex-direction: column; width: 100%; height: 100%; }
-        .screen.active { display: flex; }
-        
-        /* CARD PANELS */
         .card-panel { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 10px; }
         .section-title { font-size: 10px; font-weight: 800; color: var(--verde); margin-bottom: 8px; display: block; text-transform: uppercase; letter-spacing: 1.5px; }
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 10px; scrollbar-width: none; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 75px; cursor: pointer; }
-        .cat-circle { width: 60px; height: 60px; border-radius: 50%; background: #f9f9f9; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; }
-        .cat-circle i { font-size: 26px; color: var(--verde); }
-        .cat-item.active .cat-circle { background: var(--verde); border-color: var(--verde); }
-        .cat-item.active .cat-circle i { color: white !important; }
-        .cat-label { font-size: 8px; font-weight: 700; color: #999; text-transform: uppercase; }
         
-        select, input[type="text"] { width: 100%; padding: 12px; margin: 4px 0; border-radius: 12px; border: 1px solid #eee; outline: none; font-size: 14px; }
-        
-        .btn-accion { background: #BDC3C7; color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 10px; opacity: 0.6; }
-        .btn-accion.ready { background: var(--verde); cursor: pointer; opacity: 1; animation: pulse 2s infinite; }
-        
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(45, 70, 54, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(45, 70, 54, 0); } 100% { box-shadow: 0 0 0 0 rgba(45, 70, 54, 0); } }
-
-        /* GALERIA */
-        .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px; }
         .prenda-card { background: #EAEAEA; border-radius: 18px; overflow: hidden; position: relative; height: 170px; display: flex; align-items: center; justify-content: center; }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(45,70,54,0.9); color: white; font-size: 9px; padding: 7px; text-align: center; font-weight: bold; }
         
-        /* NAV */
-        nav { height: 85px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding-bottom: 15px; }
+        .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
         .nav-item.active { color: var(--verde); }
-        .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
 <div class="phone">
     <div id="notificacion-exito" class="kinu-popup" style="border: 2px solid var(--verde);">
-        <div style="width:50px; height:50px; background:var(--verde); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
-            <i class="ph ph-check ph-bold" style="color:white; font-size:24px;"></i>
-        </div>
-        <h3 style="margin:0; font-size:15px; color:var(--verde); font-weight:800;">¡LISTO!</h3>
-        <p style="margin:5px 0 0; font-size:11px; color:#666;">Prenda agregada al closet</p>
+        <i class="ph ph-check-circle" style="color:var(--verde); font-size:40px;"></i>
+        <h3 style="color:var(--verde);">¡LISTO!</h3>
+        <p>Prenda guardada</p>
     </div>
 
     <div id="notificacion-borrar" class="kinu-popup" style="border: 2px solid var(--rojo);">
-        <div style="width:50px; height:50px; background:var(--rojo); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
-            <i class="ph ph-trash ph-bold" style="color:white; font-size:24px;"></i>
-        </div>
-        <h3 style="margin:0; font-size:15px; color:var(--rojo); font-weight:800;">¿BORRAR?</h3>
-        <p style="margin:5px 0 0; font-size:11px; color:#666;">Esta acción no se puede deshacer</p>
+        <i class="ph ph-trash" style="color:var(--rojo); font-size:40px;"></i>
+        <h3>¿BORRAR?</h3>
         <button id="confirmar-delete-btn" class="btn-confirmar-borrar">ELIMINAR</button>
         <button onclick="cerrarPopupBorrar()" class="btn-cancelar">CANCELAR</button>
     </div>
 
     <div id="modal-ia">
         <div class="modal-header">
-            <button onclick="cerrarIA()" style="background:none; border:none; color:white; cursor:pointer;"><i class="ph ph-arrow-left" style="font-size:20px;"></i></button>
-            <span style="font-size:12px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">Photo Studio AI</span>
+            <button onclick="cerrarIA()" style="background:none; border:none; color:white;"><i class="ph ph-arrow-left"></i></button>
+            <span>PHOTO STUDIO AI</span>
         </div>
         <iframe id="iframe-ia" src=""></iframe>
     </div>
 
     <div id="auth-screen">
-        <img src="https://i.imgur.com/yTIrTq2.png" alt="KINU Logo" class="logo-welcome">
-        <div class="brand-text-welcome">KINU</div>
-        <button onclick="entrarApp()" style="background:white; color:var(--verde); border:none; padding:16px 60px; border-radius:35px; font-weight:bold; cursor:pointer;">ENTRAR</button>
+        <img src="https://i.imgur.com/yTIrTq2.png" class="logo-welcome">
+        <button onclick="entrarApp()" style="background:white; color:var(--verde); padding:15px 40px; border-radius:30px; border:none; font-weight:bold;">ENTRAR</button>
     </div>
 
     <div id="main-app">
         <header>
-            <img src="https://i.imgur.com/yTIrTq2.png" alt="KINU Logo" class="logo-header">
-            <div class="brand-text-header">KINU</div>
+            <img src="https://i.imgur.com/yTIrTq2.png" style="width:70px;">
+            <div style="color:var(--verde); letter-spacing:4px; font-weight:bold; font-size:14px;">KINU</div>
         </header>
         
         <div class="content">
             <div id="pantalla-home" class="screen active">
-                <button id="auth-btn" style="background:#4285F4; color:white; border:none; padding:12px; border-radius:12px; width:100%; font-size:11px; font-weight:bold; cursor:pointer; margin-bottom:15px;" onclick="vincularGoogleDriveReal()">VINCULAR GOOGLE DRIVE</button>
-                <div class="card-panel">
-                    <span class="section-title">Categorías</span>
-                    <div class="filter-scroll">
-                        <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
-                        <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
-                        <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
-                        <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-watch"></i></div><span class="cat-label">Accesorios</span></div>
-                    </div>
-                </div>
+                <button id="auth-btn" style="background:#4285F4; color:white; border:none; padding:12px; border-radius:12px; width:100%; font-size:11px; margin-bottom:15px;" onclick="vincularGoogleDriveReal()">VINCULAR DRIVE</button>
                 <div class="card-panel">
                     <span class="section-title">Nueva Prenda</span>
                     <select id="main-cat">
@@ -140,7 +116,7 @@
                         <option value="CALZADO">Calzado</option>
                         <option value="ACCESORIOS">Accesorios</option>
                     </select>
-                    <input type="text" id="sub-cat" placeholder="Nombre (ej. Blazer Negro)">
+                    <input type="text" id="sub-cat" placeholder="Nombre (ej. Remera Azul)">
                 </div>
                 <button id="btn-final" class="btn-accion" onclick="procesarSubidaFinal()">
                     <i class="ph ph-plus-circle"></i> <span id="btn-text">AGREGAR PRENDA</span>
@@ -148,17 +124,17 @@
             </div>
 
             <div id="pantalla-closet" class="screen">
-                <input type="text" id="busqueda" placeholder="🔍 Buscar..." oninput="filtrarGaleria()">
+                <input type="text" id="busqueda" placeholder="🔍 Buscar..." oninput="filtrarGaleria()" style="margin-bottom:15px;">
                 <div id="galeria-real" class="galeria-grid"></div>
             </div>
         </div>
 
         <nav>
-            <div class="nav-item active" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house"></i><span>INICIO</span></div>
+            <div class="nav-item active" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house" style="font-size:24px;"></i><span>INICIO</span></div>
             <div class="nav-item" onclick="document.getElementById('input-camara').click()">
                 <div class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
             </div>
-            <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive"></i><span>CLOSET</span></div>
+            <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i><span>CLOSET</span></div>
         </nav>
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
@@ -187,12 +163,12 @@
         const procesada = localStorage.getItem('imagen_procesada');
         if (procesada) {
             imagenListaParaSubir = procesada;
-            document.getElementById('btn-final').classList.add('ready');
+            const btn = document.getElementById('btn-final');
+            btn.classList.add('ready');
             botonActivo = true;
         }
     };
 
-    // MOSTRAR POPUP DE BORRADO
     function abrirPopupBorrar(id) {
         idPrendaABorrar = id;
         const pop = document.getElementById('notificacion-borrar');
@@ -207,54 +183,34 @@
 
     document.getElementById('confirmar-delete-btn').onclick = async () => {
         if (!idPrendaABorrar) return;
-        const originalText = document.getElementById('confirmar-delete-btn').innerText;
-        document.getElementById('confirmar-delete-btn').innerText = "BORRANDO...";
-        
-        await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaABorrar}`, { 
-            method: 'DELETE', 
-            headers: { Authorization: `Bearer ${accessToken}` } 
-        });
-        
-        document.getElementById('confirmar-delete-btn').innerText = originalText;
+        await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaABorrar}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } });
         cerrarPopupBorrar();
         cargarFotosCloset();
     };
 
     async function procesarSubidaFinal() {
-        if (!botonActivo) return;
-        const btn = document.getElementById('btn-final');
-        const txt = document.getElementById('btn-text');
-        txt.innerText = "SUBIENDO...";
-        
+        if (!botonActivo || !accessToken) return;
         const categoria = document.getElementById('main-cat').value;
         const nombre = document.getElementById('sub-cat').value || "Prenda";
         const fileName = `KINU_${categoria}_${nombre}_${Date.now()}.png`;
+        const base64Data = imagenListaParaSubir.split(',')[1];
+        const metadata = { name: fileName, parents: [folderId] };
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', new Blob([Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))], { type: 'image/png' }));
 
-        try {
-            const base64Data = imagenListaParaSubir.split(',')[1];
-            const metadata = { name: fileName, parents: [folderId] };
-            const form = new FormData();
-            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            form.append('file', new Blob([Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))], { type: 'image/png' }));
+        const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form
+        });
 
-            const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form
-            });
-
-            if (resp.ok) {
-                const aviso = document.getElementById('notificacion-exito');
-                aviso.style.display = 'block';
-                aviso.style.animation = 'fadeInUp 0.4s ease-out forwards';
-                
-                imagenListaParaSubir = null; botonActivo = false;
-                localStorage.removeItem('imagen_procesada');
-                btn.classList.remove('ready'); txt.innerText = "AGREGAR PRENDA";
-                document.getElementById('sub-cat').value = "";
-                
-                setTimeout(() => { aviso.style.display = 'none'; }, 2500);
-                cargarFotosCloset();
-            }
-        } catch (e) { alert("Error al subir"); }
+        if (resp.ok) {
+            const aviso = document.getElementById('notificacion-exito');
+            aviso.style.display = 'block';
+            setTimeout(() => aviso.style.display = 'none', 2000);
+            botonActivo = false;
+            document.getElementById('btn-final').classList.remove('ready');
+            cargarFotosCloset();
+        }
     }
 
     // DRIVE LOGIC
@@ -297,26 +253,22 @@
         const search = document.getElementById('busqueda').value.toLowerCase();
         todasLasPrendas.filter(p => {
             const pts = p.name.split('_');
-            const matchCat = filtroActual === 'TODO' || (pts[1] === filtroActual);
-            const matchSearch = p.name.toLowerCase().includes(search);
-            return matchCat && matchSearch;
+            return (filtroActual === 'TODO' || pts[1] === filtroActual) && p.name.toLowerCase().includes(search);
         }).forEach(f => {
             const thumb = f.thumbnailLink ? f.thumbnailLink.replace('=s220', '=s600') : '';
             const card = document.createElement('div');
             card.className = 'prenda-card';
-            card.innerHTML = `<button onclick="abrirPopupBorrar('${f.id}')" style="position:absolute; top:8px; right:8px; background:var(--rojo); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; z-index:10; display:flex; align-items:center; justify-content:center; font-size:12px;">✕</button><img src="${thumb}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2] || 'ROPA'}</div>`;
+            card.innerHTML = `<button onclick="abrirPopupBorrar('${f.id}')" style="position:absolute; top:8px; right:8px; background:var(--rojo); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; z-index:10;">✕</button><img src="${thumb}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2] || 'ROPA'}</div>`;
             gal.appendChild(card);
         });
     }
 
-    function irACategoria(c) { filtroActual = c; cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); }
     function cambiarTab(id, el, reset=false) {
         if(reset) filtroActual = 'TODO';
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        if(id === 'pantalla-closet') filtrarGaleria();
     }
 </script>
 </body>

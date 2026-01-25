@@ -12,6 +12,13 @@
         * { box-sizing: border-box; transition: all 0.3s ease; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #121212; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .phone { width: 360px; height: 740px; background: var(--fondo); border-radius: 45px; border: 12px solid #000; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        
+        /* ESTILOS DEL MODAL INTERNO PARA LA IA */
+        #modal-ia { display: none; position: absolute; inset: 0; background: white; z-index: 2000; flex-direction: column; }
+        .modal-header { background: var(--verde); color: white; padding: 15px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .btn-cerrar-modal { background: none; border: none; color: white; cursor: pointer; display: flex; align-items: center; }
+        #iframe-ia { width: 100%; flex-grow: 1; border: none; }
+
         #auth-screen { position: absolute; inset: 0; background: var(--verde); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
         .logo-welcome { width: 180px; height: auto; margin-bottom: 10px; }
         .brand-text-welcome { font-family: Arial, sans-serif; font-weight: bold; color: white; font-size: 28px; letter-spacing: 8px; margin-bottom: 40px; text-indent: 8px; }
@@ -45,11 +52,21 @@
         .nav-item i { font-size: 24px; margin-bottom: 4px; }
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-camera i { color: white; font-size: 26px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .spinning { animation: spin 1s linear infinite; }
     </style>
 </head>
 <body>
 
 <div class="phone">
+    <div id="modal-ia">
+        <div class="modal-header">
+            <button onclick="cerrarIA()" class="btn-cerrar-modal"><i class="ph ph-arrow-left" style="font-size:20px;"></i></button>
+            <span style="font-size:12px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">Photo Studio AI</span>
+        </div>
+        <iframe id="iframe-ia" src=""></iframe>
+    </div>
+
     <div id="auth-screen">
         <img src="https://i.imgur.com/yTIrTq2.png" alt="KINU Logo" class="logo-welcome">
         <div class="brand-text-welcome">KINU</div>
@@ -81,7 +98,7 @@
                         <option value="CALZADO">Calzado</option>
                         <option value="ACCESORIOS">Accesorios</option>
                     </select>
-                    <input type="text" id="sub-cat" placeholder="Nombre (ej. Gafas de sol)">
+                    <input type="text" id="sub-cat" placeholder="Nombre (ej. Camisa Blanca)">
                 </div>
                 <button class="btn-recomendar" onclick="alert('Funcionalidad de IA activa. ¡Prueba subir una prenda!')">INFO KINU</button>
             </div>
@@ -109,41 +126,36 @@
         document.getElementById('main-app').style.display = 'flex';
     }
 
-    // --- FUNCIÓN PARA ABRIR PHOTO STUDIO COMO POP-UP ---
+    // --- FUNCIÓN PARA ABRIR LA IA EN VENTANA INTERNA (IFRAME) ---
     async function transferirAPhotoStudio(file) {
         if (!file) return;
-
         const reader = new FileReader();
         reader.onloadend = function() {
             try {
-                // Guardamos imagen en localStorage
+                // Guardamos la imagen en localStorage para que el iframe la lea
                 localStorage.setItem('imagen_transferida', reader.result);
                 
-                // Configuración de ventana Pop-up (Tamaño iPhone/KINU)
-                const ancho = 360; 
-                const alto = 740;
-                const left = (window.screen.width / 2) - (ancho / 2);
-                const top = (window.screen.height / 2) - (alto / 2);
-
-                const popup = window.open(
-                    'photo_studio.html', 
-                    'PhotoStudioPopup', 
-                    `width=${ancho},height=${alto},left=${left},top=${top},menubar=no,status=no,resizable=no`
-                );
-
-                if (!popup) {
-                    alert("Por favor, permite las ventanas emergentes para abrir la edición.");
-                    window.location.href = 'photo_studio.html';
-                }
+                // Cargamos la página en el iframe y mostramos el modal
+                const modal = document.getElementById('modal-ia');
+                const iframe = document.getElementById('iframe-ia');
+                
+                iframe.src = 'photo_studio.html';
+                modal.style.display = 'flex';
             } catch (e) {
-                console.error(e);
-                alert("Error: Imagen demasiado grande.");
+                alert("Error al procesar la imagen.");
             }
         }
         reader.readAsDataURL(file);
     }
 
-    // --- LÓGICA GOOGLE DRIVE ---
+    function cerrarIA() {
+        document.getElementById('modal-ia').style.display = 'none';
+        document.getElementById('iframe-ia').src = ''; // Limpiamos el iframe
+        // Recargamos el closet por si se guardó algo
+        if (accessToken) cargarFotosCloset();
+    }
+
+    // LÓGICA DE GOOGLE DRIVE ORIGINAL
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] })); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({

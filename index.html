@@ -45,8 +45,6 @@
         .nav-item i { font-size: 24px; margin-bottom: 4px; }
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-camera i { color: white; font-size: 26px; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        .spinning { animation: spin 1s linear infinite; }
     </style>
 </head>
 <body>
@@ -83,7 +81,7 @@
                         <option value="CALZADO">Calzado</option>
                         <option value="ACCESORIOS">Accesorios</option>
                     </select>
-                    <input type="text" id="sub-cat" placeholder="Nombre (ej. Camisa Blanca)">
+                    <input type="text" id="sub-cat" placeholder="Nombre (ej. Gafas de sol)">
                 </div>
                 <button class="btn-recomendar" onclick="alert('Funcionalidad de IA activa. ¡Prueba subir una prenda!')">INFO KINU</button>
             </div>
@@ -111,22 +109,41 @@
         document.getElementById('main-app').style.display = 'flex';
     }
 
-    // FUNCIÓN PARA ENVIAR LA IMAGEN A LA OTRA APP
+    // --- FUNCIÓN PARA ABRIR PHOTO STUDIO COMO POP-UP ---
     async function transferirAPhotoStudio(file) {
         if (!file) return;
+
         const reader = new FileReader();
         reader.onloadend = function() {
             try {
+                // Guardamos imagen en localStorage
                 localStorage.setItem('imagen_transferida', reader.result);
-                window.location.href = 'photo_studio.html'; 
+                
+                // Configuración de ventana Pop-up (Tamaño iPhone/KINU)
+                const ancho = 360; 
+                const alto = 740;
+                const left = (window.screen.width / 2) - (ancho / 2);
+                const top = (window.screen.height / 2) - (alto / 2);
+
+                const popup = window.open(
+                    'photo_studio.html', 
+                    'PhotoStudioPopup', 
+                    `width=${ancho},height=${alto},left=${left},top=${top},menubar=no,status=no,resizable=no`
+                );
+
+                if (!popup) {
+                    alert("Por favor, permite las ventanas emergentes para abrir la edición.");
+                    window.location.href = 'photo_studio.html';
+                }
             } catch (e) {
-                alert("La imagen es demasiado grande para transferirla automáticamente.");
+                console.error(e);
+                alert("Error: Imagen demasiado grande.");
             }
         }
         reader.readAsDataURL(file);
     }
 
-    // LÓGICA DE GOOGLE DRIVE ORIGINAL
+    // --- LÓGICA GOOGLE DRIVE ---
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] })); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({

@@ -6,13 +6,12 @@
     <title>Photo Studio Pro AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Estilo para que encaje en la ventana interna de KINU */
         body {
             background-color: #09090b;
             margin: 0;
             padding: 15px;
             height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -30,38 +29,15 @@
         .frame-container {
             position: relative;
             width: 100%;
-            max-width: 320px; /* Ajustado para el ancho del iPhone en KINU */
-            margin-top: 10px;
+            max-width: 320px;
+            margin-top: 20px;
         }
 
-        .btn-camera-circle {
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 65px;
-            height: 65px;
-            background-color: #2D4636; /* Verde KINU */
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid #09090b;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            z-index: 30;
-        }
-
-        .btn-camera-circle:hover {
-            transform: translateX(-50%) scale(1.05);
-            background-color: #3a5a45;
-        }
-
-        .camera-icon-svg {
-            width: 28px;
-            height: 28px;
-            fill: white;
+        #result-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            z-index: 10;
         }
     </style>
 </head>
@@ -73,55 +49,48 @@
         </div>
     </div>
 
-    <div class="frame-container mb-12">
+    <div class="frame-container mb-8">
         <div class="w-full aspect-square rounded-[2rem] border border-zinc-800 checkerboard flex items-center justify-center relative overflow-hidden shadow-2xl">
-            <img id="result-image" class="absolute inset-0 w-full h-full object-contain z-10 hidden" />
+            <img id="result-image" class="hidden" />
             
             <div id="empty-state" class="text-center z-0 p-4">
                 <div class="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-zinc-800">
                     <span class="text-2xl">✨</span>
                 </div>
-                <p class="text-zinc-500 text-xs font-medium">Esperando imagen de KINU...</p>
+                <p class="text-zinc-500 text-xs font-medium">Procesando prenda de KINU...</p>
             </div>
 
             <div id="loader" class="absolute inset-0 bg-zinc-950/90 z-20 hidden flex flex-col items-center justify-center backdrop-blur-sm">
                 <div class="w-10 h-10 border-[3px] border-green-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p class="text-white font-bold text-[10px] tracking-widest uppercase">Analizando Prenda...</p>
+                <p class="text-white font-bold text-[10px] tracking-widest uppercase">Quitando Fondo...</p>
             </div>
         </div>
-
-        <button id="btn-camera" class="btn-camera-circle" onclick="document.getElementById('input-file').click()">
-            <svg class="camera-icon-svg" viewBox="0 0 24 24">
-                <path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-2a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
-            </svg>
-        </button>
     </div>
 
     <div class="w-full max-w-md flex flex-col items-center gap-4">
-        <input type="file" id="input-file" accept="image/*" class="hidden">
-        
-        <button id="btn-download" class="hidden w-full bg-zinc-100 hover:bg-white text-black py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all text-sm shadow-lg">
-            <span>💾</span> GUARDAR EN EL CLOSET
+        <button id="btn-save-back" class="hidden w-full bg-white text-black py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all text-sm shadow-lg active:scale-95">
+            <span>✅</span> GUARDAR Y CLASIFICAR EN KINU
         </button>
 
         <p class="text-[10px] text-zinc-500 text-center px-6">
-            La IA recortará automáticamente la prenda para que luzca perfecta en tu galería.
+            Al hacer clic, volverás a KINU para elegir la categoría y subirla a tu Drive.
         </p>
     </div>
 
     <script>
+        // Tu API KEY de Remove.bg
         const API_KEY = 'DMyvHPSJGrrKqVpFzkMB1ua8'; 
         const resultImg = document.getElementById('result-image');
         const loader = document.getElementById('loader');
         const emptyState = document.getElementById('empty-state');
-        const btnDownload = document.getElementById('btn-download');
-        let processedBlob = null;
+        const btnSave = document.getElementById('btn-save-back');
+        let finalBase64 = null;
 
         async function procesarImagen(blob) {
             loader.classList.remove('hidden');
             emptyState.classList.add('hidden');
-            btnDownload.classList.add('hidden');
             resultImg.classList.add('hidden');
+            btnSave.classList.add('hidden');
 
             const formData = new FormData();
             formData.append('image_file', blob);
@@ -135,68 +104,77 @@
                 });
 
                 if (response.ok) {
-                    processedBlob = await response.blob();
-                    resultImg.src = URL.createObjectURL(processedBlob);
-                    resultImg.classList.remove('hidden');
-                    btnDownload.classList.remove('hidden');
+                    const resultBlob = await response.blob();
+                    
+                    // Recorte automático de bordes transparentes (Crop)
+                    const img = new Image();
+                    img.src = URL.createObjectURL(resultBlob);
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        
+                        // Lógica de recorte de pixeles vacíos
+                        const data = ctx.getImageData(0,0, canvas.width, canvas.height).data;
+                        let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
+                        for (let y = 0; y < canvas.height; y++) {
+                            for (let x = 0; x < canvas.width; x++) {
+                                if (data[(y * canvas.width + x) * 4 + 3] > 0) {
+                                    if (x < minX) minX = x; if (y < minY) minY = y;
+                                    if (x > maxX) maxX = x; if (y > maxY) maxY = y;
+                                }
+                            }
+                        }
+                        
+                        const cropCanvas = document.createElement('canvas');
+                        cropCanvas.width = (maxX - minX) + 1;
+                        cropCanvas.height = (maxY - minY) + 1;
+                        cropCanvas.getContext('2d').drawImage(img, minX, minY, cropCanvas.width, cropCanvas.height, 0, 0, cropCanvas.width, cropCanvas.height);
+                        
+                        finalBase64 = cropCanvas.toDataURL("image/png");
+                        resultImg.src = finalBase64;
+                        
+                        resultImg.classList.remove('hidden');
+                        btnSave.classList.remove('hidden');
+                        loader.classList.add('hidden');
+                    };
                 } else {
-                    alert("Agotaste los créditos de la API o hubo un error.");
+                    alert("Error en la IA. Verifica tus créditos de remove.bg.");
+                    loader.classList.add('hidden');
                 }
             } catch (e) {
-                alert("Error de conexión con el servidor de IA.");
-            } finally {
+                alert("Error de conexión.");
                 loader.classList.add('hidden');
             }
         }
 
-        // Lógica automática al detectar imagen de KINU
+        // Se ejecuta automáticamente al abrirse dentro de KINU
         window.onload = async () => {
             const imageData = localStorage.getItem('imagen_transferida');
             if (imageData) {
-                localStorage.removeItem('imagen_transferida'); // Limpieza
                 const res = await fetch(imageData);
                 const blob = await res.blob();
                 procesarImagen(blob);
             }
         };
 
-        document.getElementById('input-file').onchange = (e) => {
-            if (e.target.files[0]) procesarImagen(e.target.files[0]);
-        };
-
-        // Función de recorte automático y descarga
-        btnDownload.onclick = () => {
-            if (!processedBlob) return;
-            const img = new Image();
-            img.src = URL.createObjectURL(processedBlob);
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = img.width; canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                const data = ctx.getImageData(0,0, canvas.width, canvas.height).data;
-                let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
-                
-                for (let y = 0; y < canvas.height; y++) {
-                    for (let x = 0; x < canvas.width; x++) {
-                        if (data[(y * canvas.width + x) * 4 + 3] > 0) {
-                            if (x < minX) minX = x; if (y < minY) minY = y;
-                            if (x > maxX) maxX = x; if (y > maxY) maxY = y;
-                        }
-                    }
-                }
-
-                const cropCanvas = document.createElement('canvas');
-                cropCanvas.width = (maxX - minX) + 1; cropCanvas.height = (maxY - minY) + 1;
-                cropCanvas.getContext('2d').drawImage(img, minX, minY, cropCanvas.width, cropCanvas.height, 0, 0, cropCanvas.width, cropCanvas.height);
-                
-                const link = document.createElement('a');
-                link.download = `kinu_item_${Date.now()}.png`;
-                link.href = cropCanvas.toDataURL("image/png");
-                link.click();
-                
-                alert("Imagen lista. Ahora puedes subirla a tu Drive desde la pantalla de Inicio.");
-            };
+        // Al hacer clic en Guardar
+        btnSave.onclick = () => {
+            if (!finalBase64) return;
+            
+            // 1. Guardamos la imagen limpia en el maletero para KINU
+            localStorage.setItem('imagen_procesada', finalBase64);
+            
+            // 2. Avisamos a la ventana padre (KINU) que ya puede cerrar este modal
+            // y mostramos un mensaje de éxito rápido antes de cerrar.
+            if (window.parent && window.parent.cerrarIA) {
+                window.parent.cerrarIA();
+            } else {
+                // Si por alguna razón no detecta al padre (ej. pestaña separada), cerramos la ventana
+                window.close();
+            }
         };
     </script>
 </body>

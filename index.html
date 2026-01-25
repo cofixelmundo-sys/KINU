@@ -72,6 +72,7 @@
                         <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                         <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
                         <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
+                        <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-watch"></i></div><span class="cat-label">Accesorios</span></div>
                     </div>
                 </div>
                 <div class="card-panel">
@@ -80,6 +81,7 @@
                         <option value="SUPERIOR">Parte Superior</option>
                         <option value="INFERIOR">Parte Inferior</option>
                         <option value="CALZADO">Calzado</option>
+                        <option value="ACCESORIOS">Accesorios</option>
                     </select>
                     <input type="text" id="sub-cat" placeholder="Nombre (ej. Camisa Blanca)">
                 </div>
@@ -97,12 +99,11 @@
             </div>
             <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive"></i><span>CLOSET</span></div>
         </nav>
-        <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="handleFileUpload(this.files[0])">
+        <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="transferirAPhotoStudio(this.files[0])">
     </div>
 </div>
 
 <script>
-    const HF_TOKEN = "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";
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
 
     function entrarApp() { 
@@ -110,61 +111,22 @@
         document.getElementById('main-app').style.display = 'flex';
     }
 
-    async function handleFileUpload(file) {
-        if (!accessToken || !folderId) return alert("Vincula Google Drive primero.");
-        const camIcon = document.getElementById('cam-icon');
-        camIcon.className = "ph ph-spinner-gap spinning";
-
-        try {
-            // USANDO DIRECTAMENTE EL FILE (Menos propenso a errores de buffer)
-            const responseIA = await fetch("https://api-inference.huggingface.co/models/briaai/RMBG-1.4", {
-                method: "POST",
-                headers: { 
-                    "Authorization": `Bearer ${HF_TOKEN}`,
-                    "X-Wait-For-Model": "true" 
-                },
-                body: file
-            });
-
-            let blobParaSubir;
-            if (responseIA.ok) {
-                blobParaSubir = await responseIA.blob();
-            } else {
-                console.error("Fallo IA:", await responseIA.text());
-                blobParaSubir = file; // Fallback
+    // FUNCIÓN PARA ENVIAR LA IMAGEN A LA OTRA APP
+    async function transferirAPhotoStudio(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onloadend = function() {
+            try {
+                localStorage.setItem('imagen_transferida', reader.result);
+                window.location.href = 'photo_studio.html'; 
+            } catch (e) {
+                alert("La imagen es demasiado grande para transferirla automáticamente.");
             }
-
-            const cat = document.getElementById('main-cat').value;
-            const sub = document.getElementById('sub-cat').value.trim() || 'Prenda';
-            const metadata = { 
-                name: `KINU_${cat}_${sub}_${Date.now()}.png`, 
-                mimeType: 'image/png', 
-                parents: [folderId] 
-            };
-
-            const formData = new FormData();
-            formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            formData.append('file', blobParaSubir);
-
-            const resDrive = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                method: 'POST', 
-                headers: { Authorization: `Bearer ${accessToken}` }, 
-                body: formData
-            });
-
-            if (resDrive.ok) { 
-                alert("¡Guardado correctamente!"); 
-                cargarFotosCloset(); 
-            }
-        } catch (e) { 
-            console.error(e);
-            alert("Error de conexión. Intenta de nuevo."); 
-        } finally { 
-            camIcon.className = "ph ph-camera"; 
         }
+        reader.readAsDataURL(file);
     }
 
-    // --- GOOGLE DRIVE LOGIC ---
+    // LÓGICA DE GOOGLE DRIVE ORIGINAL
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] })); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({

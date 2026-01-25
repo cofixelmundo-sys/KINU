@@ -23,7 +23,6 @@
             position: relative; display: flex; flex-direction: column; 
         }
 
-        /* CAPAS SUPERIORES E INFERIORES */
         header { 
             padding: 10px 20px 15px; background: white; 
             display: flex; flex-direction: column; align-items: center; 
@@ -36,14 +35,12 @@
             padding-bottom: 15px; z-index: 100; position: relative;
         }
 
-        /* ÁREA DE CONTENIDO CON SCROLL INTERNO */
         .content { 
             flex: 1; overflow-y: auto; padding: 15px; z-index: 1; 
             scrollbar-width: none;
         }
         .content::-webkit-scrollbar { display: none; }
 
-        /* CATEGORÍAS */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 75px; cursor: pointer; }
         .cat-circle { width: 60px; height: 60px; border-radius: 50%; background: #f9f9f9; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; }
@@ -52,7 +49,6 @@
         .cat-item.active .cat-circle i { color: white !important; }
         .cat-label { font-size: 8px; font-weight: 700; color: #999; text-transform: uppercase; }
 
-        /* GALERÍA */
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
         .prenda-card { background: white; border-radius: 18px; overflow: hidden; position: relative; height: 180px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; }
@@ -65,7 +61,6 @@
 
         .btn-delete { position: absolute; top: 8px; right: 8px; background: var(--rojo); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; z-index: 10; font-size: 10px; }
 
-        /* POPUPS */
         .kinu-popup { 
             display: none; position: absolute; top: 50%; left: 50%; 
             transform: translate(-50%, -50%); width: 260px; background: white; 
@@ -73,7 +68,6 @@
             box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; 
         }
 
-        /* BOTONES Y OTROS */
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
         .nav-item.active { color: var(--verde); }
@@ -124,6 +118,7 @@
                         <option value="SUPERIOR">Parte Superior</option>
                         <option value="INFERIOR">Parte Inferior</option>
                         <option value="CALZADO">Calzado</option>
+                        <option value="ACCESORIOS">Accesorios</option>
                     </select>
                     <input type="text" id="sub-cat" placeholder="Nombre de prenda" style="width:100%; padding:12px; margin-top:10px; border-radius:10px; border:1px solid #eee;">
                 </div>
@@ -200,7 +195,6 @@
         const btn = document.getElementById('btn-final');
         const txt = document.getElementById('btn-text');
         txt.innerText = "SUBIENDO...";
-        
         const categoria = document.getElementById('main-cat').value;
         const nombre = document.getElementById('sub-cat').value || "Prenda";
         const fileName = `KINU_${categoria}_${nombre}_${Date.now()}.png`;
@@ -211,11 +205,9 @@
             const form = new FormData();
             form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             form.append('file', new Blob([Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))], { type: 'image/png' }));
-
             const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                 method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form
             });
-
             if (resp.ok) {
                 document.getElementById('notificacion-exito').style.display = 'block';
                 setTimeout(() => { document.getElementById('notificacion-exito').style.display = 'none'; }, 2000);
@@ -226,7 +218,6 @@
         } catch (e) { alert("Error"); }
     }
 
-    // DRIVE LOGIC
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] })); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({
@@ -266,7 +257,9 @@
         const search = document.getElementById('busqueda').value.toLowerCase();
         todasLasPrendas.filter(p => {
             const pts = p.name.split('_');
-            return (filtroActual === 'TODO' || pts[1] === filtroActual) && p.name.toLowerCase().includes(search);
+            const matchCat = filtroActual === 'TODO' || pts[1] === filtroActual;
+            const matchSearch = p.name.toLowerCase().includes(search);
+            return matchCat && matchSearch;
         }).forEach(f => {
             const thumb = f.thumbnailLink ? f.thumbnailLink.replace('=s220', '=s600') : '';
             const card = document.createElement('div');
@@ -276,14 +269,18 @@
         });
     }
 
-    function irACategoria(c) { filtroActual = c; cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); }
+    function irACategoria(c) { 
+        filtroActual = c; 
+        cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); 
+    }
 
     function cambiarTab(id, el, reset=false) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        if(reset) { filtroActual = 'TODO'; filtrarGaleria(); }
+        if(reset) { filtroActual = 'TODO'; }
+        filtrarGaleria();
     }
 </script>
 </body>

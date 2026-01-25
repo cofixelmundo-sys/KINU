@@ -10,19 +10,33 @@
     <style>
         :root { --verde: #2D4636; --fondo: #F5F5F7; --blanco: #FFFFFF; --gris-suave: #BDC3C7; --rojo: #e74c3c; }
         * { box-sizing: border-box; transition: all 0.3s ease; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #121212; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #121212; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; }
+        
         .phone { width: 360px; height: 740px; background: var(--fondo); border-radius: 45px; border: 12px solid #000; overflow: hidden; position: relative; display: flex; flex-direction: column; }
         
-        /* MODAL INTERNO */
+        /* MODAL INTERNO PHOTO STUDIO */
         #modal-ia { display: none; position: absolute; inset: 0; background: white; z-index: 2000; flex-direction: column; }
         .modal-header { background: var(--verde); color: white; padding: 15px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         #iframe-ia { width: 100%; flex-grow: 1; border: none; }
 
-        /* AUTH SCREEN */
+        /* NOTIFICACIÓN DE ÉXITO ESTILO KINU */
+        #notificacion-exito { 
+            display: none; position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); width: 240px; background: white; 
+            border-radius: 30px; padding: 30px; text-align: center; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 3000; border: 2px solid var(--verde); 
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate(-50%, -40%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        /* LOGIN / AUTH */
         #auth-screen { position: absolute; inset: 0; background: var(--verde); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
         .logo-welcome { width: 180px; height: auto; margin-bottom: 10px; }
         .brand-text-welcome { font-family: Arial, sans-serif; font-weight: bold; color: white; font-size: 28px; letter-spacing: 8px; margin-bottom: 40px; text-indent: 8px; }
         
+        /* HEADER */
         header { padding: 10px 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; z-index: 100; box-shadow: 0 2px 15px rgba(0,0,0,0.04); }
         .logo-header { width: 80px; height: auto; margin-bottom: 5px; }
         .brand-text-header { font-family: Arial, sans-serif; font-weight: bold; color: var(--verde); font-size: 16px; letter-spacing: 4px; text-indent: 4px; }
@@ -32,6 +46,7 @@
         .screen { display: none; flex-direction: column; width: 100%; height: 100%; }
         .screen.active { display: flex; }
         
+        /* PANELES */
         .card-panel { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 10px; }
         .section-title { font-size: 10px; font-weight: 800; color: var(--verde); margin-bottom: 8px; display: block; text-transform: uppercase; letter-spacing: 1.5px; }
         
@@ -45,27 +60,15 @@
         
         select, input[type="text"] { width: 100%; padding: 12px; margin: 4px 0; border-radius: 12px; border: 1px solid #eee; outline: none; font-size: 14px; }
         
-        /* BOTÓN AGREGAR PRENDA DINÁMICO */
+        /* BOTÓN AGREGAR DINÁMICO */
         .btn-accion { 
-            background: #BDC3C7; 
-            color: white; 
-            border: none; 
-            padding: 16px; 
-            border-radius: 20px; 
-            width: 100%; 
-            font-size: 12px; 
-            font-weight: 800; 
-            cursor: not-allowed; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 10px;
-            opacity: 0.6;
+            background: #BDC3C7; color: white; border: none; padding: 16px; 
+            border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; 
+            cursor: not-allowed; display: flex; align-items: center; justify-content: center; 
+            gap: 10px; opacity: 0.6; 
         }
         .btn-accion.ready { 
-            background: var(--verde); 
-            cursor: pointer; 
-            opacity: 1;
+            background: var(--verde); cursor: pointer; opacity: 1; 
             animation: pulse 2s infinite; 
         }
         @keyframes pulse { 
@@ -74,10 +77,13 @@
             100% { box-shadow: 0 0 0 0 rgba(45, 70, 54, 0); } 
         }
 
+        /* GALERIA */
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
         .prenda-card { background: #EAEAEA; border-radius: 18px; overflow: hidden; position: relative; height: 170px; display: flex; align-items: center; justify-content: center; }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
+        .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(45,70,54,0.9); color: white; font-size: 9px; padding: 7px; text-align: center; font-weight: bold; }
         
+        /* NAV */
         nav { height: 85px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding-bottom: 15px; }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
         .nav-item.active { color: var(--verde); }
@@ -87,10 +93,18 @@
 <body>
 
 <div class="phone">
+    <div id="notificacion-exito">
+        <div style="width:60px; height:60px; background:var(--verde); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px;">
+            <i class="ph ph-check ph-bold" style="color:white; font-size:30px;"></i>
+        </div>
+        <h3 style="margin:0; font-size:16px; color:var(--verde); font-weight:800;">¡LISTO!</h3>
+        <p style="margin:5px 0 0; font-size:12px; color:#666;">Prenda agregada al closet</p>
+    </div>
+
     <div id="modal-ia">
         <div class="modal-header">
             <button onclick="cerrarIA()" style="background:none; border:none; color:white; cursor:pointer;"><i class="ph ph-arrow-left" style="font-size:20px;"></i></button>
-            <span style="font-size:12px; font-weight:bold; letter-spacing:1px;">PHOTO STUDIO AI</span>
+            <span style="font-size:12px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">Photo Studio AI</span>
         </div>
         <iframe id="iframe-ia" src=""></iframe>
     </div>
@@ -98,7 +112,7 @@
     <div id="auth-screen">
         <img src="https://i.imgur.com/yTIrTq2.png" alt="KINU Logo" class="logo-welcome">
         <div class="brand-text-welcome">KINU</div>
-        <button onclick="entrarApp()" style="background:white; color:var(--verde); border:none; padding:16px 60px; border-radius:35px; font-weight:bold; cursor:pointer;">ENTRAR</button>
+        <button onclick="entrarApp()" style="background:white; color:var(--verde); border:none; padding:16px 60px; border-radius:35px; font-weight:bold; cursor:pointer; letter-spacing:2px;">ENTRAR</button>
     </div>
 
     <div id="main-app">
@@ -109,7 +123,7 @@
         
         <div class="content">
             <div id="pantalla-home" class="screen active">
-                <button id="auth-btn" style="background:#4285F4; color:white; border:none; padding:12px; border-radius:12px; width:100%; font-size:11px; font-weight:bold; margin-bottom:15px;" onclick="vincularGoogleDriveReal()">VINCULAR GOOGLE DRIVE</button>
+                <button id="auth-btn" style="background:#4285F4; color:white; border:none; padding:12px; border-radius:12px; width:100%; font-size:11px; font-weight:bold; cursor:pointer; margin-bottom:15px;" onclick="vincularGoogleDriveReal()">VINCULAR GOOGLE DRIVE</button>
                 
                 <div class="card-panel">
                     <span class="section-title">Categorías</span>
@@ -122,14 +136,14 @@
                 </div>
 
                 <div class="card-panel">
-                    <span class="section-title">Nueva Prenda</span>
+                    <span class="section-title">Detalles de la Prenda</span>
                     <select id="main-cat">
                         <option value="SUPERIOR">Parte Superior</option>
                         <option value="INFERIOR">Parte Inferior</option>
                         <option value="CALZADO">Calzado</option>
                         <option value="ACCESORIOS">Accesorios</option>
                     </select>
-                    <input type="text" id="sub-cat" placeholder="Nombre de la prenda">
+                    <input type="text" id="sub-cat" placeholder="Nombre (ej. Camisa Blanca)">
                 </div>
 
                 <button id="btn-final" class="btn-accion" onclick="procesarSubidaFinal()">
@@ -138,17 +152,17 @@
             </div>
 
             <div id="pantalla-closet" class="screen">
-                <input type="text" id="busqueda" placeholder="🔍 Buscar..." oninput="filtrarGaleria()">
+                <input type="text" id="busqueda" style="margin-bottom:15px;" placeholder="🔍 Buscar en mi closet..." oninput="filtrarGaleria()">
                 <div id="galeria-real" class="galeria-grid"></div>
             </div>
         </div>
 
         <nav>
-            <div class="nav-item active" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house" style="font-size:24px;"></i><span>INICIO</span></div>
+            <div class="nav-item active" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house"></i><span>INICIO</span></div>
             <div class="nav-item" onclick="document.getElementById('input-camara').click()">
                 <div class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
             </div>
-            <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i><span>CLOSET</span></div>
+            <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive"></i><span>CLOSET</span></div>
         </nav>
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
@@ -172,7 +186,6 @@
         reader.readAsDataURL(file);
     }
 
-    // LLAMADA DESDE PHOTO_STUDIO
     window.cerrarIA = function() {
         document.getElementById('modal-ia').style.display = 'none';
         document.getElementById('iframe-ia').src = '';
@@ -186,7 +199,7 @@
     };
 
     async function procesarSubidaFinal() {
-        if (!botonActivo) { alert("Primero procesa una imagen en Photo Studio"); return; }
+        if (!botonActivo) { alert("Toma una foto primero"); return; }
         if (!accessToken) { alert("Vincula Google Drive primero"); return; }
 
         const btn = document.getElementById('btn-final');
@@ -212,20 +225,27 @@
             });
 
             if (resp.ok) {
-                alert("¡Prenda agregada!");
+                // Notificación nativa
+                const aviso = document.getElementById('notificacion-exito');
+                aviso.style.display = 'block';
+                aviso.style.animation = 'fadeInUp 0.4s ease-out forwards';
+                
+                // Reset Interfaz
                 imagenListaParaSubir = null;
                 botonActivo = false;
                 localStorage.removeItem('imagen_procesada');
                 btn.classList.remove('ready');
                 txt.innerText = "AGREGAR PRENDA";
                 document.getElementById('sub-cat').value = "";
+                
+                setTimeout(() => { aviso.style.display = 'none'; }, 2500);
                 cargarFotosCloset();
             }
-        } catch (e) { alert("Error al subir"); }
+        } catch (e) { alert("Error de red."); }
         finally { btn.style.opacity = "1"; }
     }
 
-    // GOOGLE DRIVE LOGIC
+    // DRIVE LOGIC
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] })); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({
@@ -262,19 +282,22 @@
 
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
+        const search = document.getElementById('busqueda').value.toLowerCase();
         todasLasPrendas.filter(p => {
             const pts = p.name.split('_');
-            return filtroActual === 'TODO' || (pts[1] === filtroActual);
+            const matchCat = filtroActual === 'TODO' || (pts[1] === filtroActual);
+            const matchSearch = p.name.toLowerCase().includes(search);
+            return matchCat && matchSearch;
         }).forEach(f => {
             const thumb = f.thumbnailLink ? f.thumbnailLink.replace('=s220', '=s600') : '';
             const card = document.createElement('div');
             card.className = 'prenda-card';
-            card.innerHTML = `<button onclick=\"borrarPrenda('${f.id}')\" style=\"position:absolute; top:5px; right:5px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; cursor:pointer;\">✕</button><img src=\"${thumb}\" class=\"prenda-img\"><div class=\"tag-sub\">${f.name.split('_')[2] || 'ROPA'}</div>`;
+            card.innerHTML = `<button onclick="borrarPrenda('${f.id}')" style="position:absolute; top:8px; right:8px; background:var(--rojo); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; z-index:10;">✕</button><img src="${thumb}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2] || 'ROPA'}</div>`;
             gal.appendChild(card);
         });
     }
 
-    async function borrarPrenda(id) { if(confirm("¿Borrar?")) { await fetch(`https://www.googleapis.com/drive/v3/files/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); cargarFotosCloset(); } }
+    async function borrarPrenda(id) { if(confirm("¿Borrar prenda del closet?")) { await fetch(`https://www.googleapis.com/drive/v3/files/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); cargarFotosCloset(); } }
     function irACategoria(c) { filtroActual = c; cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); }
     function cambiarTab(id, el, reset=false) {
         if(reset) filtroActual = 'TODO';

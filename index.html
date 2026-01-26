@@ -16,11 +16,11 @@
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             background: #121212; display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; margin: 0; overflow: hidden; position: fixed; width: 100%;
+            min-height: 100vh; margin: 0;
         }
         
         .phone { 
-            width: 100%; height: 100%; max-width: 360px; max-height: 740px; background: var(--fondo); 
+            width: 360px; height: 740px; background: var(--fondo); 
             border-radius: 45px; border: 12px solid #000; overflow: hidden; position: relative; display: flex; flex-direction: column; 
         }
 
@@ -44,11 +44,10 @@
         .cat-circle { width: 60px; height: 60px; border-radius: 50%; background: #f9f9f9; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; }
         
         /* FUERZA LA VISIBILIDAD DE LOS ICONOS */
-        .cat-circle i { font-size: 28px !important; color: var(--verde) !important; display: inline-block !important; visibility: visible !important; }
+        .cat-circle i { font-size: 28px !important; color: var(--verde) !important; display: block !important; }
         
         .cat-label { font-size: 8px; font-weight: 700; color: #999; text-transform: uppercase; text-align: center; }
 
-        /* FORMULARIO */
         .form-container { background: white; padding: 20px; border-radius: 20px; margin: 0 15px 15px; }
         .form-field { 
             width: 100%; height: 50px; padding: 0 15px; border-radius: 12px; 
@@ -56,7 +55,6 @@
             display: block; -webkit-appearance: none;
         }
 
-        /* SPINNER DE CARGA DRIVE */
         .spinner {
             display: none; width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%; border-top-color: #fff; animation: spin 1s linear infinite;
@@ -105,12 +103,7 @@
                 <div class="filter-scroll">
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                     <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
-                    
-                    <div class="cat-item" onclick="irACategoria('EXTERIOR')">
-                        <div class="cat-circle"><i class="ph ph-coat"></i></div>
-                        <span class="cat-label">Abrigos</span>
-                    </div>
-
+                    <div class="cat-item" onclick="irACategoria('EXTERIOR')"><div class="cat-circle"><i class="ph ph-coat"></i></div><span class="cat-label">Abrigos</span></div>
                     <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
                     <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-watch"></i></div><span class="cat-label">Accesorios</span></div>
                 </div>

@@ -63,6 +63,22 @@
         .cat-item.active .cat-circle i { color: white !important; }
         .cat-label { font-size: 8px; font-weight: 700; color: #999; text-transform: uppercase; text-align: center; width: 100%; }
 
+        /* ESTILO FORMULARIO UNIFICADO */
+        .form-container { background: white; padding: 15px; border-radius: 20px; margin-bottom: 15px; }
+        .form-field { 
+            width: 100%; 
+            height: 48px; /* Tamaño fijo para ambos */
+            padding: 0 15px; 
+            border-radius: 12px; 
+            border: 1px solid #eee; 
+            font-size: 14px; 
+            background: #F9F9F9;
+            color: #333;
+            -webkit-appearance: none; /* Quitar estilo defecto en iOS */
+        }
+        .form-field:focus { outline: none; border-color: var(--verde); background: white; }
+        select.form-field { cursor: pointer; }
+
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
         .prenda-card { background: white; border-radius: 18px; overflow: hidden; position: relative; height: 180px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; }
@@ -121,7 +137,7 @@
                 <div class="filter-scroll">
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                     <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
-                    <div class="cat-item" onclick="irACategoria('EXTERIOR')"><div class="cat-circle"><i class="ph ph-coat"></i></div><span class="cat-label">Abrigos</span></div>
+                    <div class="cat-item" onclick="irACategoria('EXTERIOR')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
                     <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
                     <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
                     <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-watch"></i></div><span class="cat-label">Accesorios</span></div>
@@ -129,8 +145,8 @@
                     <div class="cat-item" onclick="irACategoria('LOUNGE')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
                 </div>
 
-                <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px;">
-                    <select id="main-cat" style="width:100%; padding:12px; border-radius:10px; border:1px solid #eee;">
+                <div class="form-container">
+                    <select id="main-cat" class="form-field">
                         <option value="SUPERIOR">Parte Superior</option>
                         <option value="INFERIOR">Parte Inferior</option>
                         <option value="EXTERIOR">Abrigos / Exterior</option>
@@ -140,7 +156,7 @@
                         <option value="DEPORTE">Ropa Deportiva</option>
                         <option value="LOUNGE">Ropa de Dormir</option>
                     </select>
-                    <input type="text" id="sub-cat" placeholder="Nombre de prenda (ej: Camisa Azul)" style="width:100%; padding:12px; margin-top:10px; border-radius:10px; border:1px solid #eee;">
+                    <div style="height:10px;"></div> <input type="text" id="sub-cat" class="form-field" placeholder="Nombre de prenda (ej: Camisa Azul)">
                 </div>
 
                 <button id="btn-final" class="btn-accion" onclick="procesarSubidaFinal()">
@@ -174,6 +190,7 @@
 </div>
 
 <script>
+    /* Lógica JS mantenida igual que el paso anterior */
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
     let imagenListaParaSubir = null, botonActivo = false, idPrendaABorrar = null;
 
@@ -264,7 +281,7 @@
         if (data.files && data.files.length > 0) {
             folderId = data.files[0].id;
             title.innerText = "¡HOLA DE NUEVO!";
-            body.innerText = "KINU se ha vinculado con éxito a tu carpeta 'KINU_CLOSET'. Todas tus prendas están sincronizadas.";
+            body.innerText = "KINU se ha vinculado con éxito a tu carpeta 'KINU_CLOSET'.";
         } else {
             const res = await fetch('https://www.googleapis.com/drive/v3/files', {
                 method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
@@ -272,7 +289,7 @@
             });
             const f = await res.json(); folderId = f.id;
             title.innerText = "CARPETA CREADA";
-            body.innerText = "Hemos creado una carpeta segura llamada 'KINU_CLOSET' en tu Drive para guardar tu ropa.";
+            body.innerText = "Hemos creado una carpeta segura llamada 'KINU_CLOSET' en tu Drive.";
         }
         popup.style.display = 'block';
         setTimeout(() => { popup.style.display = 'none'; }, 4500);

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KINU - Smart Closet</title>
-    <script src="https://apis.google.com/js/api.js"></script>
+    <link rel="icon" href="data:,"> <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
@@ -159,20 +159,18 @@
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
+    // MEJORA AQUÍ: Usamos URL.createObjectURL para evitar el error de cuota
     function abrirEditor(file) {
         if (!file) return;
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            localStorage.setItem('imagen_transferida', reader.result);
-            document.getElementById('iframe-ia').src = 'photo_studio.html';
-            document.getElementById('modal-ia').style.display = 'flex';
-        }
-        reader.readAsDataURL(file);
+        const tempUrl = URL.createObjectURL(file);
+        sessionStorage.setItem('temp_img_url', tempUrl);
+        document.getElementById('iframe-ia').src = 'photo_studio.html';
+        document.getElementById('modal-ia').style.display = 'flex';
     }
 
     window.cerrarIA = function() {
         document.getElementById('modal-ia').style.display = 'none';
-        const procesada = localStorage.getItem('imagen_procesada');
+        const procesada = sessionStorage.getItem('imagen_procesada');
         if (procesada) {
             imagenListaParaSubir = procesada;
             document.getElementById('btn-final').classList.add('ready');

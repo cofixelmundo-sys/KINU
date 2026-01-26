@@ -42,9 +42,7 @@
         }
         .content::-webkit-scrollbar { display: none; }
 
-        /* Scroll horizontal de categorías mejorado para las nuevas opciones */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-        .filter-scroll::-webkit-scrollbar { display: none; }
         
         .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 75px; cursor: pointer; }
         .cat-circle { width: 60px; height: 60px; border-radius: 50%; background: #f9f9f9; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; }
@@ -56,21 +54,10 @@
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
         .prenda-card { background: white; border-radius: 18px; overflow: hidden; position: relative; height: 180px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; }
-        .tag-sub { 
-            position: absolute; bottom: 0; left: 0; right: 0; 
-            background: var(--verde); color: white; font-size: 9px; 
-            padding: 8px; text-align: center; font-weight: bold; 
-            text-transform: uppercase;
-        }
+        .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; }
 
         .btn-delete { position: absolute; top: 8px; right: 8px; background: var(--rojo); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; z-index: 10; font-size: 10px; }
-
-        .kinu-popup { 
-            display: none; position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); width: 260px; background: white; 
-            border-radius: 30px; padding: 25px; text-align: center; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; 
-        }
+        .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 260px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; }
 
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
@@ -113,7 +100,7 @@
                 <div class="filter-scroll">
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                     <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
-                    <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hanger"></i></div><span class="cat-label">Abrigos</span></div>
+                    <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
                     <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
                     <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-diamond"></i></div><span class="cat-label">Vintage</span></div>
                     <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
@@ -126,7 +113,7 @@
                     <select id="main-cat" style="width:100%; padding:12px; border-radius:10px; border:1px solid #eee;">
                         <option value="SUPERIOR">Parte Superior</option>
                         <option value="INFERIOR">Parte Inferior</option>
-                        <option value="ABRIGOS">Abrigos</option>
+                        <option value="ABRIGOS">Abrigo</option>
                         <option value="ENTERIZOS">Enterizos</option>
                         <option value="VINTAGE">Vintage</option>
                         <option value="CALZADO">Calzado</option>
@@ -172,7 +159,6 @@
     let imagenListaParaSubir = null, botonActivo = false, idPrendaABorrar = null;
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
-
     function abrirEditor(file) {
         if (!file) return;
         const tempUrl = URL.createObjectURL(file);
@@ -180,7 +166,6 @@
         document.getElementById('iframe-ia').src = 'photo_studio.html';
         document.getElementById('modal-ia').style.display = 'flex';
     }
-
     window.cerrarIA = function() {
         document.getElementById('modal-ia').style.display = 'none';
         const procesada = sessionStorage.getItem('imagen_procesada');
@@ -190,7 +175,6 @@
             botonActivo = true;
         }
     };
-
     function abrirPopupBorrar(id) { idPrendaABorrar = id; document.getElementById('notificacion-borrar').style.display = 'block'; }
     function cerrarPopupBorrar() { document.getElementById('notificacion-borrar').style.display = 'none'; idPrendaABorrar = null; }
 
@@ -206,12 +190,10 @@
         const btn = document.getElementById('btn-final');
         const txt = document.getElementById('btn-text');
         const inputNombre = document.getElementById('sub-cat');
-        
         txt.innerText = "SUBIENDO...";
         const categoria = document.getElementById('main-cat').value;
         const nombre = inputNombre.value || "Prenda";
         const fileName = `KINU_${categoria}_${nombre}_${Date.now()}.png`;
-
         try {
             const base64Data = imagenListaParaSubir.split(',')[1];
             const metadata = { name: fileName, parents: [folderId] };
@@ -283,10 +265,7 @@
         });
     }
 
-    function irACategoria(c) { 
-        filtroActual = c; 
-        cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); 
-    }
+    function irACategoria(c) { filtroActual = c; cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); }
 
     function cambiarTab(id, el, reset=false) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');

@@ -5,14 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KINU - Smart Closet</title>
     
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="KINU">
-    <meta name="theme-color" content="#2D4636">
-    <link rel="apple-touch-icon" href="https://i.imgur.com/yTIrTq2.png">
-
-    <link rel="icon" href="data:,">
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -33,307 +25,114 @@
             overflow: hidden; position: relative; display: flex; flex-direction: column; 
         }
 
-        @media (min-width: 500px) {
-            .phone { border-radius: 45px; border: 12px solid #000; height: 740px; width: 360px; }
-        }
-
         header { 
             padding: env(safe-area-inset-top) 20px 15px; background: white; 
             display: flex; flex-direction: column; align-items: center; 
             z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        nav { 
-            height: calc(70px + env(safe-area-inset-bottom)); background: white; border-top: 1px solid #eee; 
-            display: flex; justify-content: space-around; align-items: center; 
-            padding-bottom: env(safe-area-inset-bottom); z-index: 100; position: relative;
+        /* --- ANIMACIÓN DE DESLIZAMIENTO --- */
+        @keyframes asomarCategorias {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-30px); } /* Se mueve un poco a la izquierda */
+            50% { transform: translateX(0); }
+            75% { transform: translateX(-15px); }
+            100% { transform: translateX(0); }
         }
 
-        .content { 
-            flex: 1; overflow-y: auto; padding: 15px; z-index: 1; 
-            scrollbar-width: none; -webkit-overflow-scrolling: touch;
+        .filter-scroll { 
+            display: flex; 
+            gap: 12px; 
+            overflow-x: auto; 
+            padding: 10px 15px 20px; 
+            scrollbar-width: none;
+            scroll-behavior: smooth;
+            /* Aplicamos la animación al cargar */
+            animation: asomarCategorias 1.5s ease-out 1s; /* Empieza tras 1 segundo de espera */
         }
-        .content::-webkit-scrollbar { display: none; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
 
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 75px; cursor: pointer; }
-        .cat-circle { width: 60px; height: 60px; border-radius: 50%; background: #f9f9f9; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; }
+        .cat-circle { width: 60px; height: 60px; border-radius: 50%; background: white; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
         .cat-circle i { font-size: 24px; color: var(--verde); }
-        .cat-item.active .cat-circle { background: var(--verde); border-color: var(--verde); }
-        .cat-item.active .cat-circle i { color: white !important; }
-        .cat-label { font-size: 8px; font-weight: 700; color: #999; text-transform: uppercase; text-align: center; width: 100%; }
+        .cat-label { font-size: 8px; font-weight: 700; color: #999; text-transform: uppercase; }
 
-        /* ESTILO FORMULARIO UNIFICADO */
-        .form-container { background: white; padding: 15px; border-radius: 20px; margin-bottom: 15px; }
+        /* Estilo de los campos del formulario iguales */
+        .form-container { background: white; padding: 20px; border-radius: 20px; margin: 0 15px 15px; }
         .form-field { 
-            width: 100%; 
-            height: 48px; /* Tamaño fijo para ambos */
-            padding: 0 15px; 
-            border-radius: 12px; 
-            border: 1px solid #eee; 
-            font-size: 14px; 
-            background: #F9F9F9;
-            color: #333;
-            -webkit-appearance: none; /* Quitar estilo defecto en iOS */
+            width: 100%; height: 50px; padding: 0 15px; border-radius: 12px; 
+            border: 1px solid #eee; font-size: 14px; background: #F9F9F9; margin-bottom: 12px;
+            display: block; -webkit-appearance: none;
         }
-        .form-field:focus { outline: none; border-color: var(--verde); background: white; }
-        select.form-field { cursor: pointer; }
+        .form-field:last-child { margin-bottom: 0; }
 
-        .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
-        .prenda-card { background: white; border-radius: 18px; overflow: hidden; position: relative; height: 180px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; }
-        .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; }
-
-        .btn-delete { position: absolute; top: 8px; right: 8px; background: var(--rojo); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; z-index: 10; font-size: 10px; }
-
-        .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; }
-
+        /* Resto de estilos base */
+        .content { flex: 1; overflow-y: auto; z-index: 1; }
+        nav { height: 70px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; }
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
         .nav-item.active { color: var(--verde); }
-        .btn-accion { background: #BDC3C7; color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 10px; opacity: 0.6; }
-        .btn-accion.ready { background: var(--verde); cursor: pointer; opacity: 1; }
-        #auth-btn.connected { background: var(--ok-green) !important; pointer-events: none; }
+        .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: calc(100% - 30px); margin: 0 15px; font-weight: 800; cursor: pointer; }
+        .btn-accion.ready { background: var(--verde); }
     </style>
 </head>
 <body>
 
 <div class="phone">
-    <div id="notificacion-exito" class="kinu-popup" style="border: 2px solid var(--verde);">
-        <i class="ph ph-check-circle" style="color:var(--verde); font-size:40px;"></i>
-        <h3 style="color:var(--verde); margin-top:10px;">¡LISTO!</h3>
-    </div>
-
-    <div id="notificacion-drive" class="kinu-popup" style="border: 2px solid var(--google-blue);">
-        <i class="ph ph-google-drive-logo" style="color:var(--google-blue); font-size:40px;"></i>
-        <h3 id="drive-msg-title" style="color:var(--google-blue); margin-top:10px;">DRIVE CONECTADO</h3>
-        <p id="drive-msg-body" style="font-size:11px; color:#666; line-height:1.4; margin-top:10px;"></p>
-        <button onclick="document.getElementById('notificacion-drive').style.display='none'" style="background:var(--google-blue); color:white; border:none; padding:12px; border-radius:15px; width:100%; font-weight:bold; margin-top:15px;">ENTENDIDO</button>
-    </div>
-
-    <div id="notificacion-borrar" class="kinu-popup" style="border: 2px solid var(--rojo);">
-        <i class="ph ph-trash" style="color:var(--rojo); font-size:40px;"></i>
-        <h3 style="color:var(--rojo); margin-top:10px;">¿BORRAR?</h3>
-        <button id="confirmar-delete-btn" style="background:var(--rojo); color:white; border:none; padding:12px; border-radius:12px; width:100%; font-weight:bold; margin-top:15px;">ELIMINAR</button>
-        <button onclick="cerrarPopupBorrar()" style="background:#eee; color:#666; border:none; padding:10px; border-radius:12px; width:100%; margin-top:8px;">CANCELAR</button>
-    </div>
-
-    <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-        <img src="https://i.imgur.com/yTIrTq2.png" style="width:150px; margin-bottom:20px;">
-        <button onclick="entrarApp()" style="background:white; color:var(--verde); padding:15px 50px; border-radius:30px; border:none; font-weight:bold;">ENTRAR</button>
-    </div>
-
-    <div id="main-app" style="display:none; flex-direction:column; height:100%;">
-        <header>
-            <img src="https://i.imgur.com/yTIrTq2.png" style="width:60px;">
-            <div style="color:var(--verde); letter-spacing:4px; font-weight:bold; font-size:14px;">KINU</div>
-        </header>
-        
-        <div class="content">
-            <div id="pantalla-home" class="screen" style="display:block;">
-                <button id="auth-btn" style="background:var(--google-blue); color:white; border:none; padding:12px; border-radius:12px; width:100%; font-size:11px; margin-bottom:15px; font-weight:bold;" onclick="vincularGoogleDriveReal()">VINCULAR GOOGLE DRIVE</button>
-                
-                <span style="font-size:10px; font-weight:800; color:var(--verde); text-transform:uppercase;">Explorar Categorías</span>
-                <div class="filter-scroll">
-                    <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
-                    <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
-                    <div class="cat-item" onclick="irACategoria('EXTERIOR')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
-                    <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
-                    <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
-                    <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-watch"></i></div><span class="cat-label">Accesorios</span></div>
-                    <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-barbell"></i></div><span class="cat-label">Deporte</span></div>
-                    <div class="cat-item" onclick="irACategoria('LOUNGE')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
-                </div>
-
-                <div class="form-container">
-                    <select id="main-cat" class="form-field">
-                        <option value="SUPERIOR">Parte Superior</option>
-                        <option value="INFERIOR">Parte Inferior</option>
-                        <option value="EXTERIOR">Abrigos / Exterior</option>
-                        <option value="ENTERIZOS">Vestidos / Enterizos</option>
-                        <option value="CALZADO">Calzado</option>
-                        <option value="ACCESORIOS">Accesorios</option>
-                        <option value="DEPORTE">Ropa Deportiva</option>
-                        <option value="LOUNGE">Ropa de Dormir</option>
-                    </select>
-                    <div style="height:10px;"></div> <input type="text" id="sub-cat" class="form-field" placeholder="Nombre de prenda (ej: Camisa Azul)">
-                </div>
-
-                <button id="btn-final" class="btn-accion" onclick="procesarSubidaFinal()">
-                    <i class="ph ph-plus-circle"></i> <span id="btn-text">AGREGAR PRENDA</span>
-                </button>
+    <header>
+        <img src="https://i.imgur.com/yTIrTq2.png" style="width:60px;">
+        <div style="color:var(--verde); letter-spacing:4px; font-weight:bold; font-size:14px;">KINU</div>
+    </header>
+    
+    <div class="content">
+        <div id="pantalla-home" style="padding-top:15px;">
+            <div style="padding: 0 20px;"><span style="font-size:10px; font-weight:800; color:var(--verde); text-transform:uppercase;">Explorar Categorías</span></div>
+            
+            <div class="filter-scroll">
+                <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
+                <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
+                <div class="cat-item" onclick="irACategoria('EXTERIOR')"><div class="cat-circle"><i class="ph ph-coat"></i></div><span class="cat-label">Abrigos</span></div>
+                <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
+                <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
+                <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-watch"></i></div><span class="cat-label">Accesorios</span></div>
+                <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-barbell"></i></div><span class="cat-label">Deporte</span></div>
+                <div class="cat-item" onclick="irACategoria('LOUNGE')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
             </div>
 
-            <div id="pantalla-closet" class="screen" style="display:none;">
-                <input type="text" id="busqueda" placeholder="🔍 Buscar prenda..." oninput="filtrarGaleria()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #eee; margin-bottom:15px; background:white;">
-                <div id="galeria-real" class="galeria-grid"></div>
+            <div class="form-container">
+                <select id="main-cat" class="form-field">
+                    <option value="SUPERIOR">Parte Superior</option>
+                    <option value="INFERIOR">Parte Inferior</option>
+                    <option value="EXTERIOR">Abrigos / Exterior</option>
+                    <option value="ENTERIZOS">Vestidos / Enterizos</option>
+                    <option value="CALZADO">Calzado</option>
+                    <option value="ACCESORIOS">Accesorios</option>
+                    <option value="DEPORTE">Ropa Deportiva</option>
+                    <option value="LOUNGE">Ropa de Dormir</option>
+                </select>
+                <input type="text" id="sub-cat" class="form-field" placeholder="Nombre de prenda (ej: Camisa Azul)">
             </div>
+
+            <button id="btn-final" class="btn-accion">
+                AGREGAR PRENDA
+            </button>
         </div>
-
-        <nav>
-            <div class="nav-item active" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house" style="font-size:24px;"></i><span>INICIO</span></div>
-            <div class="nav-item" onclick="document.getElementById('input-camara').click()">
-                <div class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
-            </div>
-            <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i><span>CLOSET</span></div>
-        </nav>
-        <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
 
-    <div id="modal-ia" style="display:none; position:absolute; inset:0; background:white; z-index:2000; flex-direction:column;">
-        <div style="background:var(--verde); color:white; padding:15px; display:flex; align-items:center; gap:10px; padding-top: env(safe-area-inset-top);">
-            <button onclick="cerrarIA()" style="background:none; border:none; color:white;"><i class="ph ph-arrow-left"></i></button>
-            <span style="font-size:12px; font-weight:bold;">PHOTO STUDIO AI</span>
-        </div>
-        <iframe id="iframe-ia" style="width:100%; flex-grow:1; border:none;"></iframe>
-    </div>
+    <nav>
+        <div class="nav-item active"><i class="ph ph-house" style="font-size:24px;"></i><span>INICIO</span></div>
+        <div class="nav-item"><div class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div></div>
+        <div class="nav-item"><i class="ph ph-archive" style="font-size:24px;"></i><span>CLOSET</span></div>
+    </nav>
 </div>
 
 <script>
-    /* Lógica JS mantenida igual que el paso anterior */
-    let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
-    let imagenListaParaSubir = null, botonActivo = false, idPrendaABorrar = null;
-
-    function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
-
-    function abrirEditor(file) {
-        if (!file) return;
-        const tempUrl = URL.createObjectURL(file);
-        sessionStorage.setItem('temp_img_url', tempUrl);
-        document.getElementById('iframe-ia').src = 'photo_studio.html';
-        document.getElementById('modal-ia').style.display = 'flex';
-    }
-
-    window.cerrarIA = function() {
-        document.getElementById('modal-ia').style.display = 'none';
-        const procesada = sessionStorage.getItem('imagen_procesada');
-        if (procesada) {
-            imagenListaParaSubir = procesada;
-            document.getElementById('btn-final').classList.add('ready');
-            botonActivo = true;
-        }
-    };
-
-    function abrirPopupBorrar(id) { idPrendaABorrar = id; document.getElementById('notificacion-borrar').style.display = 'block'; }
-    function cerrarPopupBorrar() { document.getElementById('notificacion-borrar').style.display = 'none'; idPrendaABorrar = null; }
-
-    document.getElementById('confirmar-delete-btn').onclick = async () => {
-        if (!idPrendaABorrar) return;
-        await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaABorrar}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } });
-        cerrarPopupBorrar(); cargarFotosCloset();
-    };
-
-    async function procesarSubidaFinal() {
-        if (!botonActivo || !accessToken) return;
-        const btn = document.getElementById('btn-final');
-        const txt = document.getElementById('btn-text');
-        const inputNombre = document.getElementById('sub-cat');
-        txt.innerText = "SUBIENDO...";
-        const categoria = document.getElementById('main-cat').value;
-        const nombre = inputNombre.value || "Prenda";
-        const fileName = `KINU_${categoria}_${nombre}_${Date.now()}.png`;
-
-        try {
-            const base64Data = imagenListaParaSubir.split(',')[1];
-            const metadata = { name: fileName, parents: [folderId] };
-            const form = new FormData();
-            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            form.append('file', new Blob([Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))], { type: 'image/png' }));
-            const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form
-            });
-            if (resp.ok) {
-                document.getElementById('notificacion-exito').style.display = 'block';
-                inputNombre.value = "";
-                setTimeout(() => { document.getElementById('notificacion-exito').style.display = 'none'; }, 2000);
-                imagenListaParaSubir = null; botonActivo = false;
-                btn.classList.remove('ready'); txt.innerText = "AGREGAR PRENDA";
-                cargarFotosCloset();
-            }
-        } catch (e) { alert("Error"); }
-    }
-
-    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] })); }
-    function gisLoaded() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
-            scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.resource',
-            callback: (resp) => { accessToken = resp.access_token; marcarConectado(); obtenerOCrearCarpeta(); }
-        });
-    }
-    window.onload = () => { gapiLoaded(); gisLoaded(); };
-    function vincularGoogleDriveReal() { tokenClient.requestAccessToken({ prompt: 'consent' }); }
-
-    function marcarConectado() {
-        const btn = document.getElementById('auth-btn');
-        btn.innerText = "✓ CONECTADO";
-        btn.classList.add('connected');
-    }
-
-    async function obtenerOCrearCarpeta() {
-        const query = "name = 'KINU_CLOSET' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
-        const resp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const data = await resp.json();
-        const popup = document.getElementById('notificacion-drive');
-        const title = document.getElementById('drive-msg-title');
-        const body = document.getElementById('drive-msg-body');
-
-        if (data.files && data.files.length > 0) {
-            folderId = data.files[0].id;
-            title.innerText = "¡HOLA DE NUEVO!";
-            body.innerText = "KINU se ha vinculado con éxito a tu carpeta 'KINU_CLOSET'.";
-        } else {
-            const res = await fetch('https://www.googleapis.com/drive/v3/files', {
-                method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: 'KINU_CLOSET', mimeType: 'application/vnd.google-apps.folder' })
-            });
-            const f = await res.json(); folderId = f.id;
-            title.innerText = "CARPETA CREADA";
-            body.innerText = "Hemos creado una carpeta segura llamada 'KINU_CLOSET' en tu Drive.";
-        }
-        popup.style.display = 'block';
-        setTimeout(() => { popup.style.display = 'none'; }, 4500);
-        cargarFotosCloset();
-    }
-
-    async function cargarFotosCloset() {
-        if (!accessToken || !folderId) return;
-        const resp = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed = false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const data = await resp.json();
-        todasLasPrendas = data.files || [];
-        filtrarGaleria();
-    }
-
-    function filtrarGaleria() {
-        const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
-        const search = document.getElementById('busqueda').value.toLowerCase();
-        todasLasPrendas.filter(p => {
-            const pts = p.name.split('_');
-            const matchCat = filtroActual === 'TODO' || pts[1] === filtroActual;
-            const matchSearch = p.name.toLowerCase().includes(search);
-            return matchCat && matchSearch;
-        }).forEach(f => {
-            const thumb = f.thumbnailLink ? f.thumbnailLink.replace('=s220', '=s600') : '';
-            const card = document.createElement('div');
-            card.className = 'prenda-card';
-            card.innerHTML = `<button class="btn-delete" onclick="abrirPopupBorrar('${f.id}')">✕</button><img src="${thumb}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2] || 'ROPA'}</div>`;
-            gal.appendChild(card);
-        });
-    }
-
-    function irACategoria(c) { 
-        filtroActual = c; 
-        cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); 
-    }
-
-    function cambiarTab(id, el, reset=false) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-        if(reset) { filtroActual = 'TODO'; }
-        filtrarGaleria();
+    // Al entrar, las categorías harán el amague de moverse
+    function irACategoria(cat) {
+        console.log("Filtrando por: " + cat);
+        // Aquí iría tu lógica de navegación al closet
     }
 </script>
+
 </body>
 </html>

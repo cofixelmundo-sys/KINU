@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <style>
-        :root { --verde: #2D4636; --fondo: #F5F5F7; --blanco: #FFFFFF; --gris-suave: #BDC3C7; --rojo: #e74c3c; --google-blue: #4285F4; --ok-green: #27ae60; --vintage: #A67C52; }
+        :root { --verde: #2D4636; --fondo: #F5F5F7; --blanco: #FFFFFF; --gris-suave: #BDC3C7; --google-blue: #4285F4; --ok-green: #27ae60; --vintage: #A67C52; }
         * { box-sizing: border-box; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
         
         body { 
@@ -24,9 +24,9 @@
             border-radius: 45px; border: 12px solid #000; overflow: hidden; position: relative; display: flex; flex-direction: column; 
         }
 
-        header { padding: 15px 20px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        header { padding: 15px 20px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; }
 
-        /* Animación de aviso para que el usuario sepa que hay más categorías */
+        /* Animación de aviso */
         @keyframes asomar {
             0%, 80%, 100% { transform: translateX(0); }
             85% { transform: translateX(-60px); }
@@ -34,8 +34,9 @@
         }
 
         .filter-scroll { 
-            display: flex; gap: 12px; overflow-x: auto; padding: 15px 15px 25px; 
+            display: flex; gap: 12px; overflow-x: auto; padding: 15px 20px 25px; 
             scrollbar-width: none; animation: asomar 7s infinite ease-in-out;
+            -webkit-overflow-scrolling: touch;
         }
         .filter-scroll::-webkit-scrollbar { display: none; }
 
@@ -45,17 +46,24 @@
         .cat-label { font-size: 8px; font-weight: 800; color: #999; text-transform: uppercase; text-align: center; }
 
         .content { flex: 1; overflow-y: auto; }
-        .screen { display: none; padding: 15px; animation: fadeIn 0.4s; }
+        .screen { display: none; padding: 15px; }
         .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .form-container { background: white; padding: 20px; border-radius: 20px; margin-top: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        
+        /* ESTILO DEL DESPLEGABLE */
+        .form-field { 
+            width: 100%; height: 50px; padding: 0 15px; border-radius: 12px; 
+            border: 1px solid #eee; font-size: 14px; background: #F9F9F9; 
+            margin-bottom: 12px; display: block; outline: none;
+            color: #333;
+        }
 
         nav { height: 75px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; }
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); cursor: pointer; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--gris-suave); font-size: 9px; font-weight: bold; cursor: pointer; }
         .nav-item.active { color: var(--verde); }
         
-        .form-container { background: white; padding: 20px; border-radius: 20px; margin-top: 10px; }
-        .form-field { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #eee; font-size: 14px; background: #F9F9F9; margin-bottom: 10px; outline: none; }
         .btn-accion { background: var(--verde); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-weight: 800; cursor: pointer; }
     </style>
 </head>
@@ -75,11 +83,9 @@
         
         <div class="content">
             <div id="pantalla-home" class="screen active">
-                <div style="margin-bottom: 15px;">
-                    <button id="auth-btn" style="background:var(--google-blue); color:white; border:none; padding:14px; border-radius:12px; width:100%; font-size:11px; font-weight:bold; cursor:pointer;" onclick="vincularDrive()">VINCULAR GOOGLE DRIVE</button>
-                </div>
+                <button id="auth-btn" style="background:var(--google-blue); color:white; border:none; padding:14px; border-radius:12px; width:100%; font-size:11px; font-weight:bold; margin-bottom:15px;" onclick="vincularDrive()">VINCULAR GOOGLE DRIVE</button>
 
-                <div style="padding: 0 5px;"><span style="font-size:10px; font-weight:800; color:var(--verde); text-transform:uppercase;">Explorar</span></div>
+                <div style="padding: 0 5px;"><span style="font-size:10px; font-weight:800; color:var(--verde); text-transform:uppercase;">Categorías</span></div>
                 
                 <div class="filter-scroll">
                     <div class="cat-item" onclick="verCloset('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
@@ -95,27 +101,25 @@
 
                 <div class="form-container">
                     <select class="form-field" id="select-cat">
+                        <option value="" disabled selected>Selecciona Categoría...</option>
                         <option value="SUPERIOR">Parte Superior</option>
                         <option value="INFERIOR">Parte Inferior</option>
                         <option value="EXTERIOR">Abrigos</option>
+                        <option value="ENTERIZOS">Vestidos / Enterizos</option>
                         <option value="VINTAGE">Colección Vintage</option>
-                        <option value="ENTERIZOS">Enterizos</option>
                         <option value="CALZADO">Calzado</option>
+                        <option value="ACCESORIOS">Accesorios</option>
+                        <option value="DEPORTE">Ropa Deportiva</option>
+                        <option value="DORMIR">Ropa de Dormir</option>
                     </select>
-                    <input type="text" placeholder="Nombre de prenda (Ej: Blazer Gris)" class="form-field">
-                    <button class="btn-accion" onclick="alert('Prenda guardada en la base de datos local')">AGREGAR PRENDA</button>
+                    <input type="text" placeholder="Nombre de prenda" class="form-field">
+                    <button class="btn-accion">AGREGAR PRENDA</button>
                 </div>
             </div>
 
             <div id="pantalla-closet" class="screen">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h3 style="color:var(--verde); margin:0;">MI CLOSET</h3>
-                    <i class="ph ph-sliders" style="font-size:20px; color:var(--verde);"></i>
-                </div>
-                <div id="closet-vacio" style="text-align:center; margin-top:100px; color:#ccc;">
-                    <i class="ph ph-archive" style="font-size:60px; margin-bottom:10px;"></i>
-                    <p>Aún no tienes prendas aquí</p>
-                </div>
+                <h3 style="color:var(--verde);">MI CLOSET</h3>
+                <p style="color:#999; text-align:center; margin-top:50px;">Categoría vacía</p>
             </div>
         </div>
 
@@ -126,35 +130,22 @@
             </div>
             <div class="nav-item" onclick="navegar('pantalla-closet', this)"><i class="ph ph-archive" style="font-size:24px;"></i><span>CLOSET</span></div>
         </nav>
-        <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="alert('Foto recibida: ' + this.files[0].name)">
+        <input type="file" id="input-camara" hidden accept="image/*" capture="environment">
     </div>
 </div>
 
 <script>
-    function entrarApp() {
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('main-app').style.display = 'flex';
-    }
-
-    function navegar(pantallaId, elemento) {
+    function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
+    function navegar(p, e) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(pantallaId).classList.add('active');
+        document.getElementById(p).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        if(elemento) elemento.classList.add('active');
+        if(e) e.classList.add('active');
     }
-
-    function verCloset(cat) {
-        navegar('pantalla-closet', document.querySelectorAll('.nav-item')[2]);
-        console.log("Categoría seleccionada: " + cat);
-    }
-
+    function verCloset(c) { navegar('pantalla-closet', document.querySelectorAll('.nav-item')[2]); }
     function vincularDrive() {
-        const btn = document.getElementById('auth-btn');
-        btn.innerText = "CONECTANDO...";
-        setTimeout(() => {
-            btn.innerText = "✓ DRIVE VINCULADO";
-            btn.style.background = "var(--ok-green)";
-        }, 1500);
+        const b = document.getElementById('auth-btn'); b.innerText = "CONECTANDO...";
+        setTimeout(() => { b.innerText = "✓ CONECTADO"; b.style.background = "var(--ok-green)"; }, 1200);
     }
 </script>
 </body>

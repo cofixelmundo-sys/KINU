@@ -59,6 +59,18 @@
         .btn-delete { position: absolute; top: 8px; right: 8px; background: var(--rojo); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; z-index: 10; font-size: 10px; }
         .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 260px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; }
 
+        /* UNIFICACIÓN DE CAMPOS FORMULARIO */
+        .form-input { 
+            width: 100%; 
+            height: 48px; 
+            padding: 0 15px; 
+            border-radius: 12px; 
+            border: 1px solid #eee; 
+            font-size: 14px; 
+            background: #fdfdfd; 
+            outline: none;
+        }
+        
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
         .nav-item.active { color: var(--verde); }
@@ -109,8 +121,8 @@
                     <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-watch"></i></div><span class="cat-label">Accesorios</span></div>
                 </div>
 
-                <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px;">
-                    <select id="main-cat" style="width:100%; padding:12px; border-radius:10px; border:1px solid #eee;">
+                <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px; display: flex; flex-direction: column; gap: 10px;">
+                    <select id="main-cat" class="form-input">
                         <option value="SUPERIOR">Parte Superior</option>
                         <option value="INFERIOR">Parte Inferior</option>
                         <option value="ABRIGOS">Abrigo</option>
@@ -121,7 +133,7 @@
                         <option value="DORMIR">Dormir</option>
                         <option value="ACCESORIOS">Accesorios</option>
                     </select>
-                    <input type="text" id="sub-cat" placeholder="Nombre de prenda" style="width:100%; padding:12px; margin-top:10px; border-radius:10px; border:1px solid #eee;">
+                    <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
                 </div>
 
                 <button id="btn-final" class="btn-accion" onclick="procesarSubidaFinal()">
@@ -130,7 +142,7 @@
             </div>
 
             <div id="pantalla-closet" class="screen" style="display:none;">
-                <input type="text" id="busqueda" placeholder="🔍 Buscar..." oninput="filtrarGaleria()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #eee; margin-bottom:15px; background:white;">
+                <input type="text" id="busqueda" placeholder="🔍 Buscar..." oninput="filtrarGaleria()" class="form-input" style="margin-bottom: 15px; background: white;">
                 <div id="galeria-real" class="galeria-grid"></div>
             </div>
         </div>

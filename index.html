@@ -42,11 +42,12 @@
         }
         .content::-webkit-scrollbar { display: none; }
 
-        /* EFECTO DE REBOTE PARA INDICAR SCROLL */
+        /* ANIMACIÓN AJUSTADA PARA MOSTRAR EL 75% DEL SIGUIENTE ICONO */
         @keyframes peekScroll {
             0% { transform: translateX(0); }
-            50% { transform: translateX(-40px); } /* Se mueve a la izquierda */
-            100% { transform: translateX(0); } /* Vuelve */
+            40% { transform: translateX(-70px); } /* Movimiento suficiente para ver el siguiente */
+            60% { transform: translateX(-70px); } /* Pausa breve en el punto máximo */
+            100% { transform: translateX(0); }
         }
 
         .filter-scroll { 
@@ -58,9 +59,9 @@
             -webkit-overflow-scrolling: touch; 
         }
         
-        /* Esta es la clase que aplicaremos para el movimiento inicial */
+        /* Animación suave para que el usuario lo note sin que sea brusco */
         .peek-animation {
-            animation: peekScroll 1.2s ease-in-out 1s; /* Empieza 1 seg después de cargar */
+            animation: peekScroll 1.5s ease-in-out 1s;
         }
 
         .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 75px; cursor: pointer; }
@@ -75,9 +76,7 @@
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; }
 
-        .btn-delete { position: absolute; top: 8px; right: 8px; background: var(--rojo); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; z-index: 10; font-size: 10px; }
-        .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 260px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; }
-
+        /* UNIFICACIÓN DE CAMPOS DE FORMULARIO */
         .form-input { 
             width: 100%; 
             height: 48px; 
@@ -89,6 +88,9 @@
             outline: none;
         }
         
+        .btn-delete { position: absolute; top: 8px; right: 8px; background: var(--rojo); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; z-index: 10; font-size: 10px; }
+        .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 260px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; }
+
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
         .nav-item.active { color: var(--verde); }
@@ -185,15 +187,10 @@
 </div>
 
 <script>
-    // Lógica principal se mantiene idéntica para no afectar funcionamiento
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
     let imagenListaParaSubir = null, botonActivo = false, idPrendaABorrar = null;
 
-    function entrarApp() { 
-        document.getElementById('auth-screen').style.display = 'none'; 
-        document.getElementById('main-app').style.display = 'flex'; 
-    }
-
+    function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
     function abrirEditor(file) {
         if (!file) return;
         const tempUrl = URL.createObjectURL(file);
@@ -201,7 +198,6 @@
         document.getElementById('iframe-ia').src = 'photo_studio.html';
         document.getElementById('modal-ia').style.display = 'flex';
     }
-
     window.cerrarIA = function() {
         document.getElementById('modal-ia').style.display = 'none';
         const procesada = sessionStorage.getItem('imagen_procesada');
@@ -211,7 +207,7 @@
             botonActivo = true;
         }
     };
-
+    function irACategoria(c) { filtroActual = c; cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); }
     function cambiarTab(id, el, reset=false) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
@@ -220,13 +216,6 @@
         if(reset) { filtroActual = 'TODO'; }
         filtrarGaleria();
     }
-
-    function irACategoria(c) { 
-        filtroActual = c; 
-        cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); 
-    }
-
-    // Funciones de Drive y Galería se mantienen sin cambios para estabilidad total
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] })); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({
@@ -237,7 +226,6 @@
     }
     window.onload = () => { gapiLoaded(); gisLoaded(); };
     function vincularGoogleDriveReal() { tokenClient.requestAccessToken({ prompt: 'consent' }); }
-
     async function obtenerOCrearCarpeta() {
         const query = "name = 'KINU_CLOSET' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
         const resp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`, { headers: { Authorization: `Bearer ${accessToken}` } });
@@ -252,7 +240,6 @@
         }
         cargarFotosCloset();
     }
-
     async function cargarFotosCloset() {
         if (!accessToken || !folderId) return;
         const resp = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed = false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
@@ -260,7 +247,6 @@
         todasLasPrendas = data.files || [];
         filtrarGaleria();
     }
-
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
         const search = document.getElementById('busqueda').value.toLowerCase();
@@ -277,7 +263,6 @@
             gal.appendChild(card);
         });
     }
-
     async function procesarSubidaFinal() {
         if (!botonActivo || !accessToken) return;
         const btn = document.getElementById('btn-final');
@@ -305,7 +290,6 @@
             }
         } catch (e) { alert("Error"); }
     }
-
     function abrirPopupBorrar(id) { idPrendaABorrar = id; document.getElementById('notificacion-borrar').style.display = 'block'; }
     function cerrarPopupBorrar() { document.getElementById('notificacion-borrar').style.display = 'none'; idPrendaABorrar = null; }
 </script>

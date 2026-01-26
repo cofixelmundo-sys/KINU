@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KINU - Smart Closet</title>
-    <link rel="icon" href="data:,"> <script src="https://apis.google.com/js/api.js"></script>
+    <link rel="icon" href="data:,">
+    <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
@@ -159,7 +160,6 @@
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
-    // MEJORA AQUÍ: Usamos URL.createObjectURL para evitar el error de cuota
     function abrirEditor(file) {
         if (!file) return;
         const tempUrl = URL.createObjectURL(file);
@@ -192,9 +192,11 @@
         if (!botonActivo || !accessToken) return;
         const btn = document.getElementById('btn-final');
         const txt = document.getElementById('btn-text');
+        const inputNombre = document.getElementById('sub-cat');
+        
         txt.innerText = "SUBIENDO...";
         const categoria = document.getElementById('main-cat').value;
-        const nombre = document.getElementById('sub-cat').value || "Prenda";
+        const nombre = inputNombre.value || "Prenda";
         const fileName = `KINU_${categoria}_${nombre}_${Date.now()}.png`;
 
         try {
@@ -208,6 +210,7 @@
             });
             if (resp.ok) {
                 document.getElementById('notificacion-exito').style.display = 'block';
+                inputNombre.value = ""; // Reseteo del campo de nombre
                 setTimeout(() => { document.getElementById('notificacion-exito').style.display = 'none'; }, 2000);
                 imagenListaParaSubir = null; botonActivo = false;
                 btn.classList.remove('ready'); txt.innerText = "AGREGAR PRENDA";

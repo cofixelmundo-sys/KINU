@@ -25,15 +25,12 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             background: #121212; display: flex; justify-content: center; align-items: center; 
             min-height: 100vh; margin: 0; overflow: hidden;
-            overscroll-behavior-y: none;
-            position: fixed; width: 100%; height: 100%;
+            overscroll-behavior-y: none; position: fixed; width: 100%; height: 100%;
         }
         
         .phone { 
-            width: 100%; height: 100%; max-width: 450px;
-            background: var(--fondo); 
-            overflow: hidden; 
-            position: relative; display: flex; flex-direction: column; 
+            width: 100%; height: 100%; max-width: 450px; background: var(--fondo); 
+            overflow: hidden; position: relative; display: flex; flex-direction: column; 
         }
 
         @media (min-width: 500px) {
@@ -64,33 +61,22 @@
         .cat-circle i { font-size: 24px; color: var(--verde); }
         .cat-item.active .cat-circle { background: var(--verde); border-color: var(--verde); }
         .cat-item.active .cat-circle i { color: white !important; }
-        .cat-label { font-size: 8px; font-weight: 700; color: #999; text-transform: uppercase; }
+        .cat-label { font-size: 8px; font-weight: 700; color: #999; text-transform: uppercase; text-align: center; width: 100%; }
 
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
         .prenda-card { background: white; border-radius: 18px; overflow: hidden; position: relative; height: 180px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; }
-        .tag-sub { 
-            position: absolute; bottom: 0; left: 0; right: 0; 
-            background: var(--verde); color: white; font-size: 9px; 
-            padding: 8px; text-align: center; font-weight: bold; 
-            text-transform: uppercase;
-        }
+        .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; }
 
         .btn-delete { position: absolute; top: 8px; right: 8px; background: var(--rojo); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; z-index: 10; font-size: 10px; }
 
-        .kinu-popup { 
-            display: none; position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); width: 280px; background: white; 
-            border-radius: 30px; padding: 25px; text-align: center; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; 
-        }
+        .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; }
 
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
         .nav-item.active { color: var(--verde); }
         .btn-accion { background: #BDC3C7; color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 10px; opacity: 0.6; }
         .btn-accion.ready { background: var(--verde); cursor: pointer; opacity: 1; }
-
         #auth-btn.connected { background: var(--ok-green) !important; pointer-events: none; }
     </style>
 </head>
@@ -131,22 +117,30 @@
             <div id="pantalla-home" class="screen" style="display:block;">
                 <button id="auth-btn" style="background:var(--google-blue); color:white; border:none; padding:12px; border-radius:12px; width:100%; font-size:11px; margin-bottom:15px; font-weight:bold;" onclick="vincularGoogleDriveReal()">VINCULAR GOOGLE DRIVE</button>
                 
-                <span style="font-size:10px; font-weight:800; color:var(--verde); text-transform:uppercase;">Categorías</span>
+                <span style="font-size:10px; font-weight:800; color:var(--verde); text-transform:uppercase;">Explorar Categorías</span>
                 <div class="filter-scroll">
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                     <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
+                    <div class="cat-item" onclick="irACategoria('EXTERIOR')"><div class="cat-circle"><i class="ph ph-coat"></i></div><span class="cat-label">Abrigos</span></div>
+                    <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
                     <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
                     <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-watch"></i></div><span class="cat-label">Accesorios</span></div>
+                    <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-barbell"></i></div><span class="cat-label">Deporte</span></div>
+                    <div class="cat-item" onclick="irACategoria('LOUNGE')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
                 </div>
 
                 <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px;">
                     <select id="main-cat" style="width:100%; padding:12px; border-radius:10px; border:1px solid #eee;">
                         <option value="SUPERIOR">Parte Superior</option>
                         <option value="INFERIOR">Parte Inferior</option>
+                        <option value="EXTERIOR">Abrigos / Exterior</option>
+                        <option value="ENTERIZOS">Vestidos / Enterizos</option>
                         <option value="CALZADO">Calzado</option>
                         <option value="ACCESORIOS">Accesorios</option>
+                        <option value="DEPORTE">Ropa Deportiva</option>
+                        <option value="LOUNGE">Ropa de Dormir</option>
                     </select>
-                    <input type="text" id="sub-cat" placeholder="Nombre de prenda" style="width:100%; padding:12px; margin-top:10px; border-radius:10px; border:1px solid #eee;">
+                    <input type="text" id="sub-cat" placeholder="Nombre de prenda (ej: Camisa Azul)" style="width:100%; padding:12px; margin-top:10px; border-radius:10px; border:1px solid #eee;">
                 </div>
 
                 <button id="btn-final" class="btn-accion" onclick="procesarSubidaFinal()">
@@ -155,7 +149,7 @@
             </div>
 
             <div id="pantalla-closet" class="screen" style="display:none;">
-                <input type="text" id="busqueda" placeholder="🔍 Buscar..." oninput="filtrarGaleria()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #eee; margin-bottom:15px; background:white;">
+                <input type="text" id="busqueda" placeholder="🔍 Buscar prenda..." oninput="filtrarGaleria()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #eee; margin-bottom:15px; background:white;">
                 <div id="galeria-real" class="galeria-grid"></div>
             </div>
         </div>
@@ -209,8 +203,7 @@
     document.getElementById('confirmar-delete-btn').onclick = async () => {
         if (!idPrendaABorrar) return;
         await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaABorrar}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } });
-        cerrarPopupBorrar();
-        cargarFotosCloset();
+        cerrarPopupBorrar(); cargarFotosCloset();
     };
 
     async function procesarSubidaFinal() {
@@ -218,7 +211,6 @@
         const btn = document.getElementById('btn-final');
         const txt = document.getElementById('btn-text');
         const inputNombre = document.getElementById('sub-cat');
-        
         txt.innerText = "SUBIENDO...";
         const categoria = document.getElementById('main-cat').value;
         const nombre = inputNombre.value || "Prenda";
@@ -265,7 +257,6 @@
         const query = "name = 'KINU_CLOSET' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
         const resp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`, { headers: { Authorization: `Bearer ${accessToken}` } });
         const data = await resp.json();
-        
         const popup = document.getElementById('notificacion-drive');
         const title = document.getElementById('drive-msg-title');
         const body = document.getElementById('drive-msg-body');
@@ -279,12 +270,10 @@
                 method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: 'KINU_CLOSET', mimeType: 'application/vnd.google-apps.folder' })
             });
-            const f = await res.json(); 
-            folderId = f.id;
+            const f = await res.json(); folderId = f.id;
             title.innerText = "CARPETA CREADA";
-            body.innerText = "Hemos creado una carpeta segura llamada 'KINU_CLOSET' en tu Drive. Aquí se guardará toda tu ropa procesada.";
+            body.innerText = "Hemos creado una carpeta segura llamada 'KINU_CLOSET' en tu Drive para guardar tu ropa.";
         }
-
         popup.style.display = 'block';
         setTimeout(() => { popup.style.display = 'none'; }, 4500);
         cargarFotosCloset();

@@ -42,45 +42,35 @@
         }
         .content::-webkit-scrollbar { display: none; }
 
-        /* --- NUEVA LÓGICA DE ANIMACIÓN --- */
+        /* --- CORRECCIÓN DE ANIMACIÓN --- */
         .filter-scroll { 
             display: flex; 
-            gap: 15px; 
+            gap: 12px; 
             overflow-x: auto; 
-            padding: 10px 20px 20px; 
+            padding: 10px 15px 20px; 
             scrollbar-width: none; 
-            -webkit-overflow-scrolling: touch; 
-            scroll-snap-type: x mandatory; /* Fuerza a que los iconos encajen */
-            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth; /* Hace que el movimiento sea fluido */
         }
         
-        .cat-item { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 6px; 
-            min-width: 70px; 
-            cursor: pointer; 
-            scroll-snap-align: center; /* Cada icono se imanta al centro al moverse */
-        }
-
+        /* Animación que usa scroll real para que el navegador encuadre los iconos */
         @keyframes fingerSwipe {
-            0%, 80%, 100% { scroll-left: 0; }
-            40%, 60% { transform: translateX(-90px); } 
-            /* Nota: Usamos transform para la animación visual pero el snap corregirá la posición */
+            0%, 80%, 100% { scroll-margin-left: 0; }
+            40%, 60% { transform: translateX(-85px); } 
         }
 
-        /* Ajuste de Keyframes para que no use transform sino el scroll real simulado */
-        @keyframes autoScroll {
-            0%, 85%, 100% { transform: translateX(0); }
-            40%, 70% { transform: translateX(-85px); } 
+        /* Usamos una versión optimizada: Desplazamiento de un icono completo (ancho + gap) */
+        @keyframes autoPeek {
+            0%, 80%, 100% { transform: translateX(0); }
+            35%, 65% { transform: translateX(-87px); } /* 75px de item + 12px de gap */
         }
 
         .peek-animation {
-            animation: autoScroll 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+            animation: autoPeek 7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
         }
-        /* -------------------------------- */
+        /* ------------------------------- */
 
+        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 75px; cursor: pointer; }
         .cat-circle { width: 60px; height: 60px; border-radius: 50%; background: #f9f9f9; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; }
         .cat-circle i { font-size: 24px; color: var(--verde); }
         .cat-item.active .cat-circle { background: var(--verde); border-color: var(--verde); }

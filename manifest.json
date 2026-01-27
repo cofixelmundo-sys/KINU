@@ -4,7 +4,7 @@
   "description": "Tu closet inteligente en la nube",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#2D4636",
+  "background_color": "#121212",
   "theme_color": "#2D4636",
   "orientation": "portrait",
   "icons": [

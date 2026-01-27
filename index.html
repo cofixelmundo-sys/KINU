@@ -17,7 +17,6 @@
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        /* Variables con el gris-marrón más oscuro para mejor visibilidad */
         :root { 
             --verde: #2D4636; 
             --fondo: #F5F5F7; 
@@ -26,7 +25,7 @@
             --rojo: #e74c3c; 
         }
 
-        * { box-sizing: border-box; transition: all 0.3s ease; }
+        * { box-sizing: border-box; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
         
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
@@ -48,24 +47,25 @@
             overflow: hidden;
         }
 
-        /* Animación de pulsación con expansión de borde fino */
+        /* Animación de borde fino expandiéndose */
         @keyframes pulso-onda {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
-            50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8); }
+            50% { transform: scale(1.03); box-shadow: 0 0 0 12px rgba(255, 255, 255, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
         }
 
         .btn-entrar {
             background: white; 
             color: var(--verde); 
-            padding: 15px 60px; 
-            border-radius: 30px; 
+            padding: 16px 65px; 
+            border-radius: 35px; 
             border: none; 
-            font-weight: bold;
-            font-size: 14px;
-            letter-spacing: 1px;
+            font-weight: 800;
+            font-size: 15px;
+            letter-spacing: 2px;
             animation: pulso-onda 2.5s infinite ease-out;
             cursor: pointer;
+            text-transform: uppercase;
         }
 
         header { 
@@ -203,15 +203,16 @@
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
     let imagenListaParaSubir = null, botonActivo = false, idPrendaABorrar = null;
 
-    // --- LÓGICA DE LOGIN CON PERSISTENCIA ---
+    // --- REGISTRO DE SERVICE WORKER PARA ANDROID ---
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').then(() => console.log("SW OK"));
+    }
 
+    // --- LÓGICA DE LOGIN ---
     function gapiLoaded() { 
         gapi.load('client', () => {
-            gapi.client.init({ 
-                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] 
-            }).then(() => {
-                verificarSesionExistente(); 
-            });
+            gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] })
+            .then(() => verificarSesionExistente());
         }); 
     }
 
@@ -242,11 +243,10 @@
     }
 
     function vincularGoogleDriveReal() {
-        tokenClient.requestAccessToken({ prompt: '' }); 
+        tokenClient.requestAccessToken({ prompt: 'select_account' }); 
     }
 
-    // --- FUNCIONES DE APP ---
-
+    // --- FUNCIONES APP ---
     function entrarApp() { 
         document.getElementById('auth-screen').style.display = 'none'; 
         document.getElementById('main-app').style.display = 'flex'; 
@@ -334,10 +334,7 @@
             const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaABorrar}`, {
                 method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` }
             });
-            if (resp.ok) {
-                cerrarPopupBorrar();
-                cargarFotosCloset();
-            }
+            if (resp.ok) { cerrarPopupBorrar(); cargarFotosCloset(); }
         } catch (e) { alert("Error al borrar"); }
         btn.innerText = "ELIMINAR";
     }

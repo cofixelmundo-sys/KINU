@@ -41,16 +41,20 @@
         header { padding: env(safe-area-inset-top) 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         nav { height: calc(85px + env(safe-area-inset-bottom)); background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); z-index: 100; position: relative; }
         .content { flex: 1; overflow-y: auto; padding: 15px; z-index: 1; scrollbar-width: none; }
-        .content::-webkit-scrollbar { display: none; }
 
-        /* CATEGORÍAS */
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        /* DRIVE BUTTON ESTILO ORIGINAL */
+        #auth-btn { width: 100%; padding: 14px; border-radius: 14px; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; cursor: pointer; border: none; text-transform: uppercase; }
+        .drive-desconectado { background: var(--google-blue); color: white; }
+        .drive-conectado { background: white; color: var(--verde); border: 2.5px solid var(--verde) !important; }
+
+        /* CATEGORÍAS ICONOS GRANDES */
+        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; cursor: pointer; }
         .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
         .cat-circle i { font-size: 30px; color: var(--gris-suave); }
         .cat-item.active .cat-circle { background: var(--verde); border-color: var(--verde); }
         .cat-item.active .cat-circle i { color: white !important; }
-        .cat-label { font-size: 8px; font-weight: 800; color: var(--gris-suave); text-transform: uppercase; text-align: center; }
+        .cat-label { font-size: 8px; font-weight: 800; color: var(--gris-suave); text-transform: uppercase; }
 
         /* GALERÍA */
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
@@ -58,29 +62,30 @@
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; }
 
-        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #eee; font-size: 14px; background: #fdfdfd; outline: none; margin-bottom: 10px; }
-        
-        /* BOTONES */
+        /* BOTONES ACCION */
         .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-accion.ready { background: var(--verde); }
         .btn-donar-whatsapp { background: var(--whatsapp); color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; font-weight: 800; font-size: 13px; display: none; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; cursor: pointer; }
 
         /* POPUPS */
-        .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; border: 2px solid var(--verde); max-height: 80vh; overflow-y: auto; }
+        .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 310px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; border: 2px solid var(--verde); }
+        
+        /* SELECTOR DONAR */
+        .selector-donar-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; max-height: 200px; overflow-y: auto; padding: 5px; border: 1px solid #eee; border-radius: 15px; }
+        .prenda-mini { position: relative; border-radius: 10px; overflow: hidden; background: #f9f9f9; aspect-ratio: 1; border: 2px solid transparent; }
+        .prenda-mini img { width: 100%; height: 100%; object-fit: contain; }
+        .prenda-mini.selected { border-color: var(--verde); }
+        .check-overlay { position: absolute; top: 3px; right: 3px; color: var(--verde); display: none; background: white; border-radius: 50%; }
+        .prenda-mini.selected .check-overlay { display: block; }
 
-        /* FORMULARIO DONACIÓN */
-        .donor-form-title { color: var(--verde); font-size: 16px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: block; }
-        .prenda-lista-item { font-size: 12px; text-align: left; padding: 5px 10px; border-bottom: 1px solid #eee; color: var(--gris-suave); }
+        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #eee; font-size: 14px; background: #fdfdfd; outline: none; margin-bottom: 10px; }
 
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
         .nav-item.active { color: var(--verde); }
 
-        /* ANIMACIONES SYNC */
-        .sync-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 20px; }
-        .sync-logo { width: 45px; height: 45px; }
-        .flow-line { width: 60px; height: 4px; background: #eee; border-radius: 2px; position: relative; overflow: hidden; }
-        .flow-line::after { content: ""; position: absolute; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, var(--verde), transparent); animation: flow-move 1.5s infinite linear; }
-        @keyframes flow-move { 0% { left: -100%; } 100% { left: 100%; } }
+        @keyframes rebote-flecha { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -15px); } }
+        .flecha-guia { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); color: var(--verde); font-size: 45px; z-index: 5500; display: none; animation: rebote-flecha 1s infinite; }
     </style>
 </head>
 <body>
@@ -88,7 +93,7 @@
 <div class="main-container">
     <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         <img src="https://i.imgur.com/yTIrTq2.png" style="width:150px; margin-bottom:30px;">
-        <button class="btn-entrar" onclick="entrarApp()">ENTRAR</button>
+        <button onclick="entrarApp()" style="background:white; color:var(--verde); padding:16px 65px; border-radius:35px; border:none; font-weight:800; text-transform:uppercase; letter-spacing:2px;">ENTRAR</button>
     </div>
 
     <div id="main-app" style="display:none; flex-direction:column; height:100%;">
@@ -110,81 +115,59 @@
                     <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
                     <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
                     <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
-                    <div class="cat-item" onclick="irACategoria('DEPORTES')"><div class="cat-circle"><i class="ph ph-barbell"></i></div><span class="cat-label">Deportes</span></div>
-                    <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-sketch-logo"></i></div><span class="cat-label">Vintage</span></div>
-                    <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
-                    <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-watch"></i></div><span class="cat-label">Accesorios</span></div>
                     <div class="cat-item" onclick="irACategoria('DONAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
                 </div>
 
                 <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px; display: flex; flex-direction: column; gap: 5px;">
                     <select id="main-cat" class="form-input">
-                        <option value="SUPERIOR">Parte Superior</option>
-                        <option value="INFERIOR">Parte Inferior</option>
-                        <option value="ABRIGOS">Abrigo</option>
-                        <option value="ENTERIZOS">Enterizos</option>
-                        <option value="CALZADO">Calzado</option>
-                        <option value="DEPORTES">Deportes</option>
-                        <option value="VINTAGE">Vintage</option>
-                        <option value="DORMIR">Dormir</option>
-                        <option value="ACCESORIOS">Accesorios</option>
-                        <option value="DONAR">Donar</option>
+                        <option value="SUPERIOR">Superior</option><option value="INFERIOR">Inferior</option>
+                        <option value="ABRIGOS">Abrigo</option><option value="ENTERIZOS">Enterizo</option>
+                        <option value="CALZADO">Calzado</option><option value="DONAR">Donar</option>
                     </select>
                     <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
                 </div>
 
-                <button id="btn-final" class="btn-accion" onclick="procesarSubidaFinal()">
+                <button id="btn-final" class="btn-accion" onclick="manejarBotonAgregar()">
                     <i class="ph ph-plus-circle"></i> <span id="btn-text">AGREGAR PRENDA</span>
                 </button>
             </div>
 
             <div id="pantalla-closet" class="screen" style="display:none;">
-                <button id="btn-donar-accion" class="btn-donar-whatsapp" onclick="abrirFormularioDonante()">
+                <button id="btn-donar-accion" class="btn-donar-whatsapp" onclick="abrirSelectorVisual()">
                     <i class="ph ph-hand-heart"></i> GESTIONAR DONACIÓN
                 </button>
-                <input type="text" id="busqueda" placeholder="🔍 Buscar en mi closet..." oninput="filtrarGaleria()" class="form-input" style="background: white;">
+                <input type="text" id="busqueda" placeholder="🔍 Buscar..." oninput="filtrarGaleria()" class="form-input" style="background: white;">
                 <div id="galeria-real" class="galeria-grid"></div>
             </div>
         </div>
 
         <nav>
             <div class="nav-item active" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house" style="font-size:24px;"></i><span>INICIO</span></div>
-            <div class="nav-item" onclick="document.getElementById('input-camara').click()">
-                <div id="nav-camera-btn" class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
-            </div>
+            <div class="nav-item" onclick="document.getElementById('input-camara').click()"><div class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div></div>
             <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i><span>CLOSET</span></div>
         </nav>
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
 
-    <div id="popup-donante" class="kinu-popup">
-        <span class="donor-form-title">Datos del Donante</span>
-        <input type="text" id="donor-name" class="form-input" placeholder="Nombre completo">
-        <input type="text" id="donor-address" class="form-input" placeholder="Dirección de retiro">
-        
-        <div style="margin: 15px 0; text-align: left;">
-            <span style="font-size: 10px; font-weight: 800; color: var(--verde);">PRENDAS A DONAR:</span>
-            <div id="lista-prendas-donar" style="margin-top: 5px; max-height: 120px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px;">
-                </div>
-        </div>
+    <div id="popup-guia" class="kinu-popup">
+        <i class="ph ph-camera-plus" style="color:var(--verde); font-size:45px;"></i>
+        <h3 style="color:var(--verde); margin-top:10px; font-size:15px; text-transform:uppercase;">Captura tu prenda</h3>
+        <p style="font-size:11px; color:var(--gris-suave); margin-bottom:15px;">Para agregar una prenda tómale una foto con la cámara de KINU.</p>
+        <button onclick="cerrarGuia()" style="background:var(--verde); color:white; border:none; padding:12px; border-radius:12px; width:100%; font-weight:bold;">ENTENDIDO</button>
+    </div>
+    <div id="flecha-indicadora" class="flecha-guia"><i class="ph ph-arrow-fat-down-fill"></i></div>
 
+    <div id="popup-donante" class="kinu-popup" style="width: 90%; max-width: 350px;">
+        <span style="color:var(--verde); font-size:16px; font-weight:800; text-transform:uppercase;">Nueva Donación</span>
+        <div id="selector-donar" class="selector-donar-grid"></div>
+        <input type="text" id="donor-name" class="form-input" placeholder="Tu nombre">
+        <input type="text" id="donor-address" class="form-input" placeholder="Dirección de retiro">
         <button onclick="enviarWhatsAppDonacion()" style="background:var(--whatsapp); color:white; border:none; padding:15px; border-radius:15px; width:100%; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:10px;">
             <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR A KINU
         </button>
-        <button onclick="cerrarPopupDonante()" style="background:none; color:var(--gris-suave); border:none; margin-top:10px; font-size:11px; font-weight:bold;">CANCELAR</button>
+        <button onclick="document.getElementById('popup-donante').style.display='none'" style="background:none; color:#999; border:none; margin-top:10px; font-size:11px;">CANCELAR</button>
     </div>
 
-    <div id="popup-sync" class="kinu-popup">
-        <h3 style="color:var(--verde); margin-top:5px; font-size:14px; text-transform:uppercase;">Kinu sincronizado</h3>
-        <div class="sync-container">
-            <img src="https://i.imgur.com/yTIrTq2.png" class="sync-logo">
-            <div class="flow-line"></div>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" class="sync-logo">
-        </div>
-    </div>
-
-    <div id="notificacion-exito" class="kinu-popup"><i class="ph ph-check-circle" style="color:var(--verde); font-size:40px;"></i><h3>¡LISTO!</h3></div>
-    
     <div id="modal-ia" style="display:none; position:absolute; inset:0; background:white; z-index:2000; flex-direction:column;">
         <div style="background:var(--verde); color:white; padding:15px; display:flex; align-items:center; gap:10px;">
             <button onclick="cerrarIA()" style="background:none; border:none; color:white;"><i class="ph ph-arrow-left"></i></button>
@@ -196,137 +179,72 @@
 
 <script>
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
-    let imagenListaParaSubir = null, botonActivo = false;
+    let imagenProcesada = null, botonListo = false;
+    let prendasSeleccionadas = [];
 
     window.onload = () => { 
-        gapiLoaded(); 
-        gisLoaded();
-        const savedToken = localStorage.getItem('kinu_token');
-        const expireTime = localStorage.getItem('kinu_token_expire');
-        if (savedToken && expireTime > Date.now()) { entrarApp(); setTimeout(mostrarPopupSync, 800); }
+        gapiLoaded(); gisLoaded();
+        if (localStorage.getItem('kinu_token')) entrarApp();
     };
 
-    function mostrarPopupSync() {
-        const pop = document.getElementById('popup-sync');
-        pop.style.display = 'block'; setTimeout(() => pop.style.display = 'none', 2200);
-    }
+    function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
-    function entrarApp() { 
-        document.getElementById('auth-screen').style.display = 'none'; 
-        document.getElementById('main-app').style.display = 'flex'; 
-    }
-
-    // --- LÓGICA DE DONACIÓN ---
-    function abrirFormularioDonante() {
-        const listaDiv = document.getElementById('lista-prendas-donar');
-        listaDiv.innerHTML = '';
-        const prendasDonar = todasLasPrendas.filter(p => p.name.split('_')[1] === 'DONAR');
-        
-        if(prendasDonar.length === 0) {
-            listaDiv.innerHTML = '<div class="prenda-lista-item">No tienes prendas marcadas para donar.</div>';
+    // --- LOGICA BOTON AGREGAR (EL POPUP QUE QUERIAS) ---
+    function manejarBotonAgregar() {
+        if (!botonListo) {
+            document.getElementById('popup-guia').style.display = 'block';
+            document.getElementById('flecha-indicadora').style.display = 'block';
         } else {
-            prendasDonar.forEach(p => {
-                const item = document.createElement('div');
-                item.className = 'prenda-lista-item';
-                item.innerText = `• ${p.name.split('_')[2]}`;
-                listaDiv.appendChild(item);
-            });
+            subirPrendaFinal();
         }
+    }
+
+    function cerrarGuia() {
+        document.getElementById('popup-guia').style.display = 'none';
+        document.getElementById('flecha-indicadora').style.display = 'none';
+    }
+
+    // --- DONACIONES ---
+    function abrirSelectorVisual() {
+        const grid = document.getElementById('selector-donar');
+        grid.innerHTML = ''; prendasSeleccionadas = [];
+        todasLasPrendas.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'prenda-mini';
+            div.innerHTML = `<img src="${p.thumbnailLink.replace('=s220', '=s400')}"><div class="check-overlay"><i class="ph ph-check-circle-fill"></i></div>`;
+            div.onclick = () => {
+                div.classList.toggle('selected');
+                const nombre = p.name.split('_')[2];
+                if(div.classList.contains('selected')) prendasSeleccionadas.push(nombre);
+                else prendasSeleccionadas = prendasSeleccionadas.filter(n => n !== nombre);
+            };
+            grid.appendChild(div);
+        });
         document.getElementById('popup-donante').style.display = 'block';
     }
 
-    function cerrarPopupDonante() { document.getElementById('popup-donante').style.display = 'none'; }
-
     function enviarWhatsAppDonacion() {
-        const nombre = document.getElementById('donor-name').value;
-        const direccion = document.getElementById('donor-address').value;
-        const prendasDonar = todasLasPrendas.filter(p => p.name.split('_')[1] === 'DONAR').map(p => p.name.split('_')[2]);
-        
-        if(!nombre || !direccion) { alert("Por favor completa tus datos."); return; }
-        if(prendasDonar.length === 0) { alert("No hay prendas para donar."); return; }
-
-        let mensaje = `¡Hola KINU! 👋\n\nQuiero realizar una donación:\n`;
-        mensaje += `👤 *Nombre:* ${nombre}\n`;
-        mensaje += `📍 *Dirección:* ${direccion}\n\n`;
-        mensaje += `👕 *Detalle de prendas:* \n- ${prendasDonar.join('\n- ')}`;
-
-        const url = `https://wa.me/598092199199?text=${encodeURIComponent(mensaje)}`;
-        window.open(url, '_blank');
-        cerrarPopupDonante();
+        const nom = document.getElementById('donor-name').value;
+        const dir = document.getElementById('donor-address').value;
+        if(!nom || !dir || prendasSeleccionadas.length === 0) return alert("Completa los datos y elige prendas");
+        let msg = `¡Hola KINU! 👋\n\nDonación de: ${nom}\nDirección: ${dir}\n\nPrendas:\n- ${prendasSeleccionadas.join('\n- ')}`;
+        window.open(`https://wa.me/598092199199?text=${encodeURIComponent(msg)}`, '_blank');
+        document.getElementById('popup-donante').style.display = 'none';
     }
 
-    // --- DRIVE Y GALERÍA ---
-    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSesionExistente)); }
-
-    function gisLoaded() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
-            scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.resource',
-            callback: (resp) => { 
-                accessToken = resp.access_token; 
-                localStorage.setItem('kinu_token', accessToken);
-                localStorage.setItem('kinu_token_expire', Date.now() + (resp.expires_in * 1000));
-                actualizarBotonDrive(true); obtenerOCrearCarpeta(); mostrarPopupSync();
-            }
-        });
-    }
-
-    function verificarSesionExistente() {
-        const savedToken = localStorage.getItem('kinu_token');
-        const expireTime = localStorage.getItem('kinu_token_expire');
-        if (savedToken && expireTime > Date.now()) {
-            accessToken = savedToken; gapi.client.setToken({ access_token: accessToken });
-            actualizarBotonDrive(true); obtenerOCrearCarpeta();
-        }
-    }
-
-    function manejarAccionDrive() { tokenClient.requestAccessToken({ prompt: 'select_account' }); }
-
-    function irACategoria(c) { 
-        filtroActual = c; 
-        cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); 
-    }
-
+    // --- NAVEGACION Y DRIVE ---
     function cambiarTab(id, el, reset=false) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        if(reset && !filtroActual) filtroActual = 'TODO';
-        
-        // Mostrar botón de donar solo si estamos en esa categoría
+        if(reset) filtroActual = 'TODO';
         document.getElementById('btn-donar-accion').style.display = (filtroActual === 'DONAR' && id === 'pantalla-closet') ? 'flex' : 'none';
-        
         filtrarGaleria();
     }
 
-    async function cargarFotosCloset() {
-        if (!accessToken || !folderId) return;
-        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed = false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const d = await r.json();
-        todasLasPrendas = d.files || [];
-        filtrarGaleria();
-    }
+    function irACategoria(c) { filtroActual = c; cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); }
 
-    function filtrarGaleria() {
-        const gal = document.getElementById('galeria-real'); 
-        gal.innerHTML = '';
-        const busq = document.getElementById('busqueda').value.toLowerCase();
-        
-        todasLasPrendas.filter(p => {
-            const matchesCat = filtroActual === 'TODO' || p.name.split('_')[1] === filtroActual;
-            const matchesSearch = p.name.toLowerCase().includes(busq);
-            return matchesCat && matchesSearch;
-        }).forEach(f => {
-            const card = document.createElement('div');
-            card.className = 'prenda-card';
-            const thumb = f.thumbnailLink ? f.thumbnailLink.replace('=s220', '=s600') : '';
-            card.innerHTML = `<img src="${thumb}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
-            gal.appendChild(card);
-        });
-    }
-
-    // --- FUNCIONES DE CÁMARA E IA ---
     function abrirEditor(file) {
         if (!file) return;
         sessionStorage.setItem('temp_img_url', URL.createObjectURL(file));
@@ -337,47 +255,62 @@
     window.cerrarIA = function() {
         document.getElementById('modal-ia').style.display = 'none';
         const proc = sessionStorage.getItem('imagen_procesada');
-        if (proc) { imagenListaParaSubir = proc; document.getElementById('btn-final').classList.add('ready'); botonActivo = true; }
+        if (proc) {
+            imagenProcesada = proc; botonListo = true;
+            document.getElementById('btn-final').classList.add('ready');
+            document.getElementById('btn-text').innerText = "SUBIR AHORA";
+        }
     };
 
-    async function procesarSubidaFinal() {
-        if (!botonActivo) return;
-        const btn = document.getElementById('btn-final');
+    async function subirPrendaFinal() {
+        const btn = document.getElementById('btn-text');
+        btn.innerText = "SUBIENDO...";
         const cat = document.getElementById('main-cat').value;
         const nom = document.getElementById('sub-cat').value || "Prenda";
-        const fileName = `KINU_${cat}_${nom}_${Date.now()}.png`;
-        try {
-            const base64Data = imagenListaParaSubir.split(',')[1];
-            const metadata = { name: fileName, parents: [folderId] };
-            const form = new FormData();
-            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            form.append('file', new Blob([Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))], { type: 'image/png' }));
-            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-            document.getElementById('notificacion-exito').style.display = 'block';
-            setTimeout(() => { document.getElementById('notificacion-exito').style.display = 'none'; }, 2000);
-            cargarFotosCloset();
-        } catch (e) { alert("Error al subir"); }
-    }
-
-    async function obtenerOCrearCarpeta() {
-        const q = "name = 'KINU_CLOSET' and trashed = false";
-        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const d = await r.json();
-        if (d.files.length) folderId = d.files[0].id;
-        else {
-            const res = await fetch('https://www.googleapis.com/drive/v3/files', {
-                method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: 'KINU_CLOSET', mimeType: 'application/vnd.google-apps.folder' })
-            });
-            const f = await res.json(); folderId = f.id;
-        }
+        const meta = { name: `KINU_${cat}_${nom}_${Date.now()}.png`, parents: [folderId] };
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+        form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
+        
+        await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
+        btn.innerText = "AGREGAR PRENDA";
+        document.getElementById('btn-final').classList.remove('ready');
+        botonListo = false; imagenProcesada = null;
         cargarFotosCloset();
     }
 
+    // Funciones Drive base...
+    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSesionExistente)); }
+    function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
+            scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.resource',
+            callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); actualizarBotonDrive(true); obtenerOCrearCarpeta(); }
+        });
+    }
+    function verificarSesionExistente() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); actualizarBotonDrive(true); obtenerOCrearCarpeta(); } }
+    function manejarAccionDrive() { tokenClient.requestAccessToken({ prompt: 'select_account' }); }
     function actualizarBotonDrive(stat) {
         const b = document.getElementById('auth-btn');
         b.className = stat ? 'drive-conectado' : 'drive-desconectado';
         b.innerHTML = stat ? '<i class="ph ph-check-circle"></i> VINCULADO' : '<i class="ph ph-google-logo"></i> VINCULAR DRIVE';
+    }
+    async function obtenerOCrearCarpeta() {
+        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } });
+        const d = await r.json();
+        if (d.files.length) { folderId = d.files[0].id; cargarFotosCloset(); }
+    }
+    async function cargarFotosCloset() {
+        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
+        const d = await r.json(); todasLasPrendas = d.files || []; filtrarGaleria();
+    }
+    function filtrarGaleria() {
+        const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
+        todasLasPrendas.filter(p => filtroActual === 'TODO' || p.name.split('_')[1] === filtroActual).forEach(f => {
+            const card = document.createElement('div'); card.className = 'prenda-card';
+            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
+            gal.appendChild(card);
+        });
     }
 </script>
 </body>

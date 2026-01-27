@@ -17,7 +17,8 @@
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        :root { --verde: #2D4636; --fondo: #F5F5F7; --blanco: #FFFFFF; --gris-suave: #8B857F; --rojo: #e74c3c; }
+        /* Color gris-marrón subido de tono para mejor visibilidad (#6D6761) */
+        :root { --verde: #2D4636; --fondo: #F5F5F7; --blanco: #FFFFFF; --gris-suave: #6D6761; --rojo: #e74c3c; }
         * { box-sizing: border-box; transition: all 0.3s ease; }
         
         body { 
@@ -40,7 +41,6 @@
             overflow: hidden;
         }
 
-        /* Nueva animación de pulsación con expansión de borde fino */
         @keyframes pulso-onda {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
             50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
@@ -56,10 +56,8 @@
             font-weight: bold;
             font-size: 14px;
             letter-spacing: 1px;
-            position: relative;
             animation: pulso-onda 2.5s infinite ease-out;
             cursor: pointer;
-            z-index: 10;
         }
 
         header { 
@@ -84,7 +82,7 @@
         .cat-circle i { font-size: 24px; color: var(--gris-suave); }
         .cat-item.active .cat-circle { background: var(--verde); border-color: var(--verde); }
         .cat-item.active .cat-circle i { color: white !important; }
-        .cat-label { font-size: 8px; font-weight: 700; color: var(--gris-suave); text-transform: uppercase; text-align: center; }
+        .cat-label { font-size: 8px; font-weight: 800; color: var(--gris-suave); text-transform: uppercase; text-align: center; }
 
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
         .prenda-card { background: white; border-radius: 18px; overflow: hidden; position: relative; height: 180px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }

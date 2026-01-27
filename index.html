@@ -38,10 +38,30 @@
         
         .main-container { width: 100%; height: 100%; background: var(--fondo); display: flex; flex-direction: column; position: relative; overflow: hidden; }
 
+        @keyframes pulso-onda {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8); }
+            50% { transform: scale(1.03); box-shadow: 0 0 0 12px rgba(255, 255, 255, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        .btn-entrar {
+            background: white; color: var(--verde); padding: 16px 65px; border-radius: 35px; border: none; 
+            font-weight: 800; font-size: 15px; letter-spacing: 2px;
+            animation: pulso-onda 2.5s infinite ease-out; cursor: pointer; text-transform: uppercase;
+        }
+
         header { padding: env(safe-area-inset-top) 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         nav { height: calc(85px + env(safe-area-inset-bottom)); background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); z-index: 100; position: relative; }
         .content { flex: 1; overflow-y: auto; padding: 15px; z-index: 1; scrollbar-width: none; }
-        .content::-webkit-scrollbar { display: none; }
+
+        /* ESTILO ANTERIOR DEL BOTÓN DRIVE */
+        #auth-btn { 
+            width: 100%; padding: 14px; border-radius: 14px; font-size: 11px; font-weight: 800; 
+            display: flex; align-items: center; justify-content: center; gap: 10px; 
+            margin-bottom: 15px; cursor: pointer; border: none; text-transform: uppercase; 
+        }
+        .drive-desconectado { background: var(--google-blue); color: white; }
+        .drive-conectado { background: white; color: var(--verde); border: 2.5px solid var(--verde) !important; }
 
         /* CATEGORÍAS */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
@@ -60,22 +80,17 @@
 
         .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #eee; font-size: 14px; background: #fdfdfd; outline: none; margin-bottom: 10px; }
         
-        /* BOTONES */
-        .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; opacity: 0.6; }
+        .btn-accion.ready { background: var(--verde); opacity: 1; }
         .btn-donar-whatsapp { background: var(--whatsapp); color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; font-weight: 800; font-size: 13px; display: none; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; cursor: pointer; }
 
         /* POPUPS */
-        .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; border: 2px solid var(--verde); max-height: 80vh; overflow-y: auto; }
-
-        /* FORMULARIO DONACIÓN */
-        .donor-form-title { color: var(--verde); font-size: 16px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: block; }
-        .prenda-lista-item { font-size: 12px; text-align: left; padding: 5px 10px; border-bottom: 1px solid #eee; color: var(--gris-suave); }
+        .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 290px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; border: 2px solid var(--verde); }
 
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
         .nav-item.active { color: var(--verde); }
 
-        /* ANIMACIONES SYNC */
         .sync-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 20px; }
         .sync-logo { width: 45px; height: 45px; }
         .flow-line { width: 60px; height: 4px; background: #eee; border-radius: 2px; position: relative; overflow: hidden; }
@@ -157,32 +172,28 @@
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
 
-    <div id="popup-donante" class="kinu-popup">
-        <span class="donor-form-title">Datos del Donante</span>
+    <div id="popup-donante" class="kinu-popup" style="width: 320px; max-height: 85vh; overflow-y: auto;">
+        <span style="color:var(--verde); font-size:16px; font-weight:800; text-transform:uppercase; margin-bottom:15px; display:block;">Datos del Donante</span>
         <input type="text" id="donor-name" class="form-input" placeholder="Nombre completo">
         <input type="text" id="donor-address" class="form-input" placeholder="Dirección de retiro">
-        
         <div style="margin: 15px 0; text-align: left;">
             <span style="font-size: 10px; font-weight: 800; color: var(--verde);">PRENDAS A DONAR:</span>
-            <div id="lista-prendas-donar" style="margin-top: 5px; max-height: 120px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px;">
-                </div>
+            <div id="lista-prendas-donar" style="margin-top: 5px; max-height: 120px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; font-size: 12px; color: var(--gris-suave);"></div>
         </div>
-
         <button onclick="enviarWhatsAppDonacion()" style="background:var(--whatsapp); color:white; border:none; padding:15px; border-radius:15px; width:100%; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:10px;">
             <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR A KINU
         </button>
-        <button onclick="cerrarPopupDonante()" style="background:none; color:var(--gris-suave); border:none; margin-top:10px; font-size:11px; font-weight:bold;">CANCELAR</button>
+        <button onclick="document.getElementById('popup-donante').style.display='none'" style="background:none; color:var(--gris-suave); border:none; margin-top:10px; font-size:11px; font-weight:bold;">CANCELAR</button>
     </div>
 
     <div id="popup-sync" class="kinu-popup">
         <h3 style="color:var(--verde); margin-top:5px; font-size:14px; text-transform:uppercase;">Kinu sincronizado</h3>
         <div class="sync-container">
-            <img src="https://i.imgur.com/yTIrTq2.png" class="sync-logo">
+            <img src="https://i.imgur.com/yTIrTq2.png" style="width:45px;">
             <div class="flow-line"></div>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" class="sync-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" style="width:45px;">
         </div>
     </div>
-
     <div id="notificacion-exito" class="kinu-popup"><i class="ph ph-check-circle" style="color:var(--verde); font-size:40px;"></i><h3>¡LISTO!</h3></div>
     
     <div id="modal-ia" style="display:none; position:absolute; inset:0; background:white; z-index:2000; flex-direction:column;">
@@ -216,46 +227,6 @@
         document.getElementById('main-app').style.display = 'flex'; 
     }
 
-    // --- LÓGICA DE DONACIÓN ---
-    function abrirFormularioDonante() {
-        const listaDiv = document.getElementById('lista-prendas-donar');
-        listaDiv.innerHTML = '';
-        const prendasDonar = todasLasPrendas.filter(p => p.name.split('_')[1] === 'DONAR');
-        
-        if(prendasDonar.length === 0) {
-            listaDiv.innerHTML = '<div class="prenda-lista-item">No tienes prendas marcadas para donar.</div>';
-        } else {
-            prendasDonar.forEach(p => {
-                const item = document.createElement('div');
-                item.className = 'prenda-lista-item';
-                item.innerText = `• ${p.name.split('_')[2]}`;
-                listaDiv.appendChild(item);
-            });
-        }
-        document.getElementById('popup-donante').style.display = 'block';
-    }
-
-    function cerrarPopupDonante() { document.getElementById('popup-donante').style.display = 'none'; }
-
-    function enviarWhatsAppDonacion() {
-        const nombre = document.getElementById('donor-name').value;
-        const direccion = document.getElementById('donor-address').value;
-        const prendasDonar = todasLasPrendas.filter(p => p.name.split('_')[1] === 'DONAR').map(p => p.name.split('_')[2]);
-        
-        if(!nombre || !direccion) { alert("Por favor completa tus datos."); return; }
-        if(prendasDonar.length === 0) { alert("No hay prendas para donar."); return; }
-
-        let mensaje = `¡Hola KINU! 👋\n\nQuiero realizar una donación:\n`;
-        mensaje += `👤 *Nombre:* ${nombre}\n`;
-        mensaje += `📍 *Dirección:* ${direccion}\n\n`;
-        mensaje += `👕 *Detalle de prendas:* \n- ${prendasDonar.join('\n- ')}`;
-
-        const url = `https://wa.me/598092199199?text=${encodeURIComponent(mensaje)}`;
-        window.open(url, '_blank');
-        cerrarPopupDonante();
-    }
-
-    // --- DRIVE Y GALERÍA ---
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSesionExistente)); }
 
     function gisLoaded() {
@@ -282,6 +253,40 @@
 
     function manejarAccionDrive() { tokenClient.requestAccessToken({ prompt: 'select_account' }); }
 
+    function actualizarBotonDrive(stat) {
+        const b = document.getElementById('auth-btn');
+        b.className = stat ? 'drive-conectado' : 'drive-desconectado';
+        b.innerHTML = stat ? '<i class="ph ph-check-circle"></i> VINCULADO' : '<i class="ph ph-google-logo"></i> VINCULAR DRIVE';
+    }
+
+    // --- LÓGICA DE DONACIÓN ---
+    function abrirFormularioDonante() {
+        const listaDiv = document.getElementById('lista-prendas-donar');
+        listaDiv.innerHTML = '';
+        const prendasDonar = todasLasPrendas.filter(p => p.name.split('_')[1] === 'DONAR');
+        if(prendasDonar.length === 0) {
+            listaDiv.innerHTML = '<div style="padding:10px">No hay prendas para donar.</div>';
+        } else {
+            prendasDonar.forEach(p => {
+                const item = document.createElement('div');
+                item.style.padding = '5px 10px';
+                item.innerText = `• ${p.name.split('_')[2]}`;
+                listaDiv.appendChild(item);
+            });
+        }
+        document.getElementById('popup-donante').style.display = 'block';
+    }
+
+    function enviarWhatsAppDonacion() {
+        const nombre = document.getElementById('donor-name').value;
+        const direccion = document.getElementById('donor-address').value;
+        const prendasDonar = todasLasPrendas.filter(p => p.name.split('_')[1] === 'DONAR').map(p => p.name.split('_')[2]);
+        if(!nombre || !direccion) { alert("Completa tus datos."); return; }
+        let mensaje = `¡Hola KINU! 👋\n\nQuiero donar:\n👤 *Nombre:* ${nombre}\n📍 *Dirección:* ${direccion}\n\n👕 *Prendas:* \n- ${prendasDonar.join('\n- ')}`;
+        window.open(`https://wa.me/598092199199?text=${encodeURIComponent(mensaje)}`, '_blank');
+        document.getElementById('popup-donante').style.display = 'none';
+    }
+
     function irACategoria(c) { 
         filtroActual = c; 
         cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); 
@@ -293,10 +298,7 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
         if(reset && !filtroActual) filtroActual = 'TODO';
-        
-        // Mostrar botón de donar solo si estamos en esa categoría
         document.getElementById('btn-donar-accion').style.display = (filtroActual === 'DONAR' && id === 'pantalla-closet') ? 'flex' : 'none';
-        
         filtrarGaleria();
     }
 
@@ -312,7 +314,6 @@
         const gal = document.getElementById('galeria-real'); 
         gal.innerHTML = '';
         const busq = document.getElementById('busqueda').value.toLowerCase();
-        
         todasLasPrendas.filter(p => {
             const matchesCat = filtroActual === 'TODO' || p.name.split('_')[1] === filtroActual;
             const matchesSearch = p.name.toLowerCase().includes(busq);
@@ -326,7 +327,6 @@
         });
     }
 
-    // --- FUNCIONES DE CÁMARA E IA ---
     function abrirEditor(file) {
         if (!file) return;
         sessionStorage.setItem('temp_img_url', URL.createObjectURL(file));
@@ -356,7 +356,7 @@
             document.getElementById('notificacion-exito').style.display = 'block';
             setTimeout(() => { document.getElementById('notificacion-exito').style.display = 'none'; }, 2000);
             cargarFotosCloset();
-        } catch (e) { alert("Error al subir"); }
+        } catch (e) { alert("Error"); }
     }
 
     async function obtenerOCrearCarpeta() {
@@ -372,12 +372,6 @@
             const f = await res.json(); folderId = f.id;
         }
         cargarFotosCloset();
-    }
-
-    function actualizarBotonDrive(stat) {
-        const b = document.getElementById('auth-btn');
-        b.className = stat ? 'drive-conectado' : 'drive-desconectado';
-        b.innerHTML = stat ? '<i class="ph ph-check-circle"></i> VINCULADO' : '<i class="ph ph-google-logo"></i> VINCULAR DRIVE';
     }
 </script>
 </body>

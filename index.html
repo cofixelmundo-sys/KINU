@@ -85,17 +85,23 @@
         
         .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 290px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; }
 
-        .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: all 0.3s; }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
         .nav-item.active { color: var(--verde); }
         
-        /* BOTÓN AGREGAR DINÁMICO */
         .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; opacity: 0.6; }
         .btn-accion.ready { background: var(--verde); opacity: 1; }
 
-        /* ESTILOS GUÍA */
+        /* GUÍA Y ANIMACIONES */
         .flecha-guia { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); color: var(--verde); font-size: 45px; z-index: 5500; display: none; animation: rebote-flecha 1s infinite; pointer-events: none; }
         @keyframes rebote-flecha { 0%, 100% { bottom: 85px; } 50% { bottom: 100px; } }
+        
+        @keyframes pulso-camara {
+            0% { box-shadow: 0 0 0 0 rgba(45, 70, 54, 0.7); transform: scale(1); }
+            70% { box-shadow: 0 0 0 15px rgba(45, 70, 54, 0); transform: scale(1.1); }
+            100% { box-shadow: 0 0 0 0 rgba(45, 70, 54, 0); transform: scale(1); }
+        }
+        .camara-activa { animation: pulso-camara 1.5s infinite !important; }
     </style>
 </head>
 <body>
@@ -162,8 +168,8 @@
 
         <nav>
             <div class="nav-item active" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house" style="font-size:24px;"></i><span>INICIO</span></div>
-            <div class="nav-item" id="btn-camara-main" onclick="document.getElementById('input-camara').click()">
-                <div class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
+            <div class="nav-item" onclick="document.getElementById('input-camara').click()">
+                <div id="nav-camera-btn" class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
             </div>
             <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i><span>CLOSET</span></div>
         </nav>
@@ -171,8 +177,8 @@
     </div>
 
     <div id="popup-guia" class="kinu-popup" style="border: 2px solid var(--verde); z-index: 6000;">
-        <i class="ph ph-camera-rotate" style="color:var(--verde); font-size:45px;"></i>
-        <h3 style="color:var(--verde); margin-top:10px; font-size:16px; text-transform:uppercase;">Para agregar una prenda tómale una foto</h3>
+        <i class="ph ph-camera-plus" style="color:var(--verde); font-size:45px;"></i>
+        <h3 style="color:var(--verde); margin-top:10px; font-size:15px; text-transform:uppercase;">Para agregar una prenda tómale una foto con la cámara de KINU</h3>
         <p style="font-size:11px; color:var(--gris-suave); margin-bottom:20px; font-weight: 500;">Procura que el artículo esté solo, tenga buena luz y contraste.</p>
         <button onclick="cerrarGuia()" style="background:var(--verde); color:white; border:none; padding:12px; border-radius:12px; width:100%; font-weight:bold;">ENTENDIDO</button>
     </div>
@@ -204,7 +210,6 @@
 
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
 
-    // --- MANEJO DE ESTADO DRIVE ---
     function manejarAccionDrive() {
         if (accessToken) document.getElementById('popup-desvincular').style.display = 'block';
         else vincularGoogleDriveReal();
@@ -232,10 +237,12 @@
     function mostrarGuia() { 
         document.getElementById('popup-guia').style.display = 'block'; 
         document.getElementById('flecha-indicadora').style.display = 'block'; 
+        document.getElementById('nav-camera-btn').classList.add('camara-activa');
     }
     function cerrarGuia() { 
         document.getElementById('popup-guia').style.display = 'none'; 
         document.getElementById('flecha-indicadora').style.display = 'none'; 
+        document.getElementById('nav-camera-btn').classList.remove('camara-activa');
     }
 
     // --- LÓGICA GOOGLE ---
@@ -271,7 +278,6 @@
 
     function vincularGoogleDriveReal() { tokenClient.requestAccessToken({ prompt: 'select_account' }); }
 
-    // --- FUNCIONES APP ---
     function entrarApp() { 
         document.getElementById('auth-screen').style.display = 'none'; 
         document.getElementById('main-app').style.display = 'flex'; 
@@ -361,12 +367,7 @@
     }
 
     async function procesarSubidaFinal() {
-        // LÓGICA DE GUÍA: Si el botón no está en estado "ready" (sin foto), muestra el popup informativo
-        if (!botonActivo) { 
-            mostrarGuia(); 
-            return; 
-        }
-        
+        if (!botonActivo) { mostrarGuia(); return; }
         if (!accessToken) { alert("Vincula Google Drive primero"); return; }
         
         const btn = document.getElementById('btn-final');
@@ -391,7 +392,7 @@
                 btn.classList.remove('ready'); txt.innerText = "AGREGAR PRENDA";
                 cargarFotosCloset();
             }
-        } catch (e) { alert("Error de red o permisos"); }
+        } catch (e) { alert("Error"); }
     }
 
     function abrirPopupBorrar(id) { idPrendaABorrar = id; document.getElementById('notificacion-borrar').style.display = 'block'; }

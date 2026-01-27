@@ -2,9 +2,9 @@
   "name": "KINU - Smart Closet",
   "short_name": "KINU",
   "description": "Tu closet inteligente en la nube",
-  "start_url": "index.html",
+  "start_url": "/KINU/",
   "display": "standalone",
-  "background_color": "#121212",
+  "background_color": "#F5F5F7",
   "theme_color": "#2D4636",
   "orientation": "portrait",
   "icons": [

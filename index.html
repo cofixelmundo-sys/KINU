@@ -61,6 +61,7 @@
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 75px; cursor: pointer; }
         .cat-circle { width: 60px; height: 60px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
+        .cat-circle i { font-size: 26px; color: var(--gris-suave); }
         .cat-item.active .cat-circle { background: var(--verde); border-color: var(--verde); }
         .cat-item.active .cat-circle i { color: white !important; }
         .cat-label { font-size: 8px; font-weight: 800; color: var(--gris-suave); text-transform: uppercase; }
@@ -71,9 +72,8 @@
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; }
 
         .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #eee; font-size: 14px; background: #fdfdfd; outline: none; }
-        .btn-delete { position: absolute; top: 8px; right: 8px; background: var(--rojo); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; z-index: 10; font-size: 10px; }
         
-        .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 290px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; }
+        .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 290px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; border: 2px solid var(--verde); }
 
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
@@ -81,6 +81,17 @@
         
         .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; opacity: 0.6; }
         .btn-accion.ready { background: var(--verde); opacity: 1; }
+
+        /* ANIMACIÓN FLUJO SYNC */
+        .sync-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 20px; }
+        .sync-logo { width: 45px; height: 45px; object-fit: contain; }
+        .flow-line { width: 60px; height: 4px; background: #eee; border-radius: 2px; position: relative; overflow: hidden; }
+        .flow-line::after {
+            content: ""; position: absolute; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, var(--verde), transparent);
+            animation: flow-move 1.5s infinite linear;
+        }
+        @keyframes flow-move { 0% { left: -100%; } 100% { left: 100%; } }
 
         .flecha-guia { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); color: var(--verde); font-size: 45px; z-index: 5500; display: none; animation: rebote-flecha 1s infinite; pointer-events: none; }
         @keyframes rebote-flecha { 0%, 100% { bottom: 85px; } 50% { bottom: 100px; } }
@@ -113,6 +124,7 @@
                     <i class="ph ph-google-logo"></i> <span>VINCULAR GOOGLE DRIVE</span>
                 </button>
                 
+                <span style="font-size:10px; font-weight:800; color:var(--verde); text-transform:uppercase;">Categorías</span>
                 <div class="filter-scroll">
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                     <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
@@ -153,20 +165,28 @@
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
 
-    <div id="popup-guia" class="kinu-popup" style="border: 2px solid var(--verde); z-index: 6000;">
+    <div id="popup-sync" class="kinu-popup">
+        <h3 style="color:var(--verde); margin-top:5px; font-size:14px; text-transform:uppercase; letter-spacing: 1px;">Kinu está vinculado a Google Drive</h3>
+        <div class="sync-container">
+            <img src="https://i.imgur.com/yTIrTq2.png" class="sync-logo">
+            <div class="flow-line"></div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" class="sync-logo">
+        </div>
+    </div>
+
+    <div id="popup-guia" class="kinu-popup">
         <i class="ph ph-camera-plus" style="color:var(--verde); font-size:45px;"></i>
         <h3 style="color:var(--verde); margin-top:10px; font-size:15px; text-transform:uppercase;">Para agregar una prenda tómale una foto con la cámara de KINU</h3>
-        <p style="font-size:11px; color:var(--gris-suave); margin-bottom:20px; font-weight: 500;">Procura que el artículo esté solo, tenga buena luz y contraste.</p>
+        <p style="font-size:11px; color:var(--gris-suave); margin-bottom:10px;">Procura que el artículo esté solo, tenga buena luz y contraste.</p>
         <button onclick="cerrarGuia()" style="background:var(--verde); color:white; border:none; padding:12px; border-radius:12px; width:100%; font-weight:bold;">ENTENDIDO</button>
     </div>
     <div id="flecha-indicadora" class="flecha-guia"><i class="ph ph-arrow-fat-down-fill"></i></div>
 
-    <div id="popup-desvincular" class="kinu-popup" style="border: 2px solid var(--rojo);">
+    <div id="popup-desvincular" class="kinu-popup" style="border-color: var(--rojo);">
         <i class="ph ph-warning-octagon" style="color:var(--rojo); font-size:40px;"></i>
         <h3 style="color:var(--rojo); margin-top:10px;">¿DESVINCULAR DRIVE?</h3>
-        <p style="font-size:11px; color:#666; margin-bottom:20px;">Se cerrará la sesión actual.</p>
         <button onclick="procederDesvincular()" style="background:var(--rojo); color:white; border:none; padding:12px; border-radius:12px; width:100%; font-weight:bold;">PROCEDER</button>
-        <button onclick="cerrarPopupDesvincular()" style="background:#eee; color:#666; border:none; padding:10px; border-radius:12px; width:100%; margin-top:8px;">CANCELAR</button>
+        <button onclick="document.getElementById('popup-desvincular').style.display='none'" style="background:#eee; color:#666; border:none; padding:10px; border-radius:12px; width:100%; margin-top:8px;">CANCELAR</button>
     </div>
 
     <div id="modal-ia" style="display:none; position:absolute; inset:0; background:white; z-index:2000; flex-direction:column;">
@@ -177,21 +197,29 @@
         <iframe id="iframe-ia" style="width:100%; flex-grow:1; border:none;"></iframe>
     </div>
 
-    <div id="notificacion-exito" class="kinu-popup" style="border: 2px solid var(--verde);"><i class="ph ph-check-circle" style="color:var(--verde); font-size:40px;"></i><h3>¡LISTO!</h3></div>
+    <div id="notificacion-exito" class="kinu-popup"><i class="ph ph-check-circle" style="color:var(--verde); font-size:40px;"></i><h3>¡LISTO!</h3></div>
 </div>
 
 <script>
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
     let imagenListaParaSubir = null, botonActivo = false;
 
-    // --- LÓGICA DE PERSISTENCIA ---
     window.onload = () => { 
         gapiLoaded(); 
         gisLoaded();
         const savedToken = localStorage.getItem('kinu_token');
         const expireTime = localStorage.getItem('kinu_token_expire');
-        if (savedToken && expireTime > Date.now()) entrarApp(); 
+        if (savedToken && expireTime > Date.now()) {
+            entrarApp();
+            setTimeout(mostrarPopupSync, 800); // Mostrar mensaje de bienvenida al entrar
+        }
     };
+
+    function mostrarPopupSync() {
+        const pop = document.getElementById('popup-sync');
+        pop.style.display = 'block';
+        setTimeout(() => { pop.style.display = 'none'; }, 2500);
+    }
 
     function gapiLoaded() { 
         gapi.load('client', () => {
@@ -209,7 +237,9 @@
                 accessToken = resp.access_token; 
                 localStorage.setItem('kinu_token', accessToken);
                 localStorage.setItem('kinu_token_expire', Date.now() + (resp.expires_in * 1000));
-                actualizarBotonDrive(true); obtenerOCrearCarpeta(); 
+                actualizarBotonDrive(true); 
+                obtenerOCrearCarpeta(); 
+                mostrarPopupSync(); // Mostrar al vincular por primera vez
             }
         });
     }
@@ -227,7 +257,6 @@
         }
     }
 
-    // --- FUNCIONES DE APP ---
     function manejarAccionDrive() {
         if (accessToken) document.getElementById('popup-desvincular').style.display = 'block';
         else tokenClient.requestAccessToken({ prompt: 'select_account' });
@@ -276,13 +305,12 @@
 
     async function procesarSubidaFinal() {
         if (!botonActivo) { mostrarGuia(); return; }
-        if (!accessToken) return;
         const btn = document.getElementById('btn-final');
         const txt = document.getElementById('btn-text');
         txt.innerText = "SUBIENDO...";
-        const categoria = document.getElementById('main-cat').value;
-        const nombre = document.getElementById('sub-cat').value || "Prenda";
-        const fileName = `KINU_${categoria}_${nombre}_${Date.now()}.png`;
+        const cat = document.getElementById('main-cat').value;
+        const nom = document.getElementById('sub-cat').value || "Prenda";
+        const fileName = `KINU_${cat}_${nom}_${Date.now()}.png`;
         
         try {
             const base64Data = imagenListaParaSubir.split(',')[1];
@@ -298,7 +326,7 @@
                 btn.classList.remove('ready'); txt.innerText = "AGREGAR PRENDA";
                 cargarFotosCloset();
             }
-        } catch (e) { alert("Error"); }
+        } catch (e) { alert("Error al subir"); }
     }
 
     function actualizarBotonDrive(stat) {
@@ -336,7 +364,8 @@
         todasLasPrendas.filter(p => filtroActual === 'TODO' || p.name.split('_')[1] === filtroActual).forEach(f => {
             const card = document.createElement('div');
             card.className = 'prenda-card';
-            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
+            const thumb = f.thumbnailLink ? f.thumbnailLink.replace('=s220', '=s600') : '';
+            card.innerHTML = `<img src="${thumb}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
             gal.appendChild(card);
         });
     }
@@ -350,7 +379,6 @@
         if(reset) filtroActual = 'TODO';
         filtrarGaleria();
     }
-    function cerrarPopupDesvincular() { document.getElementById('popup-desvincular').style.display = 'none'; }
 </script>
 </body>
 </html>

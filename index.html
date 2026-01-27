@@ -17,7 +17,6 @@
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        /* Gris actualizado: más oscuro y con un ligero tono marrón (#8B857F) */
         :root { --verde: #2D4636; --fondo: #F5F5F7; --blanco: #FFFFFF; --gris-suave: #8B857F; --rojo: #e74c3c; }
         * { box-sizing: border-box; transition: all 0.3s ease; }
         
@@ -41,22 +40,26 @@
             overflow: hidden;
         }
 
-        @keyframes pulso-discreto {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.03); opacity: 0.9; }
-            100% { transform: scale(1); opacity: 1; }
+        /* Nueva animación de pulsación con expansión de borde fino */
+        @keyframes pulso-onda {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
         }
 
         .btn-entrar {
             background: white; 
             color: var(--verde); 
-            padding: 15px 50px; 
+            padding: 15px 60px; 
             border-radius: 30px; 
             border: none; 
             font-weight: bold;
-            animation: pulso-discreto 3s infinite ease-in-out;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 14px;
+            letter-spacing: 1px;
+            position: relative;
+            animation: pulso-onda 2.5s infinite ease-out;
             cursor: pointer;
+            z-index: 10;
         }
 
         header { 
@@ -78,7 +81,6 @@
         .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 75px; cursor: pointer; }
         .cat-circle { width: 60px; height: 60px; border-radius: 50%; background: #f9f9f9; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; }
         
-        /* Aplicación del nuevo gris a los iconos */
         .cat-circle i { font-size: 24px; color: var(--gris-suave); }
         .cat-item.active .cat-circle { background: var(--verde); border-color: var(--verde); }
         .cat-item.active .cat-circle i { color: white !important; }
@@ -104,7 +106,7 @@
 
 <div class="main-container">
     <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-        <img src="https://i.imgur.com/yTIrTq2.png" style="width:150px; margin-bottom:20px;">
+        <img src="https://i.imgur.com/yTIrTq2.png" style="width:150px; margin-bottom:30px;">
         <button class="btn-entrar" onclick="entrarApp()">ENTRAR</button>
     </div>
 

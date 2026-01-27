@@ -58,13 +58,16 @@
         .drive-desconectado { background: var(--google-blue); color: white; }
         .drive-conectado { background: white; color: var(--verde); border: 2.5px solid var(--verde) !important; }
 
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 75px; cursor: pointer; }
-        .cat-circle { width: 60px; height: 60px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
-        .cat-circle i { font-size: 26px; color: var(--gris-suave); }
+        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; cursor: pointer; }
+        
+        /* ICONOS MÁS GRANDES */
+        .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
+        .cat-circle i { font-size: 30px; color: var(--gris-suave); }
+        
         .cat-item.active .cat-circle { background: var(--verde); border-color: var(--verde); }
         .cat-item.active .cat-circle i { color: white !important; }
-        .cat-label { font-size: 8px; font-weight: 800; color: var(--gris-suave); text-transform: uppercase; }
+        .cat-label { font-size: 8px; font-weight: 800; color: var(--gris-suave); text-transform: uppercase; text-align: center; }
 
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
         .prenda-card { background: white; border-radius: 18px; overflow: hidden; position: relative; height: 180px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
@@ -82,7 +85,6 @@
         .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; opacity: 0.6; }
         .btn-accion.ready { background: var(--verde); opacity: 1; }
 
-        /* ANIMACIÓN FLUJO SYNC */
         .sync-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 20px; }
         .sync-logo { width: 45px; height: 45px; object-fit: contain; }
         .flow-line { width: 60px; height: 4px; background: #eee; border-radius: 2px; position: relative; overflow: hidden; }
@@ -125,12 +127,18 @@
                 </button>
                 
                 <span style="font-size:10px; font-weight:800; color:var(--verde); text-transform:uppercase;">Categorías</span>
+                
                 <div class="filter-scroll">
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                     <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
                     <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
                     <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
                     <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
+                    <div class="cat-item" onclick="irACategoria('DEPORTES')"><div class="cat-circle"><i class="ph ph-barbell"></i></div><span class="cat-label">Deportes</span></div>
+                    <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-sketch-logo"></i></div><span class="cat-label">Vintage</span></div>
+                    <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
+                    <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-watch"></i></div><span class="cat-label">Accesorios</span></div>
+                    <div class="cat-item" onclick="irACategoria('DONAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
                 </div>
 
                 <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px; display: flex; flex-direction: column; gap: 10px;">
@@ -140,6 +148,11 @@
                         <option value="ABRIGOS">Abrigo</option>
                         <option value="ENTERIZOS">Enterizos</option>
                         <option value="CALZADO">Calzado</option>
+                        <option value="DEPORTES">Deportes</option>
+                        <option value="VINTAGE">Vintage</option>
+                        <option value="DORMIR">Dormir</option>
+                        <option value="ACCESORIOS">Accesorios</option>
+                        <option value="DONAR">Donar</option>
                     </select>
                     <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
                 </div>
@@ -166,7 +179,7 @@
     </div>
 
     <div id="popup-sync" class="kinu-popup">
-        <h3 style="color:var(--verde); margin-top:5px; font-size:14px; text-transform:uppercase; letter-spacing: 1px;">Kinu está vinculado a Google Drive</h3>
+        <h3 style="color:var(--verde); margin-top:5px; font-size:14px; text-transform:uppercase;">Kinu está vinculado a Google Drive</h3>
         <div class="sync-container">
             <img src="https://i.imgur.com/yTIrTq2.png" class="sync-logo">
             <div class="flow-line"></div>
@@ -211,7 +224,7 @@
         const expireTime = localStorage.getItem('kinu_token_expire');
         if (savedToken && expireTime > Date.now()) {
             entrarApp();
-            setTimeout(mostrarPopupSync, 800); // Mostrar mensaje de bienvenida al entrar
+            setTimeout(mostrarPopupSync, 800);
         }
     };
 
@@ -239,7 +252,7 @@
                 localStorage.setItem('kinu_token_expire', Date.now() + (resp.expires_in * 1000));
                 actualizarBotonDrive(true); 
                 obtenerOCrearCarpeta(); 
-                mostrarPopupSync(); // Mostrar al vincular por primera vez
+                mostrarPopupSync();
             }
         });
     }

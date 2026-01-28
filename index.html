@@ -65,12 +65,20 @@
 
         #auth-screen.hide { transform: translateY(-100%); }
 
-        /* Efecto Pulso para Botón Entrar */
-        .btn-pulso { animation: pulso-kinu 2s infinite; }
-        @keyframes pulso-kinu {
+        /* Efecto Pulso Generales */
+        .btn-pulso { animation: pulso-blanco 2s infinite; }
+        .camara-pulso { animation: pulso-verde 2s infinite; }
+
+        @keyframes pulso-blanco {
             0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
             70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
             100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        @keyframes pulso-verde {
+            0% { box-shadow: 0 0 0 0 rgba(45, 70, 54, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(45, 70, 54, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(45, 70, 54, 0); }
         }
 
         header { padding: env(safe-area-inset-top) 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
@@ -172,7 +180,9 @@
 
         <nav>
             <div class="nav-item active" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house" style="font-size:24px;"></i><span>INICIO</span></div>
-            <div class="nav-item" onclick="document.getElementById('input-camara').click()"><div class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div></div>
+            <div class="nav-item" onclick="document.getElementById('input-camara').click()">
+                <div class="nav-camera camara-pulso"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
+            </div>
             <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i><span>CLOSET</span></div>
         </nav>
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
@@ -388,7 +398,6 @@
         form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
         await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
         
-        // Limpiar estado tras subir
         botonListo = false;
         imagenProcesada = null;
         document.getElementById('btn-final').classList.remove('ready');

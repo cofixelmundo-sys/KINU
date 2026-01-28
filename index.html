@@ -26,7 +26,21 @@
             --whatsapp: #25D366;
         }
 
-        * { box-sizing: border-box; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
+        /* BLOQUEO DE SELECCIÓN Y MENÚS NATIVOS */
+        * { 
+            box-sizing: border-box; 
+            transition: all 0.3s ease; 
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-touch-callout: none; /* Bloquea el menú de "copiar/guardar imagen" en iOS */
+            -webkit-user-select: none;    /* Bloquea selección de texto */
+            user-select: none; 
+        }
+
+        /* Permitir selección solo en inputs para que puedas escribir nombres */
+        input, select, textarea { 
+            -webkit-user-select: text; 
+            user-select: text; 
+        }
         
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
@@ -58,7 +72,7 @@
 
         /* GALERÍA */
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
-        .prenda-card { background: white; border-radius: 18px; overflow: hidden; position: relative; height: 180px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); user-select: none; }
+        .prenda-card { background: white; border-radius: 18px; overflow: hidden; position: relative; height: 180px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); touch-action: manipulation; }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; pointer-events: none; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; }
 
@@ -83,9 +97,7 @@
         .nav-item.active { color: var(--verde); }
     </style>
 </head>
-<body>
-
-<div class="main-container">
+<body oncontextmenu="return false;"> <div class="main-container">
     <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         <img src="https://i.imgur.com/yTIrTq2.png" style="width:150px; margin-bottom:30px;">
         <button onclick="entrarApp()" style="background:white; color:var(--verde); padding:16px 65px; border-radius:35px; border:none; font-weight:800; text-transform:uppercase; letter-spacing:2px;">ENTRAR</button>
@@ -195,7 +207,7 @@
 <script>
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
     let imagenProcesada = null, botonListo = false, prendasSeleccionadas = [];
-    let prendaAMover = null; // Para guardar la prenda que se quiere donar
+    let prendaAMover = null;
 
     window.onload = () => { 
         gapiLoaded(); gisLoaded();
@@ -204,25 +216,35 @@
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
-    // --- LOGICA LONG PRESS ---
+    // --- LOGICA LONG PRESS MEJORADA ---
     function initLongPress(element, prenda) {
         let timer;
-        element.addEventListener('touchstart', () => {
-            timer = setTimeout(() => {
-                if(prenda.name.split('_')[1] !== 'DONAR') {
-                    prendaAMover = prenda;
-                    document.getElementById('popup-preguntar-donar').style.display = 'flex';
-                }
-            }, 800); // 800ms para detectar el "mantener presionado"
-        });
-        element.addEventListener('touchend', () => clearTimeout(timer));
-        element.addEventListener('touchmove', () => clearTimeout(timer));
+        const start = (e) => {
+            // Prevenir comportamiento nativo de toque largo (el menú de copiar)
+            if (e.type === 'touchstart') {
+                timer = setTimeout(() => {
+                    if(prenda.name.split('_')[1] !== 'DONAR') {
+                        prendaAMover = prenda;
+                        document.getElementById('popup-preguntar-donar').style.display = 'flex';
+                        window.navigator.vibrate(50); // Vibración sutil si el dispositivo lo permite
+                    }
+                }, 700);
+            }
+        };
+
+        const cancel = () => clearTimeout(timer);
+
+        element.addEventListener('touchstart', start, { passive: true });
+        element.addEventListener('touchend', cancel);
+        element.addEventListener('touchmove', cancel);
+        element.addEventListener('mousedown', start);
+        element.addEventListener('mouseup', cancel);
+        element.addEventListener('mouseleave', cancel);
     }
 
     async function moverADonar() {
         if(!prendaAMover) return;
         const btn = document.querySelector('#popup-preguntar-donar .btn-accion');
-        const originalText = btn.innerText;
         btn.innerText = "MOVIENDO...";
 
         const parts = prendaAMover.name.split('_');
@@ -239,11 +261,11 @@
             });
             
             document.getElementById('popup-preguntar-donar').style.display = 'none';
-            await cargarFotosCloset(); // Recargar galería
+            await cargarFotosCloset();
         } catch (e) {
-            alert("Error al mover la prenda.");
+            alert("Error al mover.");
         } finally {
-            btn.innerText = originalText;
+            btn.innerText = "SÍ, MOVER A DONAR";
             prendaAMover = null;
         }
     }
@@ -327,7 +349,7 @@
         }).forEach(f => {
             const card = document.createElement('div'); card.className = 'prenda-card';
             card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
-            initLongPress(card, f); // ACTIVAR LONG PRESS EN CADA FOTO
+            initLongPress(card, f);
             gal.appendChild(card);
         });
     }

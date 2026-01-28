@@ -62,14 +62,18 @@
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; }
 
-        /* BOTONES ACCION */
-        .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-accion.ready { background: var(--verde); }
-        .btn-donar-whatsapp { background: var(--whatsapp); color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; font-weight: 800; font-size: 13px; display: none; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; cursor: pointer; }
-
         /* POPUPS */
-        .kinu-popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 310px; background: white; border-radius: 30px; padding: 25px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 5000; border: 2px solid var(--verde); }
+        .kinu-popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5000; align-items: center; justify-content: center; padding: 20px; }
+        .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; position: relative; text-align: center; }
         
+        /* SELECTOR DONAR EN POPUP */
+        .selector-donar-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; max-height: 150px; overflow-y: auto; padding: 5px; border: 1px solid #eee; border-radius: 15px; }
+        .prenda-mini { position: relative; border-radius: 10px; overflow: hidden; background: #f9f9f9; aspect-ratio: 1; border: 2px solid transparent; }
+        .prenda-mini img { width: 100%; height: 100%; object-fit: contain; }
+        .prenda-mini.selected { border-color: var(--verde); }
+        .check-overlay { position: absolute; top: 2px; right: 2px; color: var(--verde); display: none; background: white; border-radius: 50%; }
+        .prenda-mini.selected .check-overlay { display: block; }
+
         /* CONFIRMACIÓN DESVINCULAR */
         .popup-confirmar { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 6000; align-items: center; justify-content: center; padding: 20px; }
         .confirm-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 320px; text-align: center; border: 2px solid var(--verde); }
@@ -77,6 +81,9 @@
         .btn-confirm-no { background: var(--fondo); color: var(--gris-suave); border: none; padding: 12px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
 
         .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #eee; font-size: 14px; background: #fdfdfd; outline: none; margin-bottom: 10px; }
+        .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-accion.ready { background: var(--verde); }
+        .btn-donar-whatsapp { background: var(--whatsapp); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: none; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; }
 
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
@@ -130,6 +137,9 @@
             </div>
 
             <div id="pantalla-closet" class="screen" style="display:none;">
+                <button id="btn-donar-accion" class="btn-donar-whatsapp" onclick="abrirFormularioDonacion()">
+                    <i class="ph ph-hand-heart"></i> GESTIONAR DONACIÓN
+                </button>
                 <input type="text" id="busqueda" placeholder="🔍 Buscar..." oninput="filtrarGaleria()" class="form-input" style="background: white;">
                 <div id="galeria-real" class="galeria-grid"></div>
             </div>
@@ -141,6 +151,21 @@
             <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i><span>CLOSET</span></div>
         </nav>
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
+    </div>
+
+    <div id="popup-donante" class="kinu-popup">
+        <div class="popup-content">
+            <h3 style="margin:0 0 15px 0; color:var(--verde); font-size:16px; text-transform:uppercase;">Detalles de Donación</h3>
+            <div id="selector-donar" class="selector-donar-grid"></div>
+            <input type="text" id="don-nom" class="form-input" placeholder="Tu nombre">
+            <input type="text" id="don-dir" class="form-input" placeholder="Dirección de retiro">
+            <input type="text" id="don-hor" class="form-input" placeholder="Horario de preferencia">
+            <input type="tel" id="don-tel" class="form-input" placeholder="Teléfono de contacto">
+            <button onclick="enviarWhatsAppDonacion()" class="btn-accion" style="background:var(--whatsapp);">
+                <i class="ph ph-whatsapp-logo"></i> ENVIAR A KINU
+            </button>
+            <button onclick="document.getElementById('popup-donante').style.display='none'" style="border:none; background:none; color:#999; width:100%; margin-top:10px; font-size:11px;">CANCELAR</button>
+        </div>
     </div>
 
     <div id="popup-desvincular" class="popup-confirmar">
@@ -164,7 +189,7 @@
 
 <script>
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
-    let imagenProcesada = null, botonListo = false;
+    let imagenProcesada = null, botonListo = false, prendasSeleccionadas = [];
 
     window.onload = () => { 
         gapiLoaded(); gisLoaded();
@@ -173,12 +198,10 @@
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
+    // --- DRIVE Y SESIÓN ---
     function manejarAccionDrive() {
-        if (accessToken) {
-            document.getElementById('popup-desvincular').style.display = 'flex';
-        } else {
-            tokenClient.requestAccessToken({ prompt: 'select_account' });
-        }
+        if (accessToken) document.getElementById('popup-desvincular').style.display = 'flex';
+        else tokenClient.requestAccessToken({ prompt: 'select_account' });
     }
 
     function confirmarDesvinculacion() {
@@ -231,6 +254,7 @@
         const d = await r.json(); todasLasPrendas = d.files || []; filtrarGaleria();
     }
 
+    // --- GALERÍA Y NAVEGACIÓN ---
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real');
         const busq = document.getElementById('busqueda').value.toLowerCase();
@@ -251,12 +275,50 @@
         document.getElementById(id).style.display = 'block';
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        if(reset) filtroActual = 'TODO';
+        if(reset) { filtroActual = 'TODO'; document.getElementById('busqueda').value = ''; }
+        document.getElementById('btn-donar-accion').style.display = (filtroActual === 'DONAR' && id === 'pantalla-closet') ? 'flex' : 'none';
         filtrarGaleria();
     }
 
     function irACategoria(c) { filtroActual = c; cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); }
 
+    // --- DONACIONES ---
+    function abrirFormularioDonacion() {
+        const grid = document.getElementById('selector-donar');
+        grid.innerHTML = ''; prendasSeleccionadas = [];
+        const prendasDonar = todasLasPrendas.filter(p => p.name.split('_')[1] === 'DONAR');
+        
+        if(prendasDonar.length === 0) return alert("No tienes prendas en la categoría DONAR.");
+
+        prendasDonar.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'prenda-mini';
+            div.innerHTML = `<img src="${p.thumbnailLink.replace('=s220', '=s400')}"><div class="check-overlay"><i class="ph ph-check-circle-fill"></i></div>`;
+            div.onclick = () => {
+                div.classList.toggle('selected');
+                const nom = p.name.split('_')[2];
+                if(div.classList.contains('selected')) prendasSeleccionadas.push(nom);
+                else prendasSeleccionadas = prendasSeleccionadas.filter(n => n !== nom);
+            };
+            grid.appendChild(div);
+        });
+        document.getElementById('popup-donante').style.display = 'flex';
+    }
+
+    function enviarWhatsAppDonacion() {
+        const nom = document.getElementById('don-nom').value;
+        const dir = document.getElementById('don-dir').value;
+        const hor = document.getElementById('don-hor').value;
+        const tel = document.getElementById('don-tel').value;
+
+        if(!nom || !dir || !hor || !tel || prendasSeleccionadas.length === 0) return alert("Completa todos los datos y selecciona al menos una prenda.");
+
+        const mensaje = `¡Hola KINU! 👋 Quiero realizar una donación:\n\n👤 *Nombre:* ${nom}\n📍 *Dirección:* ${dir}\n⏰ *Horario:* ${hor}\n📞 *Teléfono:* ${tel}\n\n👕 *Prendas:*\n- ${prendasSeleccionadas.join('\n- ')}`;
+        window.open(`https://wa.me/598092199199?text=${encodeURIComponent(mensaje)}`, '_blank');
+        document.getElementById('popup-donante').style.display = 'none';
+    }
+
+    // --- SUBIDA DE PRENDAS ---
     function manejarBotonAgregar() { if (!botonListo) alert("Toma una foto primero"); else subirPrendaFinal(); }
 
     function abrirEditor(file) {

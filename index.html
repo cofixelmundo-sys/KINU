@@ -115,14 +115,23 @@
                     <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
                     <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
                     <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
+                    <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
+                    <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-basketball"></i></div><span class="cat-label">Deporte</span></div>
+                    <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
                     <div class="cat-item" onclick="irACategoria('DONAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
                 </div>
 
                 <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px; display: flex; flex-direction: column; gap: 5px;">
                     <select id="main-cat" class="form-input">
-                        <option value="SUPERIOR">Superior</option><option value="INFERIOR">Inferior</option>
-                        <option value="ABRIGOS">Abrigo</option><option value="ENTERIZOS">Enterizo</option>
-                        <option value="CALZADO">Calzado</option><option value="DONAR">Donar</option>
+                        <option value="SUPERIOR">Superior</option>
+                        <option value="INFERIOR">Inferior</option>
+                        <option value="ABRIGOS">Abrigo</option>
+                        <option value="ENTERIZOS">Enterizo</option>
+                        <option value="CALZADO">Calzado</option>
+                        <option value="VINTAGE">Vintage</option>
+                        <option value="DEPORTE">Deporte</option>
+                        <option value="DORMIR">Dormir</option>
+                        <option value="DONAR">Donar</option>
                     </select>
                     <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
                 </div>
@@ -189,7 +198,7 @@
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
-    // --- LOGICA BOTON AGREGAR (EL POPUP QUE QUERIAS) ---
+    // --- LOGICA BOTON AGREGAR ---
     function manejarBotonAgregar() {
         if (!botonListo) {
             document.getElementById('popup-guia').style.display = 'block';

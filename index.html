@@ -28,11 +28,17 @@
             --whatsapp: #25D366;
         }
 
-        /* ANIMACIÓN DE PULSO */
+        /* ANIMACIÓN DE PULSO ENTRAR */
         @keyframes pulso-onda {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
             70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        /* ANIMACIÓN RESALTE CÁMARA */
+        @keyframes resalte-camara {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
         }
 
         .btn-pulso { animation: pulso-onda 2s infinite; cursor: pointer; }
@@ -49,7 +55,7 @@
         .main-container { width: 100%; height: 100%; background: var(--fondo); display: flex; flex-direction: column; position: relative; }
 
         header { padding: env(safe-area-inset-top) 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        nav { height: calc(85px + env(safe-area-inset-bottom)); background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); z-index: 100; }
+        nav { height: calc(85px + env(safe-area-inset-bottom)); background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); z-index: 100; position: relative; }
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
 
         /* CATEGORÍAS */
@@ -70,17 +76,25 @@
         .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
         .btn-accion.ready { background: var(--verde); }
 
-        .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        /* CLASE PARA RESALTAR LA CÁMARA (Z-INDEX 6000 para estar sobre el popup) */
+        .camara-resaltada { 
+            animation: resalte-camara 1s infinite; 
+            z-index: 6000 !important; 
+            box-shadow: 0 0 30px rgba(255,255,255,0.8);
+        }
+
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
         .nav-item.active { color: var(--verde); }
 
         /* POPUPS */
-        .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 5000; align-items: center; justify-content: center; padding: 20px; }
+        .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 5000; align-items: center; justify-content: center; padding: 20px; }
         .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); }
         
         /* FLECHA GUIA */
         @keyframes rebote-flecha { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -15px); } }
-        .flecha-guia { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); color: var(--verde); font-size: 45px; z-index: 5500; display: none; animation: rebote-flecha 1s infinite; }
+        .flecha-guia { position: fixed; bottom: 105px; left: 50%; transform: translateX(-50%); color: white; font-size: 45px; z-index: 6100; display: none; animation: rebote-flecha 1s infinite; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
@@ -135,9 +149,6 @@
             </div>
 
             <div id="pantalla-closet" class="screen" style="display:none;">
-                <button id="btn-donar-accion" class="btn-accion" style="background:var(--whatsapp); display:none; margin-bottom:15px;" onclick="abrirFormularioDonacion()">
-                    <i class="ph ph-hand-heart"></i> GESTIONAR DONACIÓN
-                </button>
                 <input type="text" id="busqueda" placeholder="🔍 Buscar prendas..." oninput="filtrarGaleria()" class="form-input" style="background: white;">
                 <div id="galeria-real" class="galeria-grid"></div>
             </div>
@@ -145,7 +156,9 @@
 
         <nav>
             <div class="nav-item active" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house" style="font-size:24px;"></i><span>INICIO</span></div>
-            <div class="nav-item" onclick="document.getElementById('input-camara').click()"><div class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div></div>
+            <div class="nav-item" onclick="document.getElementById('input-camara').click()">
+                <div id="camara-circle" class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
+            </div>
             <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i><span>CLOSET</span></div>
         </nav>
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
@@ -155,11 +168,11 @@
         <div class="popup-content">
             <i class="ph ph-camera-plus" style="color:var(--verde); font-size:50px;"></i>
             <h3 style="color:var(--verde); margin-top:15px; text-transform:uppercase; font-size:16px;">Captura tu prenda</h3>
-            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px; line-height:1.5;">Para agregar una prenda nueva, utiliza el botón de cámara en el centro del menú inferior.</p>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px; line-height:1.5;">Para agregar una prenda nueva, utiliza el botón de cámara resaltado aquí abajo.</p>
             <button onclick="cerrarGuia()" style="background:var(--verde); color:white; border:none; padding:15px; border-radius:15px; width:100%; font-weight:bold; cursor:pointer;">ENTENDIDO</button>
         </div>
     </div>
-    <div id="flecha-indicadora" class="flecha-guia"><i class="ph ph-arrow-fat-down-fill"></i></div>
+    <div id="flecha-indicadora" class="flecha-guia"><i class="ph ph-caret-double-down"></i></div>
 
     <div id="modal-ia" style="display:none; position:absolute; inset:0; background:white; z-index:2000; flex-direction:column;">
         <div style="background:var(--verde); color:white; padding:15px; display:flex; align-items:center; gap:10px;">
@@ -181,14 +194,14 @@
         document.getElementById('main-app').style.display = 'flex'; 
     }
 
-    // --- LÓGICA BOTÓN AGREGAR (POPUP GUÍA) ---
+    // --- LÓGICA BOTÓN AGREGAR CON RESALTE ---
     function manejarBotonAgregar() {
         if (!botonListo) {
-            // Si no hay foto procesada, mostrar el popup de instrucciones
             document.getElementById('popup-guia').style.display = 'flex';
             document.getElementById('flecha-indicadora').style.display = 'block';
+            // Aplicamos el resalte a la cámara
+            document.getElementById('camara-circle').classList.add('camara-resaltada');
         } else {
-            // Si ya hay foto, subirla
             subirPrendaFinal();
         }
     }
@@ -196,6 +209,8 @@
     function cerrarGuia() {
         document.getElementById('popup-guia').style.display = 'none';
         document.getElementById('flecha-indicadora').style.display = 'none';
+        // Quitamos el resalte
+        document.getElementById('camara-circle').classList.remove('camara-resaltada');
     }
 
     // --- DRIVE ---
@@ -243,6 +258,8 @@
     // --- FOTOS ---
     function abrirEditor(file) { 
         if (!file) return; 
+        // Si el popup estaba abierto al disparar la cámara desde el input, lo cerramos
+        cerrarGuia();
         sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); 
         document.getElementById('iframe-ia').src = 'photo_studio.html'; 
         document.getElementById('modal-ia').style.display = 'flex'; 

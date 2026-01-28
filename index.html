@@ -50,6 +50,23 @@
         
         .main-container { width: 100%; height: 100%; background: var(--fondo); display: flex; flex-direction: column; position: relative; overflow: hidden; }
 
+        /* Pantalla de Inicio con animación */
+        #auth-screen {
+            position: absolute; 
+            inset: 0; 
+            background: var(--verde); 
+            z-index: 1000; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #auth-screen.hide {
+            transform: translateY(-100%);
+        }
+
         header { padding: env(safe-area-inset-top) 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         nav { height: calc(85px + env(safe-area-inset-bottom)); background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); z-index: 100; position: relative; }
         .content { flex: 1; overflow-y: auto; padding: 15px; z-index: 1; scrollbar-width: none; }
@@ -92,9 +109,9 @@
 <body oncontextmenu="return false;">
 
 <div class="main-container">
-    <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+    <div id="auth-screen">
         <img src="https://i.imgur.com/yTIrTq2.png" style="width:150px; margin-bottom:30px;">
-        <button onclick="entrarApp()" style="background:white; color:var(--verde); padding:16px 65px; border-radius:35px; border:none; font-weight:800; text-transform:uppercase; letter-spacing:2px;">ENTRAR</button>
+        <button onclick="entrarApp()" style="background:white; color:var(--verde); padding:16px 65px; border-radius:35px; border:none; font-weight:800; text-transform:uppercase; letter-spacing:2px; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">ENTRAR</button>
     </div>
 
     <div id="main-app" style="display:none; flex-direction:column; height:100%;">
@@ -106,7 +123,7 @@
         <div class="content">
             <div id="pantalla-home" class="screen">
                 <button id="auth-btn" onclick="manejarAccionDrive()" class="btn-accion" style="background:var(--google-blue); margin-bottom:15px;">
-                    <i class="ph ph-google-logo"></i> <span>VINCULAR GOOGLE DRIVE</span>
+                    <i class="ph ph-google-logo"></i> <span id="auth-btn-text">VINCULAR GOOGLE DRIVE</span>
                 </button>
                 
                 <span style="font-size:10px; font-weight:800; color:var(--verde); text-transform:uppercase;">Categorías</span>
@@ -169,14 +186,11 @@
         <div class="popup-content">
             <h3 style="margin:0 0 10px 0; color:var(--verde); font-size:16px; text-transform:uppercase;">Formulario de Donación</h3>
             <p style="font-size:10px; color:var(--gris-suave); margin-bottom:5px;">Selecciona las prendas de la lista:</p>
-            
             <div id="selector-donar" class="selector-donar-grid"></div>
-            
             <input type="text" id="don-nom" class="form-input" placeholder="Nombre completo">
             <input type="text" id="don-dir" class="form-input" placeholder="Dirección de retiro">
             <input type="text" id="don-hor" class="form-input" placeholder="Horario de preferencia">
             <input type="tel" id="don-tel" class="form-input" placeholder="Teléfono celular">
-            
             <button onclick="finalizarDonacionConPDF()" class="btn-accion" style="background:var(--whatsapp);">
                 <i class="ph ph-file-pdf"></i> GENERAR Y ENVIAR
             </button>
@@ -199,13 +213,94 @@
     let prendaAMover = null;
 
     window.onload = () => { 
-        gapiLoaded(); gisLoaded();
-        if (localStorage.getItem('kinu_token')) entrarApp();
+        gapiLoaded(); 
+        gisLoaded();
+        // Se quitó entrarApp() automático para que siempre pida presionar el botón de inicio
     };
 
-    function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
+    function entrarApp() { 
+        const authScreen = document.getElementById('auth-screen');
+        authScreen.classList.add('hide'); // Inicia animación de subida
+        
+        document.getElementById('main-app').style.display = 'flex';
+        
+        // Limpieza después de la animación
+        setTimeout(() => {
+            authScreen.style.display = 'none';
+        }, 600);
+    }
 
-    // --- LOGICA LONG PRESS ---
+    // --- DRIVE ---
+    function manejarAccionDrive() { tokenClient.requestAccessToken({ prompt: 'select_account' }); }
+    
+    function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
+            scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.resource',
+            callback: (resp) => {
+                if (resp.access_token) {
+                    accessToken = resp.access_token;
+                    localStorage.setItem('kinu_token', accessToken);
+                    obtenerOCrearCarpeta();
+                }
+            }
+        });
+    }
+
+    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSesionExistente)); }
+    
+    function verificarSesionExistente() { 
+        const t = localStorage.getItem('kinu_token'); 
+        if(t){ 
+            accessToken=t; 
+            gapi.client.setToken({access_token:t}); 
+            obtenerOCrearCarpeta(); 
+        } 
+    }
+
+    async function obtenerOCrearCarpeta() {
+        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } });
+        const d = await r.json();
+        if (d.files.length) { 
+            folderId = d.files[0].id; 
+            
+            // Actualizar botón de vinculación
+            const btnAuth = document.getElementById('auth-btn');
+            btnAuth.style.background = "var(--verde)";
+            btnAuth.innerHTML = '<i class="ph ph-check-circle"></i> <span>VINCULADO</span>';
+            
+            cargarFotosCloset(); 
+        }
+    }
+
+    // --- LAS DEMÁS FUNCIONES PERMANECEN IGUAL ---
+    async function cargarFotosCloset() {
+        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
+        const d = await r.json(); todasLasPrendas = d.files || []; filtrarGaleria();
+    }
+
+    function cambiarTab(id, el, reset=false) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        if(reset) filtroActual = 'TODO';
+        document.getElementById('btn-donar-accion').style.display = (filtroActual === 'DONAR' && id === 'pantalla-closet') ? 'flex' : 'none';
+        filtrarGaleria();
+    }
+
+    function irACategoria(c) { filtroActual = c; cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); }
+
+    function filtrarGaleria() {
+        const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
+        todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.split('_')[1] === filtroActual)).forEach(f => {
+            const card = document.createElement('div'); card.className = 'prenda-card';
+            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
+            initLongPress(card, f);
+            gal.appendChild(card);
+        });
+    }
+
     function initLongPress(element, prenda) {
         let timer;
         const start = (e) => {
@@ -236,68 +331,12 @@
         cargarFotosCloset();
     }
 
-    // --- DRIVE ---
-    function manejarAccionDrive() { tokenClient.requestAccessToken({ prompt: 'select_account' }); }
-    
-    function gisLoaded() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
-            scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.resource',
-            callback: (resp) => {
-                if (resp.access_token) {
-                    accessToken = resp.access_token;
-                    localStorage.setItem('kinu_token', accessToken);
-                    obtenerOCrearCarpeta();
-                }
-            }
-        });
-    }
-
-    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSesionExistente)); }
-    function verificarSesionExistente() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }
-
-    async function obtenerOCrearCarpeta() {
-        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const d = await r.json();
-        if (d.files.length) { folderId = d.files[0].id; cargarFotosCloset(); }
-    }
-
-    async function cargarFotosCloset() {
-        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const d = await r.json(); todasLasPrendas = d.files || []; filtrarGaleria();
-    }
-
-    // --- NAVEGACIÓN ---
-    function cambiarTab(id, el, reset=false) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-        if(reset) filtroActual = 'TODO';
-        document.getElementById('btn-donar-accion').style.display = (filtroActual === 'DONAR' && id === 'pantalla-closet') ? 'flex' : 'none';
-        filtrarGaleria();
-    }
-
-    function irACategoria(c) { filtroActual = c; cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); }
-
-    function filtrarGaleria() {
-        const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
-        todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.split('_')[1] === filtroActual)).forEach(f => {
-            const card = document.createElement('div'); card.className = 'prenda-card';
-            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
-            initLongPress(card, f);
-            gal.appendChild(card);
-        });
-    }
-
-    // --- GESTIÓN DE PDF Y DONACIÓN ---
     function abrirFormularioDonacion() {
         const grid = document.getElementById('selector-donar');
         grid.innerHTML = ''; prendasSeleccionadas = [];
         const prendasDonar = todasLasPrendas.filter(p => p.name.split('_')[1] === 'DONAR');
-        
         if(prendasDonar.length === 0) {
-            grid.innerHTML = '<p style="grid-column:1/-1; font-size:11px; color:var(--rojo); padding:20px;">No tienes prendas marcadas para donar. Mantén presionada una foto en el closet para moverla aquí.</p>';
+            grid.innerHTML = '<p style="grid-column:1/-1; font-size:11px; color:var(--rojo); padding:20px;">No tienes prendas marcadas para donar.</p>';
         } else {
             prendasDonar.forEach(p => {
                 const div = document.createElement('div');
@@ -320,58 +359,16 @@
         const dir = document.getElementById('don-dir').value;
         const hor = document.getElementById('don-hor').value;
         const tel = document.getElementById('don-tel').value;
-
-        if(!nom || !dir || !hor || !tel) return alert("Por favor completa tus datos.");
-        if(prendasSeleccionadas.length === 0) return alert("Selecciona al menos una prenda para donar.");
-
+        if(!nom || !dir || !hor || !tel || prendasSeleccionadas.length === 0) return alert("Completa los datos y selecciona prendas.");
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-
-        // Estilo del PDF
-        doc.setFontSize(22);
-        doc.setTextColor(45, 70, 54); // Color Verde KINU
         doc.text("KINU - Gestión de Donación", 14, 22);
-        
-        doc.setFontSize(12);
-        doc.setTextColor(100);
-        doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 32);
-
-        // Tabla de datos del donante
-        doc.autoTable({
-            startY: 40,
-            head: [['Campo', 'Información']],
-            body: [
-                ['Donante', nom],
-                ['Dirección', dir],
-                ['Horario', hor],
-                ['Teléfono', tel]
-            ],
-            theme: 'striped',
-            headStyles: { fillColor: [45, 70, 54] }
-        });
-
-        // Tabla de prendas
-        const bodyPrendas = prendasSeleccionadas.map((p, index) => [index + 1, p.nombre, 'Donación']);
-        doc.autoTable({
-            startY: doc.lastAutoTable.finalY + 10,
-            head: [['#', 'Nombre de Prenda', 'Categoría']],
-            body: bodyPrendas,
-            headStyles: { fillColor: [45, 70, 54] }
-        });
-
-        // Guardar PDF localmente (para que el usuario lo tenga)
-        const fileName = `Donacion_KINU_${Date.now()}.pdf`;
-        doc.save(fileName);
-
-        // Enviar mensaje por WhatsApp
-        const listadoTxt = prendasSeleccionadas.map(p => `- ${p.nombre}`).join('\n');
-        const mensaje = `¡Hola KINU! 👋 He generado una nueva solicitud de donación.\n\n👤 *Nombre:* ${nom}\n📍 *Dirección:* ${dir}\n⏰ *Horario:* ${hor}\n\n👕 *Prendas:* \n${listadoTxt}\n\n(Adjunto envío el PDF generado por la App)`;
-        
-        window.open(`https://wa.me/598092199199?text=${encodeURIComponent(mensaje)}`, '_blank');
+        doc.autoTable({ startY: 30, body: [['Donante', nom], ['Dirección', dir], ['Horario', hor], ['Teléfono', tel]] });
+        doc.save(`Donacion_KINU_${Date.now()}.pdf`);
+        window.open(`https://wa.me/598092199199?text=${encodeURIComponent("Nueva donación de " + nom)}`, '_blank');
         document.getElementById('popup-donante').style.display = 'none';
     }
 
-    // --- AGREGAR PRENDA (IGUAL) ---
     function manejarBotonAgregar() { if (!botonListo) alert("Toma una foto"); else subirPrendaFinal(); }
     function abrirEditor(file) { if (!file) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
     window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } };

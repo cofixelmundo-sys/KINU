@@ -66,19 +66,15 @@
         .kinu-popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5000; align-items: center; justify-content: center; padding: 20px; }
         .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; position: relative; text-align: center; }
         
-        /* SELECTOR DONAR EN POPUP */
-        .selector-donar-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; max-height: 150px; overflow-y: auto; padding: 5px; border: 1px solid #eee; border-radius: 15px; }
+        .selector-donar-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; max-height: 120px; overflow-y: auto; padding: 5px; border: 1px solid #eee; border-radius: 15px; }
         .prenda-mini { position: relative; border-radius: 10px; overflow: hidden; background: #f9f9f9; aspect-ratio: 1; border: 2px solid transparent; }
         .prenda-mini img { width: 100%; height: 100%; object-fit: contain; }
         .prenda-mini.selected { border-color: var(--verde); }
-        .check-overlay { position: absolute; top: 2px; right: 2px; color: var(--verde); display: none; background: white; border-radius: 50%; }
+        .check-overlay { position: absolute; top: 2px; right: 2px; color: var(--verde); display: none; background: white; border-radius: 50%; font-size: 14px; }
         .prenda-mini.selected .check-overlay { display: block; }
 
-        /* CONFIRMACIÓN DESVINCULAR */
         .popup-confirmar { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 6000; align-items: center; justify-content: center; padding: 20px; }
         .confirm-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 320px; text-align: center; border: 2px solid var(--verde); }
-        .btn-confirm-si { background: var(--rojo); color: white; border: none; padding: 12px; border-radius: 12px; width: 100%; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
-        .btn-confirm-no { background: var(--fondo); color: var(--gris-suave); border: none; padding: 12px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
 
         .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #eee; font-size: 14px; background: #fdfdfd; outline: none; margin-bottom: 10px; }
         .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
@@ -123,9 +119,12 @@
 
                 <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px;">
                     <select id="main-cat" class="form-input">
-                        <option value="SUPERIOR">Superior</option><option value="INFERIOR">Inferior</option>
-                        <option value="ABRIGOS">Abrigo</option><option value="ENTERIZOS">Enterizo</option>
-                        <option value="CALZADO">Calzado</option><option value="ACCESORIOS">Accesorios</option>
+                        <option value="SUPERIOR">Superior</option>
+                        <option value="INFERIOR">Inferior</option>
+                        <option value="ABRIGOS">Abrigo</option>
+                        <option value="ENTERIZOS">Enterizo</option>
+                        <option value="CALZADO">Calzado</option>
+                        <option value="ACCESORIOS">Accesorios</option>
                         <option value="DONAR">Donar</option>
                     </select>
                     <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
@@ -140,7 +139,7 @@
                 <button id="btn-donar-accion" class="btn-donar-whatsapp" onclick="abrirFormularioDonacion()">
                     <i class="ph ph-hand-heart"></i> GESTIONAR DONACIÓN
                 </button>
-                <input type="text" id="busqueda" placeholder="🔍 Buscar..." oninput="filtrarGaleria()" class="form-input" style="background: white;">
+                <input type="text" id="busqueda" placeholder="🔍 Buscar prendas..." oninput="filtrarGaleria()" class="form-input" style="background: white;">
                 <div id="galeria-real" class="galeria-grid"></div>
             </div>
         </div>
@@ -155,16 +154,20 @@
 
     <div id="popup-donante" class="kinu-popup">
         <div class="popup-content">
-            <h3 style="margin:0 0 15px 0; color:var(--verde); font-size:16px; text-transform:uppercase;">Detalles de Donación</h3>
+            <h3 style="margin:0 0 10px 0; color:var(--verde); font-size:16px; text-transform:uppercase;">Datos de Donación</h3>
+            <p style="font-size:10px; color:var(--gris-suave); margin-bottom:10px;">Selecciona prendas y completa tus datos:</p>
+            
             <div id="selector-donar" class="selector-donar-grid"></div>
-            <input type="text" id="don-nom" class="form-input" placeholder="Tu nombre">
+            
+            <input type="text" id="don-nom" class="form-input" placeholder="Nombre completo">
             <input type="text" id="don-dir" class="form-input" placeholder="Dirección de retiro">
             <input type="text" id="don-hor" class="form-input" placeholder="Horario de preferencia">
-            <input type="tel" id="don-tel" class="form-input" placeholder="Teléfono de contacto">
-            <button onclick="enviarWhatsAppDonacion()" class="btn-accion" style="background:var(--whatsapp);">
-                <i class="ph ph-whatsapp-logo"></i> ENVIAR A KINU
+            <input type="tel" id="don-tel" class="form-input" placeholder="Teléfono celular">
+            
+            <button onclick="enviarWhatsAppDonacion()" class="btn-accion" style="background:var(--whatsapp); margin-top:5px;">
+                <i class="ph ph-whatsapp-logo"></i> ENVIAR SOLICITUD
             </button>
-            <button onclick="document.getElementById('popup-donante').style.display='none'" style="border:none; background:none; color:#999; width:100%; margin-top:10px; font-size:11px;">CANCELAR</button>
+            <button onclick="document.getElementById('popup-donante').style.display='none'" style="border:none; background:none; color:#999; width:100%; margin-top:10px; font-size:11px; font-weight:bold;">CANCELAR</button>
         </div>
     </div>
 
@@ -172,9 +175,9 @@
         <div class="confirm-content">
             <i class="ph ph-warning-circle" style="color:var(--rojo); font-size:45px;"></i>
             <h3 style="color:var(--verde); margin: 15px 0 10px; font-size:16px; text-transform:uppercase;">¿Desvincular cuenta?</h3>
-            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Dejarás de ver tus prendas guardadas hasta que vuelvas a conectar tu cuenta de Drive.</p>
-            <button class="btn-confirm-si" onclick="confirmarDesvinculacion()">SÍ, DESVINCULAR</button>
-            <button class="btn-confirm-no" onclick="cerrarPopupDesvincular()">CANCELAR</button>
+            <p style="font-size:11px; color:var(--gris-suave); margin-bottom:20px;">Se cerrará la conexión con Google Drive.</p>
+            <button class="btn-confirm-si" style="background:var(--rojo); color:white; border:none; padding:12px; border-radius:12px; width:100%; font-weight:bold; margin-bottom:10px;" onclick="confirmarDesvinculacion()">SÍ, DESVINCULAR</button>
+            <button style="background:var(--fondo); color:var(--gris-suave); border:none; padding:12px; border-radius:12px; width:100%; font-weight:bold;" onclick="document.getElementById('popup-desvincular').style.display='none'">CANCELAR</button>
         </div>
     </div>
 
@@ -198,7 +201,7 @@
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
-    // --- DRIVE Y SESIÓN ---
+    // --- DRIVE ---
     function manejarAccionDrive() {
         if (accessToken) document.getElementById('popup-desvincular').style.display = 'flex';
         else tokenClient.requestAccessToken({ prompt: 'select_account' });
@@ -209,10 +212,8 @@
         localStorage.removeItem('kinu_token');
         document.getElementById('galeria-real').innerHTML = '';
         actualizarBotonDrive(false);
-        cerrarPopupDesvincular();
+        document.getElementById('popup-desvincular').style.display = 'none';
     }
-
-    function cerrarPopupDesvincular() { document.getElementById('popup-desvincular').style.display = 'none'; }
 
     function actualizarBotonDrive(stat) {
         const b = document.getElementById('auth-btn');
@@ -254,22 +255,7 @@
         const d = await r.json(); todasLasPrendas = d.files || []; filtrarGaleria();
     }
 
-    // --- GALERÍA Y NAVEGACIÓN ---
-    function filtrarGaleria() {
-        const gal = document.getElementById('galeria-real');
-        const busq = document.getElementById('busqueda').value.toLowerCase();
-        gal.innerHTML = '';
-        todasLasPrendas.filter(p => {
-            const mCat = (filtroActual === 'TODO' || p.name.split('_')[1] === filtroActual);
-            const mBus = p.name.split('_')[2].toLowerCase().includes(busq);
-            return mCat && mBus;
-        }).forEach(f => {
-            const card = document.createElement('div'); card.className = 'prenda-card';
-            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
-            gal.appendChild(card);
-        });
-    }
-
+    // --- NAVEGACIÓN ---
     function cambiarTab(id, el, reset=false) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
@@ -282,26 +268,44 @@
 
     function irACategoria(c) { filtroActual = c; cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]); }
 
+    function filtrarGaleria() {
+        const gal = document.getElementById('galeria-real');
+        const busq = document.getElementById('busqueda').value.toLowerCase();
+        gal.innerHTML = '';
+        todasLasPrendas.filter(p => {
+            const parts = p.name.split('_');
+            const mCat = (filtroActual === 'TODO' || parts[1] === filtroActual);
+            const mBus = (parts[2] || '').toLowerCase().includes(busq);
+            return mCat && mBus;
+        }).forEach(f => {
+            const card = document.createElement('div'); card.className = 'prenda-card';
+            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
+            gal.appendChild(card);
+        });
+    }
+
     // --- DONACIONES ---
     function abrirFormularioDonacion() {
         const grid = document.getElementById('selector-donar');
         grid.innerHTML = ''; prendasSeleccionadas = [];
         const prendasDonar = todasLasPrendas.filter(p => p.name.split('_')[1] === 'DONAR');
         
-        if(prendasDonar.length === 0) return alert("No tienes prendas en la categoría DONAR.");
-
-        prendasDonar.forEach(p => {
-            const div = document.createElement('div');
-            div.className = 'prenda-mini';
-            div.innerHTML = `<img src="${p.thumbnailLink.replace('=s220', '=s400')}"><div class="check-overlay"><i class="ph ph-check-circle-fill"></i></div>`;
-            div.onclick = () => {
-                div.classList.toggle('selected');
-                const nom = p.name.split('_')[2];
-                if(div.classList.contains('selected')) prendasSeleccionadas.push(nom);
-                else prendasSeleccionadas = prendasSeleccionadas.filter(n => n !== nom);
-            };
-            grid.appendChild(div);
-        });
+        if(prendasDonar.length === 0) {
+            grid.innerHTML = '<p style="grid-column:1/-1; font-size:10px; color:var(--rojo); padding:10px;">Aún no tienes fotos en la categoría DONAR.</p>';
+        } else {
+            prendasDonar.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'prenda-mini';
+                div.innerHTML = `<img src="${p.thumbnailLink.replace('=s220', '=s400')}"><div class="check-overlay"><i class="ph ph-check-circle-fill"></i></div>`;
+                div.onclick = () => {
+                    div.classList.toggle('selected');
+                    const nom = p.name.split('_')[2];
+                    if(div.classList.contains('selected')) prendasSeleccionadas.push(nom);
+                    else prendasSeleccionadas = prendasSeleccionadas.filter(n => n !== nom);
+                };
+                grid.appendChild(div);
+            });
+        }
         document.getElementById('popup-donante').style.display = 'flex';
     }
 
@@ -311,14 +315,16 @@
         const hor = document.getElementById('don-hor').value;
         const tel = document.getElementById('don-tel').value;
 
-        if(!nom || !dir || !hor || !tel || prendasSeleccionadas.length === 0) return alert("Completa todos los datos y selecciona al menos una prenda.");
+        if(!nom || !dir || !hor || !tel) return alert("Por favor completa tus datos de contacto.");
 
-        const mensaje = `¡Hola KINU! 👋 Quiero realizar una donación:\n\n👤 *Nombre:* ${nom}\n📍 *Dirección:* ${dir}\n⏰ *Horario:* ${hor}\n📞 *Teléfono:* ${tel}\n\n👕 *Prendas:*\n- ${prendasSeleccionadas.join('\n- ')}`;
+        let listado = prendasSeleccionadas.length > 0 ? `\n\n👕 *Prendas:*\n- ${prendasSeleccionadas.join('\n- ')}` : "\n\n(No seleccionó prendas de la galería)";
+
+        const mensaje = `¡Hola KINU! 👋 Quiero realizar una donación:\n\n👤 *Nombre:* ${nom}\n📍 *Dirección:* ${dir}\n⏰ *Horario:* ${hor}\n📞 *Teléfono:* ${tel}${listado}`;
         window.open(`https://wa.me/598092199199?text=${encodeURIComponent(mensaje)}`, '_blank');
         document.getElementById('popup-donante').style.display = 'none';
     }
 
-    // --- SUBIDA DE PRENDAS ---
+    // --- AGREGAR PRENDA ---
     function manejarBotonAgregar() { if (!botonListo) alert("Toma una foto primero"); else subirPrendaFinal(); }
 
     function abrirEditor(file) {

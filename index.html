@@ -62,31 +62,24 @@
         }
         #auth-screen.hide { transform: translateY(-100%); }
 
-        /* --- ANIMACIONES DE PULSO --- */
+        /* --- ANIMACIONES --- */
         .btn-pulso { animation: pulso-blanco 2s infinite; }
         
-        /* PULSO TRIPLE PARA LA CÁMARA (CORREGIDO) */
-        .camara-pulso { 
-            animation: pulso-triple 1.5s infinite; 
-            position: relative;
-            z-index: 6001; /* Por encima de la barra y el popup */
+        /* Animación de aumento y disminución solicitada */
+        .camara-animada { 
+            animation: latido-camara 1s infinite alternate ease-in-out;
+            z-index: 6001 !important; /* Asegura visibilidad sobre el overlay del popup */
+        }
+
+        @keyframes latido-camara {
+            from { transform: scale(1); }
+            to { transform: scale(1.2); }
         }
 
         @keyframes pulso-blanco {
             0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
             70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
             100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-        }
-
-        @keyframes pulso-triple {
-            0% {
-                box-shadow: 0 0 0 0 rgba(45, 70, 54, 0.7), 
-                            0 0 0 0 rgba(45, 70, 54, 0.4);
-            }
-            100% {
-                box-shadow: 0 0 0 20px rgba(45, 70, 54, 0), 
-                            0 0 0 40px rgba(45, 70, 54, 0);
-            }
         }
 
         header { padding: env(safe-area-inset-top) 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
@@ -227,11 +220,11 @@
         setTimeout(() => { authScreen.style.display = 'none'; }, 600);
     }
 
+    /* Lógica corregida para el pulso de escala */
     function manejarBotonAgregar() { 
         if (!botonListo) {
             document.getElementById('popup-recordatorio-camara').style.display = 'flex';
-            // ACTIVA PULSO VISUAL
-            document.getElementById('circulo-camara').classList.add('camara-pulso');
+            document.getElementById('circulo-camara').classList.add('camara-animada');
             document.getElementById('bottom-nav').style.zIndex = "6000";
         } else {
             subirPrendaFinal(); 
@@ -240,8 +233,7 @@
 
     function cerrarRecordatorio() {
         document.getElementById('popup-recordatorio-camara').style.display = 'none';
-        // QUITA PULSO VISUAL
-        document.getElementById('circulo-camara').classList.remove('camara-pulso');
+        document.getElementById('circulo-camara').classList.remove('camara-animada');
         document.getElementById('bottom-nav').style.zIndex = "100";
     }
 

@@ -21,7 +21,6 @@
     <style>
         :root { 
             --verde: #2D4636; 
-            --verde-claro: #3e5f49;
             --fondo: #F5F5F7; 
             --blanco: #FFFFFF; 
             --gris-suave: #4A4540; 
@@ -39,7 +38,7 @@
         
         .main-container { width: 100%; height: 100%; background: var(--fondo); display: flex; flex-direction: column; position: relative; overflow: hidden; }
 
-        /* --- ANIMACIONES RESTAURADAS --- */
+        /* --- ANIMACIONES --- */
         @keyframes pulso-blanco {
             0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
             70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
@@ -57,56 +56,53 @@
         }
         .camara-animada { 
             animation: latido-camara 0.8s infinite alternate ease-in-out, eco-ondas 1.2s infinite ease-out; 
+            z-index: 6001 !important;
         }
 
-        /* --- UI GENERAL --- */
         header { padding: env(safe-area-inset-top) 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         
         nav { 
             height: calc(85px + env(safe-area-inset-bottom)); 
             background: white; border-top: 1px solid #eee; 
             display: flex; justify-content: space-around; align-items: center; 
-            padding-bottom: env(safe-area-inset-bottom); z-index: 5500; position: relative; 
+            padding-bottom: env(safe-area-inset-bottom); z-index: 100; position: relative; 
         }
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
 
-        /* Categorías */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; cursor: pointer; }
-        .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: #EBEAE8; display: flex; align-items: center; justify-content: center; border: 1.5px solid #DDD; }
+        .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
         .cat-circle i { font-size: 28px; color: var(--gris-suave); }
         .cat-label { font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--gris-suave); }
 
-        /* Galería */
-        .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 120px; }
+        .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
         .prenda-card { background: white; border-radius: 18px; height: 180px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; text-transform: uppercase; font-weight: bold; }
 
-        /* Botón Donar Centrado */
-        #area-donar { display: none; justify-content: center; position: absolute; bottom: 100px; width: 100%; z-index: 5100; }
-        .btn-donar-central { background: var(--verde); color: white; padding: 16px 35px; border-radius: 50px; font-weight: 800; font-size: 12px; border: none; box-shadow: 0 8px 25px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px; letter-spacing: 1px; }
-
-        /* Cámara */
-        .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-
-        /* Popups Estilizados */
-        .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 6000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
-        .popup-content { background: white; border-radius: 30px; padding: 30px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        /* --- POPUP CORREGIDO --- */
+        .kinu-popup { 
+            display: none; position: fixed; inset: 0; 
+            background: rgba(0,0,0,0.7); z-index: 9999; 
+            align-items: center; justify-content: center; padding: 20px; 
+            backdrop-filter: blur(5px);
+        }
+        .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; }
         
-        .form-input { width: 100%; height: 52px; padding: 0 18px; border-radius: 15px; border: 1px solid #E0E0E0; margin-bottom: 15px; font-size: 14px; background: #FAFAFA; outline: none; }
-        .form-input:focus { border-color: var(--verde); background: white; }
-        .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 18px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; letter-spacing: 1px; }
+        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; }
+        .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; }
         .btn-accion.ready { background: var(--verde); }
+
+        .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
 <div class="main-container">
     <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-        <img src="https://i.imgur.com/yTIrTq2.png" style="width:130px; margin-bottom:40px;">
-        <button onclick="entrarApp()" class="btn-pulso" style="background:white; color:var(--verde); padding:18px 70px; border-radius:40px; border:none; font-weight:800; letter-spacing:2px;">ENTRAR</button>
+        <img src="https://i.imgur.com/yTIrTq2.png" style="width:130px; margin-bottom:30px;">
+        <button onclick="entrarApp()" class="btn-pulso" style="background:white; color:var(--verde); padding:16px 65px; border-radius:35px; border:none; font-weight:800; letter-spacing:2px;">ENTRAR</button>
     </div>
 
     <div id="main-app" style="display:none; flex-direction:column; height:100%;">
@@ -114,7 +110,7 @@
         
         <div class="content">
             <div id="pantalla-home" class="screen">
-                <button id="auth-btn" onclick="manejarAccionDrive()" class="btn-accion" style="background:var(--google-blue); margin-bottom:20px;">VINCULAR GOOGLE DRIVE</button>
+                <button id="auth-btn" onclick="manejarAccionDrive()" class="btn-accion" style="background:var(--google-blue); margin-bottom:15px;">VINCULAR DRIVE</button>
                 
                 <div class="filter-scroll">
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
@@ -129,7 +125,7 @@
                     <div class="cat-item" onclick="irACategoria('DONAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
                 </div>
 
-                <div style="background:white; padding:20px; border-radius:25px; margin-bottom:20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px;">
                     <select id="main-cat" class="form-input">
                         <option value="SUPERIOR">Superior</option>
                         <option value="INFERIOR">Inferior</option>
@@ -140,9 +136,9 @@
                         <option value="VINTAGE">Vintage</option>
                         <option value="DEPORTE">Deporte</option>
                         <option value="DORMIR">Dormir</option>
-                        <option value="DONAR">Para Donar</option>
+                        <option value="DONAR">Donar</option>
                     </select>
-                    <input type="text" id="sub-cat" class="form-input" placeholder="Nombre (Ej: Buzo Rojo Algodón)">
+                    <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
                     <button id="btn-final" class="btn-accion" onclick="manejarBotonAgregar()"><span id="btn-text">AGREGAR PRENDA</span></button>
                 </div>
             </div>
@@ -152,38 +148,26 @@
             </div>
         </div>
 
-        <div id="area-donar">
-            <button class="btn-donar-central" onclick="abrirFormDonar()"><i class="ph ph-whatsapp-logo"></i> GESTIONAR DONACIÓN</button>
-        </div>
-
-        <nav>
+        <nav id="bottom-nav">
             <div class="nav-item" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house" style="font-size:24px;"></i></div>
             <div class="nav-item" onclick="document.getElementById('input-camara').click()">
-                <div id="camara-circle" class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
+                <div id="circulo-camara" class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
             </div>
-            <div class="nav-item" id="tab-closet" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i></div>
+            <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i></div>
         </nav>
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
 
-    <div id="modal-donar" class="kinu-popup">
+    <div id="popup-recordatorio-camara" class="kinu-popup">
         <div class="popup-content">
-            <div style="background: var(--verde); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -60px auto 20px; box-shadow: 0 10px 20px rgba(45, 70, 54, 0.3);">
-                <i class="ph ph-truck" style="color:white; font-size:30px;"></i>
-            </div>
-            <h3 style="color:var(--verde); margin-bottom: 5px; letter-spacing: 1px;">RECOLECCIÓN</h3>
-            <p style="font-size: 11px; color: #888; margin-bottom: 25px;">Completa los datos para coordinar el retiro.</p>
-            
-            <input type="text" id="don-nombre" class="form-input" placeholder="Tu nombre completo">
-            <input type="text" id="don-direccion" class="form-input" placeholder="Dirección de retiro">
-            <button onclick="enviarDonacionWhatsApp()" class="btn-accion ready" style="background: #25D366; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
-            </button>
-            <button onclick="document.getElementById('modal-donar').style.display='none'" style="background:none; border:none; color:#AAA; margin-top:20px; font-size:11px; font-weight:bold; text-transform:uppercase;">Cerrar</button>
+            <i class="ph ph-camera-rotate" style="font-size:45px; color:var(--verde);"></i>
+            <h3 style="margin:15px 0 10px; color:var(--verde);">¡FALTA LA FOTO!</h3>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Primero captura la prenda usando la cámara.</p>
+            <button onclick="cerrarRecordatorio()" class="btn-accion ready">ENTENDIDO</button>
         </div>
     </div>
 
-    <div id="modal-ia" style="display:none; position:absolute; inset:0; background:white; z-index:10000; flex-direction:column;">
+    <div id="modal-ia" style="display:none; position:absolute; inset:0; background:white; z-index:2000; flex-direction:column;">
         <iframe id="iframe-ia" style="width:100%; flex-grow:1; border:none;"></iframe>
     </div>
 </div>
@@ -194,7 +178,28 @@
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
-    // --- GOOGLE DRIVE ---
+    function manejarBotonAgregar() { 
+        if (!botonListo) {
+            document.getElementById('popup-recordatorio-camara').style.display = 'flex';
+            document.getElementById('circulo-camara').classList.add('camara-animada');
+        } else {
+            subirPrendaFinal(); 
+        }
+    }
+
+    function cerrarRecordatorio() {
+        document.getElementById('popup-recordatorio-camara').style.display = 'none';
+        document.getElementById('circulo-camara').classList.remove('camara-animada');
+    }
+
+    function abrirEditor(file) { 
+        if (!file) return; 
+        sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); 
+        document.getElementById('iframe-ia').src = 'photo_studio.html'; 
+        document.getElementById('modal-ia').style.display = 'flex'; 
+    }
+
+    // --- DRIVE LOGIC ---
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSesion)); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({
@@ -204,7 +209,7 @@
         });
     }
     function manejarAccionDrive() { tokenClient.requestAccessToken(); }
-    function verificarSesion() { const t = localStorage.getItem('kinu_token'); if(t) { accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }
+    function verificarSesion() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }
     async function obtenerOCrearCarpeta() {
         const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } });
         const d = await r.json(); if (d.files.length) { folderId = d.files[0].id; cargarFotos(); }
@@ -214,57 +219,32 @@
         const d = await r.json(); todasLasPrendas = d.files || []; filtrarGaleria();
     }
 
-    // --- UI ---
     function cambiarTab(id, el, reset=false) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
         if(reset) filtroActual = 'TODO';
-        document.getElementById('area-donar').style.display = 'none';
         filtrarGaleria();
     }
-    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', document.getElementById('tab-closet')); }
+
+    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', null); }
+
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
-        const filtradas = todasLasPrendas.filter(p => filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`));
-        filtradas.forEach(f => {
+        todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`))).forEach(f => {
             const card = document.createElement('div'); card.className = 'prenda-card';
             card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
             gal.appendChild(card);
         });
-        if(filtroActual === 'DONAR' && filtradas.length > 0) document.getElementById('area-donar').style.display = 'flex';
     }
 
-    // --- ANIMACIÓN CÁMARA ---
-    function manejarBotonAgregar() {
-        if (!botonListo) {
-            const cam = document.getElementById('camara-circle');
-            cam.classList.add('camara-animada');
-            setTimeout(() => cam.classList.remove('camara-animada'), 3000);
-        } else { subirPrendaFinal(); }
-    }
-
-    // --- WHATSAPP SILENCIOSO ---
-    function abrirFormDonar() { document.getElementById('modal-donar').style.display = 'flex'; }
-    function enviarDonacionWhatsApp() {
-        const nombre = document.getElementById('don-nombre').value;
-        const direccion = document.getElementById('don-direccion').value;
-        const prendas = todasLasPrendas.filter(p => p.name.includes('_DONAR_')).length;
-        
-        if(!nombre || !direccion) return alert("Por favor completa los datos");
-
-        const mensaje = `Hola KINU! 👋%0A%0AQuiero coordinar una donación:%0A👤 *Nombre:* ${nombre}%0A📍 *Dirección:* ${direccion}%0A📦 *Cantidad de prendas:* ${prendas}%0A%0A_Enviado desde mi Smart Closet_`;
-        
-        // Abre directamente la aplicación
-        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
-        document.getElementById('modal-donar').style.display = 'none';
-    }
-
-    // --- EDITOR IA ---
-    function abrirEditor(f) { if(!f) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(f)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
     window.cerrarIA = function() { 
         document.getElementById('modal-ia').style.display = 'none'; 
         const proc = sessionStorage.getItem('imagen_procesada'); 
-        if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } 
+        if (proc) { 
+            imagenProcesada = proc; botonListo = true; 
+            document.getElementById('btn-final').classList.add('ready'); 
+            document.getElementById('btn-text').innerText = "SUBIR AHORA"; 
+        } 
     };
 
     async function subirPrendaFinal() {

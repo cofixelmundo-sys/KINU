@@ -25,314 +25,138 @@
             --blanco: #FFFFFF; 
             --gris-suave: #4A4540; 
             --google-blue: #4285F4;
-            --whatsapp: #25D366;
         }
 
         * { 
             box-sizing: border-box; 
             transition: all 0.3s ease; 
             -webkit-tap-highlight-color: transparent; 
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none; 
         }
 
-        input, select, textarea { -webkit-user-select: text; user-select: text; }
-        
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             background: var(--verde); 
-            display: flex; flex-direction: column;
             height: 100vh; margin: 0; overflow: hidden;
             position: fixed; width: 100%;
         }
         
         .main-container { width: 100%; height: 100%; background: var(--fondo); display: flex; flex-direction: column; position: relative; overflow: hidden; }
 
+        /* --- PANTALLA AUTH --- */
         #auth-screen {
-            position: absolute; 
-            inset: 0; 
-            background: var(--verde); 
-            z-index: 1000; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center;
+            position: absolute; inset: 0; background: var(--verde); z-index: 10000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         #auth-screen.hide { transform: translateY(-100%); }
 
-        /* --- ANIMACIONES DE PULSO --- */
-        .btn-pulso { animation: pulso-blanco 2s infinite; }
-        
-        /* PULSO TRIPLE PARA LA CÁMARA (CORREGIDO) */
-        .camara-pulso { 
-            animation: pulso-triple 1.5s infinite; 
-            position: relative;
-            z-index: 6001; /* Por encima de la barra y el popup */
+        /* --- ANIMACIÓN DE AGRANDAR/ACHICAR (LATIDO) --- */
+        .camara-latido { 
+            animation: latido-escala 1s infinite alternate ease-in-out; 
+            z-index: 6001 !important;
         }
 
-        @keyframes pulso-blanco {
-            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        @keyframes latido-escala {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.2); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         }
 
-        @keyframes pulso-triple {
-            0% {
-                box-shadow: 0 0 0 0 rgba(45, 70, 54, 0.7), 
-                            0 0 0 0 rgba(45, 70, 54, 0.4);
-            }
-            100% {
-                box-shadow: 0 0 0 20px rgba(45, 70, 54, 0), 
-                            0 0 0 40px rgba(45, 70, 54, 0);
-            }
-        }
-
+        /* --- INTERFAZ --- */
         header { padding: env(safe-area-inset-top) 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         
         nav { 
             height: calc(85px + env(safe-area-inset-bottom)); 
-            background: white; 
-            border-top: 1px solid #eee; 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            padding-bottom: env(safe-area-inset-bottom); 
-            z-index: 100; 
-            position: relative; 
+            background: white; border-top: 1px solid #eee; 
+            display: flex; justify-content: space-around; align-items: center; 
+            padding-bottom: env(safe-area-inset-bottom); z-index: 100; position: relative; 
         }
 
-        .content { flex: 1; overflow-y: auto; padding: 15px; z-index: 1; scrollbar-width: none; }
+        .content { flex: 1; overflow-y: auto; padding: 15px; }
 
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; cursor: pointer; }
-        .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
-        .cat-circle i { font-size: 30px; color: var(--gris-suave); }
-        .cat-item.active .cat-circle { background: var(--verde); border-color: var(--verde); }
-        .cat-item.active .cat-circle i { color: white !important; }
-        .cat-label { font-size: 8px; font-weight: 800; color: var(--gris-suave); text-transform: uppercase; }
-
-        .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
-        .prenda-card { background: white; border-radius: 18px; overflow: hidden; position: relative; height: 180px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; pointer-events: none; }
-        .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; }
-
-        .kinu-popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5000; align-items: center; justify-content: center; padding: 20px; }
+        .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 5000; align-items: center; justify-content: center; padding: 20px; }
         .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; }
         
-        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #eee; font-size: 14px; background: #fdfdfd; outline: none; margin-bottom: 10px; }
         .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-accion.ready { background: var(--verde); }
 
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; position: relative; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--gris-suave); font-size: 9px; font-weight: bold; }
+
+        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #eee; font-size: 14px; margin-bottom: 10px; outline: none; }
     </style>
 </head>
 <body>
 
 <div class="main-container">
     <div id="auth-screen">
-        <img src="https://i.imgur.com/yTIrTq2.png" style="width:150px; margin-bottom:30px;">
-        <button onclick="entrarApp()" class="btn-pulso" style="background:white; color:var(--verde); padding:16px 65px; border-radius:35px; border:none; font-weight:800; text-transform:uppercase; letter-spacing:2px;">ENTRAR</button>
+        <img src="https://i.imgur.com/yTIrTq2.png" style="width:120px; margin-bottom:20px;">
+        <button onclick="entrarApp()" style="background:white; color:var(--verde); padding:15px 50px; border-radius:30px; border:none; font-weight:bold;">ENTRAR</button>
     </div>
 
-    <div id="main-app" style="display:none; flex-direction:column; height:100%;">
-        <header>
-            <img src="https://i.imgur.com/yTIrTq2.png" style="width:60px;">
-            <div style="color:var(--verde); letter-spacing:4px; font-weight:bold; font-size:14px;">KINU</div>
-        </header>
-        
-        <div class="content">
-            <div id="pantalla-home" class="screen">
-                <button id="auth-btn" onclick="manejarAccionDrive()" class="btn-accion" style="background:var(--google-blue); margin-bottom:15px;">
-                    <i class="ph ph-google-logo"></i> <span id="auth-btn-text">VINCULAR GOOGLE DRIVE</span>
-                </button>
-                
-                <span style="font-size:10px; font-weight:800; color:var(--verde); text-transform:uppercase;">Categorías</span>
-                <div class="filter-scroll">
-                    <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
-                    <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
-                    <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
-                    <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
-                    <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
-                    <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
-                    <div class="cat-item" onclick="irACategoria('DONAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
-                </div>
-
-                <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px;">
-                    <select id="main-cat" class="form-input">
-                        <option value="SUPERIOR">Superior</option>
-                        <option value="INFERIOR">Inferior</option>
-                        <option value="ABRIGOS">Abrigo</option>
-                        <option value="ENTERIZOS">Enterizo</option>
-                        <option value="CALZADO">Calzado</option>
-                        <option value="ACCESORIOS">Accesorios</option>
-                        <option value="DONAR">Donar</option>
-                    </select>
-                    <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
-                </div>
-
-                <button id="btn-final" class="btn-accion" onclick="manejarBotonAgregar()">
-                    <i class="ph ph-plus-circle"></i> <span id="btn-text">AGREGAR PRENDA</span>
-                </button>
+    <header>
+        <img src="https://i.imgur.com/yTIrTq2.png" style="width:60px;">
+        <div style="color:var(--verde); letter-spacing:4px; font-weight:bold; font-size:14px;">KINU</div>
+    </header>
+    
+    <div class="content">
+        <div id="pantalla-home" class="screen">
+            <button id="auth-btn" onclick="manejarAccionDrive()" class="btn-accion" style="background:var(--google-blue); margin-bottom:20px;">
+                <i class="ph ph-google-logo"></i> VINCULAR DRIVE
+            </button>
+            <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px;">
+                <select id="main-cat" class="form-input">
+                    <option value="SUPERIOR">Superior</option>
+                    <option value="INFERIOR">Inferior</option>
+                </select>
+                <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
             </div>
-
-            <div id="pantalla-closet" class="screen" style="display:none;">
-                <input type="text" id="busqueda" placeholder="🔍 Buscar prendas..." oninput="filtrarGaleria()" class="form-input" style="background: white;">
-                <div id="galeria-real" class="galeria-grid"></div>
-            </div>
+            <button id="btn-final" class="btn-accion" onclick="manejarBotonAgregar()">
+                <i class="ph ph-plus-circle"></i> AGREGAR PRENDA
+            </button>
         </div>
-
-        <nav id="bottom-nav">
-            <div class="nav-item active" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house" style="font-size:24px;"></i><span>INICIO</span></div>
-            <div class="nav-item" onclick="document.getElementById('input-camara').click()">
-                <div id="circulo-camara" class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
-            </div>
-            <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i><span>CLOSET</span></div>
-        </nav>
-        <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
+
+    <nav id="bottom-nav">
+        <div class="nav-item"><i class="ph ph-house" style="font-size:24px;"></i><span>INICIO</span></div>
+        <div class="nav-item" onclick="document.getElementById('input-camara').click()">
+            <div id="circulo-camara" class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
+        </div>
+        <div class="nav-item"><i class="ph ph-archive" style="font-size:24px;"></i><span>CLOSET</span></div>
+    </nav>
+    
+    <input type="file" id="input-camara" hidden accept="image/*" capture="environment">
 
     <div id="popup-recordatorio-camara" class="kinu-popup">
         <div class="popup-content">
             <i class="ph ph-camera-rotate" style="font-size:45px; color:var(--verde);"></i>
-            <h3 style="margin:15px 0 10px; color:var(--verde); text-transform:uppercase;">¡Falta la foto!</h3>
-            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">
-                Primero debes capturar la prenda usando la <strong>cámara de KINU</strong>.
-            </p>
+            <h3 style="margin:15px 0 10px; color:var(--verde);">¡FALTA LA FOTO!</h3>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Toca la cámara para continuar.</p>
             <button onclick="cerrarRecordatorio()" class="btn-accion" style="background:var(--verde);">ENTENDIDO</button>
         </div>
-    </div>
-
-    <div id="modal-ia" style="display:none; position:absolute; inset:0; background:white; z-index:2000; flex-direction:column;">
-        <div style="background:var(--verde); color:white; padding:15px; display:flex; align-items:center; gap:10px;">
-            <button onclick="cerrarIA()" style="background:none; border:none; color:white;"><i class="ph ph-arrow-left"></i></button>
-            <span style="font-size:12px; font-weight:bold;">PHOTO STUDIO AI</span>
-        </div>
-        <iframe id="iframe-ia" style="width:100%; flex-grow:1; border:none;"></iframe>
     </div>
 </div>
 
 <script>
-    let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
-    let imagenProcesada = null, botonListo = false;
+    let botonListo = false;
 
-    window.onload = () => { gapiLoaded(); gisLoaded(); };
-
-    function entrarApp() { 
-        const authScreen = document.getElementById('auth-screen');
-        authScreen.classList.add('hide'); 
-        document.getElementById('main-app').style.display = 'flex';
-        setTimeout(() => { authScreen.style.display = 'none'; }, 600);
-    }
+    function entrarApp() { document.getElementById('auth-screen').classList.add('hide'); }
 
     function manejarBotonAgregar() { 
         if (!botonListo) {
             document.getElementById('popup-recordatorio-camara').style.display = 'flex';
-            // ACTIVA PULSO VISUAL
-            document.getElementById('circulo-camara').classList.add('camara-pulso');
+            // Aplicamos la animación de latido
+            document.getElementById('circulo-camara').classList.add('camara-latido');
+            // Elevamos el nav para que no quede detrás del fondo oscuro
             document.getElementById('bottom-nav').style.zIndex = "6000";
-        } else {
-            subirPrendaFinal(); 
         }
     }
 
     function cerrarRecordatorio() {
         document.getElementById('popup-recordatorio-camara').style.display = 'none';
-        // QUITA PULSO VISUAL
-        document.getElementById('circulo-camara').classList.remove('camara-pulso');
+        // Quitamos la animación
+        document.getElementById('circulo-camara').classList.remove('camara-latido');
+        // Devolvemos el nav a su lugar
         document.getElementById('bottom-nav').style.zIndex = "100";
-    }
-
-    function abrirEditor(file) { 
-        if (!file) return; 
-        cerrarRecordatorio();
-        sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); 
-        document.getElementById('iframe-ia').src = 'photo_studio.html'; 
-        document.getElementById('modal-ia').style.display = 'flex'; 
-    }
-
-    function manejarAccionDrive() { tokenClient.requestAccessToken({ prompt: 'select_account' }); }
-    
-    function gisLoaded() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
-            scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.resource',
-            callback: (resp) => {
-                if (resp.access_token) {
-                    accessToken = resp.access_token;
-                    localStorage.setItem('kinu_token', accessToken);
-                    obtenerOCrearCarpeta();
-                }
-            }
-        });
-    }
-
-    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSesionExistente)); }
-    
-    function verificarSesionExistente() { 
-        const t = localStorage.getItem('kinu_token'); 
-        if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } 
-    }
-
-    async function obtenerOCrearCarpeta() {
-        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const d = await r.json();
-        if (d.files.length) { 
-            folderId = d.files[0].id; 
-            document.getElementById('auth-btn').style.background = "var(--verde)";
-            document.getElementById('auth-btn').innerHTML = '<i class="ph ph-check-circle"></i> VINCULADO';
-            cargarFotosCloset(); 
-        }
-    }
-
-    async function cargarFotosCloset() {
-        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const d = await r.json(); todasLasPrendas = d.files || []; filtrarGaleria();
-    }
-
-    function cambiarTab(id, el, reset=false) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-        if(reset) filtroActual = 'TODO';
-        filtrarGaleria();
-    }
-
-    function filtrarGaleria() {
-        const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
-        todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.split('_')[1] === filtroActual)).forEach(f => {
-            const card = document.createElement('div'); card.className = 'prenda-card';
-            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
-            gal.appendChild(card);
-        });
-    }
-
-    window.cerrarIA = function() { 
-        document.getElementById('modal-ia').style.display = 'none'; 
-        const proc = sessionStorage.getItem('imagen_procesada'); 
-        if (proc) { 
-            imagenProcesada = proc; botonListo = true; 
-            document.getElementById('btn-final').classList.add('ready'); 
-            document.getElementById('btn-text').innerText = "SUBIR AHORA"; 
-        } 
-    };
-
-    async function subirPrendaFinal() {
-        const cat = document.getElementById('main-cat').value;
-        const nom = document.getElementById('sub-cat').value || "Prenda";
-        const meta = { name: `KINU_${cat}_${nom}_${Date.now()}.png`, parents: [folderId] };
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
-        form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
-        await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-        
-        botonListo = false; imagenProcesada = null;
-        document.getElementById('btn-final').classList.remove('ready');
-        document.getElementById('btn-text').innerText = "AGREGAR PRENDA";
-        cargarFotosCloset();
     }
 </script>
 </body>

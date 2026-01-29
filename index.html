@@ -39,10 +39,21 @@
         
         .main-container { width: 100%; height: 100%; background: var(--fondo); display: flex; flex-direction: column; position: relative; overflow: hidden; }
 
-        /* --- ANIMACIONES --- */
+        /* --- ANIMACIONES Y EFECTOS --- */
         @keyframes resalte-lento {
             0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
             50% { transform: scale(1.2); box-shadow: 0 0 45px rgba(255, 255, 255, 0.9); }
+        }
+
+        @keyframes caer-hacia-camara {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            20% { opacity: 0.8; }
+            100% { transform: translateY(var(--distancia)) scale(0.5); opacity: 0; }
+        }
+
+        .icono-caida {
+            position: absolute; color: var(--verde-claro); font-size: 24px; pointer-events: none; z-index: 5500;
+            animation: caer-hacia-camara 2s linear forwards;
         }
 
         header { padding: env(safe-area-inset-top) 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
@@ -51,7 +62,7 @@
             height: calc(85px + env(safe-area-inset-bottom)); 
             background: white; border-top: 1px solid #eee; 
             display: flex; justify-content: space-around; align-items: center; 
-            padding-bottom: env(safe-area-inset-bottom); z-index: 5500; position: relative; 
+            padding-bottom: env(safe-area-inset-bottom); z-index: 100; position: relative; 
         }
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
@@ -74,17 +85,19 @@
             display: none; justify-content: center; position: absolute; bottom: 100px; width: 100%; z-index: 5100;
         }
         .btn-donar-central {
-            background: var(--verde); color: white; padding: 16px 40px; border-radius: 50px; font-weight: 800; font-size: 14px; border: none; box-shadow: 0 10px 25px rgba(45, 70, 54, 0.3); display: flex; align-items: center; gap: 10px;
+            background: var(--verde); color: white; padding: 16px 35px; border-radius: 50px; font-weight: 800; font-size: 13px; border: none; box-shadow: 0 8px 25px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px;
         }
 
+        /* Cámara */
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .camara-resaltada { animation: resalte-lento 3s infinite ease-in-out; }
 
+        /* Popups */
         .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 6000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
-        .popup-content { background: white; border-radius: 30px; padding: 30px; width: 100%; max-width: 400px; }
+        .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 360px; text-align: center; }
         
-        .form-input { width: 100%; height: 50px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 15px; }
-        .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 13px; font-weight: 800; cursor: pointer; }
+        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; }
+        .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; }
         .btn-accion.ready { background: var(--verde); }
     </style>
 </head>
@@ -93,38 +106,44 @@
 <div class="main-container">
     <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         <img src="https://i.imgur.com/yTIrTq2.png" style="width:120px; margin-bottom:30px;">
-        <button onclick="entrarApp()" style="background:white; color:var(--verde); padding:16px 60px; border-radius:35px; border:none; font-weight:800; letter-spacing:1px;">ENTRAR</button>
+        <button onclick="entrarApp()" style="background:white; color:var(--verde); padding:16px 60px; border-radius:35px; border:none; font-weight:800;">ENTRAR</button>
     </div>
 
     <div id="main-app" style="display:none; flex-direction:column; height:100%;">
-        <header>
-            <div style="color:var(--verde); letter-spacing:4px; font-weight:bold; font-size:14px;">KINU</div>
-        </header>
+        <header><div style="color:var(--verde); letter-spacing:4px; font-weight:bold; font-size:14px;">KINU</div></header>
         
         <div class="content">
             <div id="pantalla-home" class="screen">
-                <button id="auth-btn" onclick="manejarAccionDrive()" class="btn-accion" style="background:var(--google-blue); margin-bottom:20px;">VINCULAR GOOGLE DRIVE</button>
+                <button id="auth-btn" onclick="manejarAccionDrive()" class="btn-accion" style="background:var(--google-blue); margin-bottom:15px;">VINCULAR DRIVE</button>
                 
                 <div class="filter-scroll">
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                     <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
                     <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
+                    <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
+                    <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
+                    <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
                     <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
                     <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
+                    <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
                     <div class="cat-item" onclick="irACategoria('DONAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
                 </div>
 
-                <div style="background:white; padding:20px; border-radius:25px; margin-bottom:15px;">
+                <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px;">
                     <select id="main-cat" class="form-input">
                         <option value="SUPERIOR">Superior</option>
                         <option value="INFERIOR">Inferior</option>
-                        <option value="ABRIGOS">Abrigos</option>
+                        <option value="ABRIGOS">Abrigo</option>
+                        <option value="ENTERIZOS">Enterizo</option>
+                        <option value="CALZADO">Calzado</option>
+                        <option value="ACCESORIOS">Accesorios</option>
                         <option value="VINTAGE">Vintage</option>
                         <option value="DEPORTE">Deporte</option>
-                        <option value="DONAR">Donar</option>
+                        <option value="DORMIR">Dormir</option>
+                        <option value="DONAR">Para Donar</option>
                     </select>
-                    <input type="text" id="sub-cat" class="form-input" placeholder="Nombre (Ej: Gorro Verde Lana)">
-                    <button id="btn-final" class="btn-accion" onclick="manejarBotonAgregar()">AGREGAR PRENDA</button>
+                    <input type="text" id="sub-cat" class="form-input" placeholder="Ej: Gorro Verde Lana">
+                    <button id="btn-final" class="btn-accion" onclick="manejarBotonAgregar()"><span id="btn-text">AGREGAR PRENDA</span></button>
                 </div>
             </div>
 
@@ -134,9 +153,7 @@
         </div>
 
         <div id="area-donar">
-            <button class="btn-donar-central" onclick="abrirFormDonar()">
-                <i class="ph ph-file-pdf"></i> GENERAR LISTA TÉCNICA
-            </button>
+            <button class="btn-donar-central" onclick="abrirFormDonar()"><i class="ph ph-file-pdf"></i> GENERAR LISTA TÉCNICA</button>
         </div>
 
         <nav>
@@ -144,7 +161,7 @@
             <div class="nav-item" onclick="document.getElementById('input-camara').click()">
                 <div id="camara-circle" class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
             </div>
-            <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i></div>
+            <div class="nav-item" id="tab-closet" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i></div>
         </nav>
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
@@ -152,11 +169,10 @@
     <div id="modal-donar" class="kinu-popup">
         <div class="popup-content">
             <h3 style="color:var(--verde); margin-top:0;">RECOLECCIÓN</h3>
-            <input type="text" id="don-nombre" class="form-input" placeholder="Tu Nombre">
-            <input type="text" id="don-direccion" class="form-input" placeholder="Dirección de retiro">
-            <input type="text" id="don-horario" class="form-input" placeholder="Horario">
-            <button onclick="generarDocumentoFinal()" class="btn-accion ready">DESCARGAR LISTADO Y FOTOS</button>
-            <button onclick="document.getElementById('modal-donar').style.display='none'" style="background:none; border:none; color:#999; margin-top:15px; width:100%;">Cancelar</button>
+            <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
+            <input type="text" id="don-direccion" class="form-input" placeholder="Dirección">
+            <button onclick="generarPDFDonacion()" class="btn-accion ready">DESCARGAR DOCUMENTO</button>
+            <button onclick="document.getElementById('modal-donar').style.display='none'" style="background:none; border:none; color:#999; margin-top:15px;">Cancelar</button>
         </div>
     </div>
 
@@ -167,11 +183,10 @@
 
 <script>
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
-    let imagenProcesada = null, botonListo = false;
+    let imagenProcesada = null, botonListo = false, intervaloCaida;
 
-    // Palabras clave para IA de texto (Color y Material)
     const COLORES = ["Rojo", "Azul", "Verde", "Blanco", "Negro", "Gris", "Amarillo", "Rosa", "Marron", "Beige"];
-    const MATERIALES = ["Lana", "Algodon", "Jean", "Cuero", "Seda", "Lino", "Poliester"];
+    const MATERIALES = ["Lana", "Algodon", "Jean", "Cuero", "Seda", "Lino", "Poliester", "Hilo"];
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
@@ -204,6 +219,11 @@
         filtrarGaleria();
     }
 
+    function irACategoria(cat) { 
+        filtroActual = cat; 
+        cambiarTab('pantalla-closet', document.getElementById('tab-closet')); 
+    }
+
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
         const filtradas = todasLasPrendas.filter(p => filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`));
@@ -215,80 +235,60 @@
         if(filtroActual === 'DONAR' && filtradas.length > 0) document.getElementById('area-donar').style.display = 'flex';
     }
 
-    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', null); }
-
-    function abrirFormDonar() { document.getElementById('modal-donar').style.display = 'flex'; }
-
-    // --- GENERACIÓN DE DOCUMENTO TÉCNICO ---
-    async function generarDocumentoFinal() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const prendasDonar = todasLasPrendas.filter(p => p.name.includes('_DONAR_'));
-        
-        const info = { n: document.getElementById('don-nombre').value, d: document.getElementById('don-direccion').value };
-
-        // Encabezado
-        doc.setFontSize(22); doc.setTextColor(45, 70, 54);
-        doc.text("LISTADO TÉCNICO DE DONACIÓN", 20, 25);
-        doc.setFontSize(10); doc.setTextColor(100);
-        doc.text(`Solicitante: ${info.n} | Ubicación: ${info.d}`, 20, 35);
-
-        const tableData = [];
-        for (let p of prendasDonar) {
-            const partes = p.name.split('_'); 
-            const nombreOriginal = partes[2];
-            
-            // Lógica para extraer Color y Material del nombre
-            let colorDetectado = "-";
-            let materialDetectado = "-";
-
-            COLORES.forEach(c => { if(nombreOriginal.toLowerCase().includes(c.toLowerCase())) colorDetectado = c; });
-            MATERIALES.forEach(m => { if(nombreOriginal.toLowerCase().includes(m.toLowerCase())) materialDetectado = m; });
-
-            tableData.push([
-                partes[1] || "DONAR", // Categoría real (Si viene de Inferior, etc)
-                nombreOriginal,
-                colorDetectado,
-                materialDetectado
-            ]);
-        }
-
-        // Tabla
-        doc.autoTable({
-            startY: 45,
-            head: [['Categoría Origen', 'Artículo', 'Color', 'Material']],
-            body: tableData,
-            headStyles: { fillColor: [45, 70, 54] },
-            theme: 'striped'
-        });
-
-        // Fotos
-        let yPos = doc.lastAutoTable.finalY + 20;
-        doc.setFontSize(14); doc.text("CATÁLOGO DE IMÁGENES:", 20, yPos);
-        yPos += 10;
-
-        for (let p of prendasDonar) {
-            if (yPos > 240) { doc.addPage(); yPos = 20; }
-            try {
-                const imgData = await fetch(p.thumbnailLink.replace('=s220', '=s600')).then(r => r.blob()).then(blob => {
-                    return new Promise(res => { const reader = new FileReader(); reader.onloadend = () => res(reader.result); reader.readAsDataURL(blob); });
-                });
-                doc.addImage(imgData, 'JPEG', 20, yPos, 45, 45);
-                doc.setFontSize(9);
-                doc.text(`Ref: ${p.name.split('_')[2]}`, 70, yPos + 25);
-                yPos += 55;
-            } catch(e) {}
-        }
-
-        doc.save(`KINU_Donacion_${info.n}.pdf`);
-        document.getElementById('modal-donar').style.display = 'none';
-        alert("¡Documento generado con éxito! El PDF se encuentra en tus descargas.");
+    // --- EFECTOS ---
+    function manejarBotonAgregar() {
+        if (!botonListo) {
+            document.getElementById('camara-circle').classList.add('camara-resaltada');
+            intervaloCaida = setInterval(() => {
+                const icono = document.createElement('i');
+                icono.className = 'ph ph-camera icono-caida';
+                icono.style.left = Math.random() * window.innerWidth + 'px';
+                icono.style.top = '100px';
+                const rectC = document.getElementById('camara-circle').getBoundingClientRect();
+                icono.style.setProperty('--distancia', (rectC.top - 100) + 'px');
+                document.body.appendChild(icono);
+                setTimeout(() => icono.remove(), 2000);
+            }, 200);
+            setTimeout(() => { clearInterval(intervaloCaida); document.getElementById('camara-circle').classList.remove('camara-resaltada'); }, 3000);
+        } else { subirPrendaFinal(); }
     }
 
-    // --- AGREGAR PRENDA (IGUAL) ---
-    function manejarBotonAgregar() { if (!botonListo) alert("Toma una foto"); else subirPrendaFinal(); }
-    function abrirEditor(file) { if (!file) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
+    // --- IA / EDITOR ---
+    function abrirEditor(f) { if(!f) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(f)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
     window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } };
+
+    // --- PDF ---
+    function abrirFormDonar() { document.getElementById('modal-donar').style.display = 'flex'; }
+    async function generarPDFDonacion() {
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        const prendasDonar = todasLasPrendas.filter(p => p.name.includes('_DONAR_'));
+        const info = { n: document.getElementById('don-nombre').value, d: document.getElementById('don-direccion').value };
+        doc.setFontSize(22); doc.setTextColor(45, 70, 54); doc.text("LISTA TÉCNICA KINU", 20, 25);
+        doc.setFontSize(10); doc.text(`Donante: ${info.n} | Dirección: ${info.d}`, 20, 35);
+        
+        const tableData = prendasDonar.map(p => {
+            const partes = p.name.split('_'); const nombre = partes[2];
+            let col = "-", mat = "-";
+            COLORES.forEach(c => { if(nombre.toLowerCase().includes(c.toLowerCase())) col = c; });
+            MATERIALES.forEach(m => { if(nombre.toLowerCase().includes(m.toLowerCase())) mat = m; });
+            return [partes[1], nombre, col, mat];
+        });
+
+        doc.autoTable({ startY: 45, head: [['Origen', 'Artículo', 'Color', 'Material']], body: tableData, headStyles: { fillColor: [45, 70, 54] } });
+
+        let yPos = doc.lastAutoTable.finalY + 15;
+        for (let p of prendasDonar) {
+            if (yPos > 240) { doc.addPage(); yPos = 20; }
+            const imgData = await fetch(p.thumbnailLink.replace('=s220', '=s600')).then(r => r.blob()).then(blob => {
+                return new Promise(res => { const reader = new FileReader(); reader.onloadend = () => res(reader.result); reader.readAsDataURL(blob); });
+            });
+            doc.addImage(imgData, 'JPEG', 20, yPos, 40, 40);
+            doc.text(p.name.split('_')[2], 65, yPos + 20); yPos += 50;
+        }
+        doc.save(`KINU_Donacion_${info.n}.pdf`);
+        document.getElementById('modal-donar').style.display = 'none';
+    }
+
     async function subirPrendaFinal() {
         const cat = document.getElementById('main-cat').value;
         const nom = document.getElementById('sub-cat').value || "Prenda";
@@ -297,7 +297,7 @@
         form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
         form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
         await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-        botonListo = false; imagenProcesada = null; cargarFotos();
+        botonListo = false; imagenProcesada = null; document.getElementById('btn-final').classList.remove('ready'); document.getElementById('btn-text').innerText = "AGREGAR PRENDA"; cargarFotos();
     }
 </script>
 

@@ -65,15 +65,21 @@
         /* --- ANIMACIONES --- */
         .btn-pulso { animation: pulso-blanco 2s infinite; }
         
-        /* Animación de aumento y disminución solicitada */
+        /* EFECTO COMBINADO: ESCALA + ECO (Ondas) */
         .camara-animada { 
-            animation: latido-camara 1s infinite alternate ease-in-out;
-            z-index: 6001 !important; /* Asegura visibilidad sobre el overlay del popup */
+            animation: latido-camara 1s infinite alternate ease-in-out, 
+                       eco-ondas 1s infinite ease-out;
+            z-index: 6001 !important;
         }
 
         @keyframes latido-camara {
             from { transform: scale(1); }
-            to { transform: scale(1.2); }
+            to { transform: scale(1.15); }
+        }
+
+        @keyframes eco-ondas {
+            0% { box-shadow: 0 0 0 0 rgba(45, 70, 54, 0.6); }
+            100% { box-shadow: 0 0 0 25px rgba(45, 70, 54, 0); }
         }
 
         @keyframes pulso-blanco {
@@ -220,7 +226,6 @@
         setTimeout(() => { authScreen.style.display = 'none'; }, 600);
     }
 
-    /* Lógica corregida para el pulso de escala */
     function manejarBotonAgregar() { 
         if (!botonListo) {
             document.getElementById('popup-recordatorio-camara').style.display = 'flex';

@@ -372,3 +372,83 @@
         const nom = document.getElementById('sub-cat').value || "Prenda";
         const meta = { name: `KINU_${cat}_${nom}_${Date.now()}.png`, parents: [folderId] };
         const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+        form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
+        await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
+        
+        botonListo = false; imagenProcesada = null;
+        document.getElementById('btn-final').classList.remove('ready');
+        document.getElementById('btn-text').innerText = "AGREGAR PRENDA";
+        cargarFotosCloset();
+    }
+
+    // --- LÓGICA DE DONACIÓN ---
+    function abrirFormularioDonacion() {
+        document.getElementById('modal-donacion').style.display = 'flex';
+    }
+
+    function cerrarDonacion() {
+        document.getElementById('modal-donacion').style.display = 'none';
+    }
+
+    async function procesarDonacion() {
+        const info = {
+            nombre: document.getElementById('don-nombre').value,
+            direccion: document.getElementById('don-direccion').value,
+            horario: document.getElementById('don-horario').value,
+            celular: document.getElementById('don-celular').value
+        };
+
+        if(!info.nombre || !info.celular) { alert("Nombre y celular son obligatorios"); return; }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const prendasDonar = todasLasPrendas.filter(p => p.name.split('_')[1] === 'DONAR');
+        
+        doc.setFontSize(18); doc.setTextColor(45, 70, 54);
+        doc.text("SOLICITUD DE DONACIÓN - KINU", 20, 20);
+        
+        doc.setFontSize(11); doc.setTextColor(0, 0, 0);
+        doc.text(`Nombre: ${info.nombre}`, 20, 35);
+        doc.text(`Dirección: ${info.direccion}`, 20, 42);
+        doc.text(`Horario: ${info.horario}`, 20, 49);
+        doc.text(`Celular: ${info.celular}`, 20, 56);
+
+        let listaTexto = "";
+        let yPos = 70;
+
+        for (const p of prendasDonar) {
+            const nombrePrenda = p.name.split('_')[2];
+            listaTexto += `- ${nombrePrenda}\n`;
+            
+            if(yPos > 250) { doc.addPage(); yPos = 20; }
+            doc.text(`• ${nombrePrenda}`, 20, yPos);
+            
+            try {
+                const imgData = await fetch(p.thumbnailLink.replace('=s220', '=s600')).then(r => r.blob()).then(blob => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                });
+                doc.addImage(imgData, 'PNG', 150, yPos - 5, 25, 25);
+            } catch(e) {}
+            yPos += 30;
+        }
+
+        doc.save(`Donacion_${info.nombre}.pdf`);
+
+        const mensajeWA = `*NUEVA DONACIÓN KINU*\n\n` +
+                          `*Nombre:* ${info.nombre}\n` +
+                          `*Dirección:* ${info.direccion}\n` +
+                          `*Horario:* ${info.horario}\n\n` +
+                          `*Prendas a donar:*\n${listaTexto}\n` +
+                          `_He descargado el PDF adjunto con las fotos._`;
+        
+        window.open(`https://wa.me/?text=${encodeURIComponent(mensajeWA)}`, '_blank');
+        cerrarDonacion();
+    }
+</script>
+</body>
+</html>

@@ -56,7 +56,7 @@
             100% { box-shadow: 0 0 0 25px rgba(255, 255, 255, 0); }
         }
 
-        /* Estilo para el Botón Duplicado - ALINEACIÓN Y COLOR DE ECO CORREGIDOS */
+        /* Estilo para el Botón Duplicado */
         .camara-fantasma {
             position: fixed;
             bottom: calc(env(safe-area-inset-bottom) + 22px); 
@@ -262,10 +262,20 @@
     }
     function manejarAccionDrive() { tokenClient.requestAccessToken(); }
     function verificarSesion() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }
+    
     async function obtenerOCrearCarpeta() {
         const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const d = await r.json(); if (d.files.length) { folderId = d.files[0].id; cargarFotos(); }
+        const d = await r.json(); 
+        if (d.files.length) { 
+            folderId = d.files[0].id; 
+            // CAMBIO AQUÍ: Actualizamos el botón de vinculación
+            const authBtn = document.getElementById('auth-btn');
+            authBtn.style.background = "var(--verde)";
+            authBtn.innerHTML = '<i class="ph ph-check-circle"></i> VINCULADO';
+            cargarFotos(); 
+        }
     }
+
     async function cargarFotos() {
         const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
         const d = await r.json(); todasLasPrendas = d.files || []; filtrarGaleria();

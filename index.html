@@ -26,6 +26,7 @@
             --gris-suave: #4A4540; 
             --google-blue: #4285F4;
             --whatsapp: #25D366;
+            --rojo: #C0392B;
         }
 
         * { box-sizing: border-box; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
@@ -56,7 +57,6 @@
             100% { box-shadow: 0 0 0 25px rgba(255, 255, 255, 0); }
         }
 
-        /* Estilo para el Botón Duplicado */
         .camara-fantasma {
             position: fixed;
             bottom: calc(env(safe-area-inset-bottom) + 22px); 
@@ -183,6 +183,18 @@
         <i class="ph ph-camera" style="color:white; font-size:26px;"></i>
     </div>
 
+    <div id="popup-logout-drive" class="kinu-popup">
+        <div class="popup-content">
+            <i class="ph ph-warning-circle" style="font-size:45px; color:var(--rojo);"></i>
+            <h3 style="margin:15px 0 10px; color:var(--verde);">¿DESVINCULAR DRIVE?</h3>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Dejarás de tener acceso a tu closet en la nube hasta que vuelvas a vincularte.</p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="document.getElementById('popup-logout-drive').style.display='none'" class="btn-accion" style="background:#eee; color:#666;">CANCELAR</button>
+                <button onclick="confirmarDesvinculacion()" class="btn-accion" style="background:var(--rojo);">DESVINCULAR</button>
+            </div>
+        </div>
+    </div>
+
     <div id="popup-recordatorio-camara" class="kinu-popup">
         <div class="popup-content">
             <i class="ph ph-camera-rotate" style="font-size:45px; color:var(--verde);"></i>
@@ -218,6 +230,27 @@
     let imagenProcesada = null, botonListo = false;
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
+
+    // Lógica Drive: Vincular o Abrir Alerta de Desvinculación
+    function manejarAccionDrive() { 
+        if(accessToken) {
+            document.getElementById('popup-logout-drive').style.display = 'flex';
+        } else {
+            tokenClient.requestAccessToken(); 
+        }
+    }
+
+    function confirmarDesvinculacion() {
+        accessToken = null;
+        folderId = null;
+        todasLasPrendas = [];
+        localStorage.removeItem('kinu_token');
+        document.getElementById('popup-logout-drive').style.display = 'none';
+        const authBtn = document.getElementById('auth-btn');
+        authBtn.style.background = "var(--google-blue)";
+        authBtn.innerHTML = 'VINCULAR DRIVE';
+        filtrarGaleria();
+    }
 
     function manejarBotonAgregar() { 
         if (!botonListo) {
@@ -260,7 +293,6 @@
             callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); }
         });
     }
-    function manejarAccionDrive() { tokenClient.requestAccessToken(); }
     function verificarSesion() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }
     
     async function obtenerOCrearCarpeta() {
@@ -268,7 +300,6 @@
         const d = await r.json(); 
         if (d.files.length) { 
             folderId = d.files[0].id; 
-            // CAMBIO AQUÍ: Actualizamos el botón de vinculación
             const authBtn = document.getElementById('auth-btn');
             authBtn.style.background = "var(--verde)";
             authBtn.innerHTML = '<i class="ph ph-check-circle"></i> VINCULADO';
@@ -277,6 +308,7 @@
     }
 
     async function cargarFotos() {
+        if(!folderId) return;
         const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
         const d = await r.json(); todasLasPrendas = d.files || []; filtrarGaleria();
     }
@@ -312,6 +344,7 @@
     };
 
     async function subirPrendaFinal() {
+        if(!accessToken) return alert("Vincula Google Drive primero");
         const cat = document.getElementById('main-cat').value;
         const nom = document.getElementById('sub-cat').value || "Prenda";
         const meta = { name: `KINU_${cat}_${nom}_${Date.now()}.png`, parents: [folderId] };

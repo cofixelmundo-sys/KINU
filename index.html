@@ -25,6 +25,7 @@
             --blanco: #FFFFFF; 
             --gris-suave: #4A4540; 
             --google-blue: #4285F4;
+            --whatsapp: #25D366;
         }
 
         * { box-sizing: border-box; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
@@ -81,7 +82,6 @@
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; text-transform: uppercase; font-weight: bold; }
 
-        /* --- POPUP CORREGIDO --- */
         .kinu-popup { 
             display: none; position: fixed; inset: 0; 
             background: rgba(0,0,0,0.7); z-index: 9999; 
@@ -91,7 +91,7 @@
         .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; }
         
         .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; }
-        .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; }
+        .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-accion.ready { background: var(--verde); }
 
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
@@ -144,6 +144,11 @@
             </div>
 
             <div id="pantalla-closet" class="screen" style="display:none;">
+                <div id="area-donar-control" style="display: none; margin-bottom: 15px;">
+                    <button onclick="abrirModalDonar()" class="btn-accion" style="background: var(--verde);">
+                        <i class="ph ph-truck"></i> GESTIONAR RECOLECCIÓN
+                    </button>
+                </div>
                 <div id="galeria-real" class="galeria-grid"></div>
             </div>
         </div>
@@ -164,6 +169,24 @@
             <h3 style="margin:15px 0 10px; color:var(--verde);">¡FALTA LA FOTO!</h3>
             <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Primero captura la prenda usando la cámara.</p>
             <button onclick="cerrarRecordatorio()" class="btn-accion ready">ENTENDIDO</button>
+        </div>
+    </div>
+
+    <div id="modal-donar" class="kinu-popup">
+        <div class="popup-content" style="border-top: 8px solid var(--whatsapp);">
+            <div style="background: #e8f9ef; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -55px auto 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <i class="ph ph-truck" style="color:var(--whatsapp); font-size:35px;"></i>
+            </div>
+            <h3 style="color:var(--verde); margin:0 0 5px; font-size: 18px;">SOLICITAR RETIRO</h3>
+            <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Coordinaremos el retiro de tus donaciones.</p>
+            
+            <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
+            <input type="text" id="don-direccion" class="form-input" placeholder="Dirección de recojo">
+            
+            <button onclick="enviarDonacionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
+                <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
+            </button>
+            <button onclick="document.getElementById('modal-donar').style.display='none'" style="background:none; border:none; color:#999; margin-top:15px; font-size:11px; font-weight:bold;">CANCELAR</button>
         </div>
     </div>
 
@@ -190,6 +213,20 @@
     function cerrarRecordatorio() {
         document.getElementById('popup-recordatorio-camara').style.display = 'none';
         document.getElementById('circulo-camara').classList.remove('camara-animada');
+    }
+
+    function abrirModalDonar() { document.getElementById('modal-donar').style.display = 'flex'; }
+
+    function enviarDonacionWhatsApp() {
+        const nombre = document.getElementById('don-nombre').value;
+        const direccion = document.getElementById('don-direccion').value;
+        const cantidadPrendas = todasLasPrendas.filter(p => p.name.includes('_DONAR_')).length;
+        
+        if(!nombre || !direccion) return alert("Completa los datos");
+
+        const mensaje = `*NUEVA SOLICITUD DE DONACIÓN*%0A%0A👤 *Donante:* ${nombre}%0A📍 *Dirección:* ${direccion}%0A📦 *Prendas:* ${cantidadPrendas}%0A%0A_Enviado desde KINU Smart Closet_`;
+        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
+        document.getElementById('modal-donar').style.display = 'none';
     }
 
     function abrirEditor(file) { 
@@ -230,7 +267,11 @@
 
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
-        todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`))).forEach(f => {
+        const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
+        
+        document.getElementById('area-donar-control').style.display = (filtroActual === 'DONAR' && filtradas.length > 0) ? 'block' : 'none';
+
+        filtradas.forEach(f => {
             const card = document.createElement('div'); card.className = 'prenda-card';
             card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
             gal.appendChild(card);

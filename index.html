@@ -125,6 +125,25 @@
 
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--gris-suave); font-size: 9px; font-weight: bold; position: relative; }
+
+        /* Botón Donar Flotante */
+        #btn-donar-flotante {
+            display: none;
+            position: fixed;
+            bottom: 110px;
+            right: 20px;
+            background: var(--whatsapp);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 99;
+            align-items: center;
+            gap: 10px;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -188,6 +207,10 @@
             </div>
         </div>
 
+        <button id="btn-donar-flotante" onclick="abrirFormularioDonacion()">
+            <i class="ph ph-whatsapp-logo"></i> GESTIONAR DONACIÓN
+        </button>
+
         <nav id="bottom-nav">
             <div class="nav-item active" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house" style="font-size:24px;"></i><span>INICIO</span></div>
             <div class="nav-item" onclick="document.getElementById('input-camara').click()">
@@ -202,10 +225,22 @@
         <div class="popup-content">
             <i class="ph ph-camera-rotate" style="font-size:45px; color:var(--verde);"></i>
             <h3 style="margin:15px 0 10px; color:var(--verde); text-transform:uppercase;">¡Falta la foto!</h3>
-            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">
-                Primero debes capturar la prenda usando la <strong>cámara de KINU</strong>.
-            </p>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Primero debes capturar la prenda usando la <strong>cámara de KINU</strong>.</p>
             <button onclick="cerrarRecordatorio()" class="btn-accion" style="background:var(--verde);">ENTENDIDO</button>
+        </div>
+    </div>
+
+    <div id="modal-donacion" class="kinu-popup">
+        <div class="popup-content" style="text-align: left;">
+            <h3 style="color:var(--verde); text-align:center; margin-bottom:15px;">DATOS DE RECOLECCIÓN</h3>
+            <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
+            <input type="text" id="don-direccion" class="form-input" placeholder="Dirección de retiro">
+            <input type="text" id="don-horario" class="form-input" placeholder="Horario (ej: 10:00 a 14:00)">
+            <input type="tel" id="don-celular" class="form-input" placeholder="Celular">
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button onclick="cerrarDonacion()" class="btn-accion" style="background:#ccc;">CANCELAR</button>
+                <button onclick="procesarDonacion()" class="btn-accion ready">ENVIAR WHATSAPP</button>
+            </div>
         </div>
     </div>
 
@@ -300,6 +335,7 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
         if(reset) filtroActual = 'TODO';
+        document.getElementById('btn-donar-flotante').style.display = 'none';
         filtrarGaleria();
     }
 
@@ -310,6 +346,10 @@
             card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
             gal.appendChild(card);
         });
+        
+        if(filtroActual === 'DONAR' && document.getElementById('pantalla-closet').style.display === 'block') {
+            document.getElementById('btn-donar-flotante').style.display = 'flex';
+        }
     }
 
     function irACategoria(cat) {
@@ -332,15 +372,3 @@
         const nom = document.getElementById('sub-cat').value || "Prenda";
         const meta = { name: `KINU_${cat}_${nom}_${Date.now()}.png`, parents: [folderId] };
         const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
-        form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
-        await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-        
-        botonListo = false; imagenProcesada = null;
-        document.getElementById('btn-final').classList.remove('ready');
-        document.getElementById('btn-text').innerText = "AGREGAR PRENDA";
-        cargarFotosCloset();
-    }
-</script>
-</body>
-</html>

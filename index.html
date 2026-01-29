@@ -65,7 +65,6 @@
         /* --- ANIMACIONES --- */
         .btn-pulso { animation: pulso-blanco 2s infinite; }
         
-        /* EFECTO COMBINADO: ESCALA + ECO (Ondas) */
         .camara-animada { 
             animation: latido-camara 1s infinite alternate ease-in-out, 
                        eco-ondas 1s infinite ease-out;
@@ -156,6 +155,9 @@
                     <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
                     <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
                     <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
+                    <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-hourglass-high"></i></div><span class="cat-label">Vintage</span></div>
+                    <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
+                    <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
                     <div class="cat-item" onclick="irACategoria('DONAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
                 </div>
 
@@ -167,6 +169,9 @@
                         <option value="ENTERIZOS">Enterizo</option>
                         <option value="CALZADO">Calzado</option>
                         <option value="ACCESORIOS">Accesorios</option>
+                        <option value="VINTAGE">Vintage</option>
+                        <option value="DEPORTE">Deporte</option>
+                        <option value="DORMIR">Dormir</option>
                         <option value="DONAR">Donar</option>
                     </select>
                     <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
@@ -305,6 +310,11 @@
             card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
             gal.appendChild(card);
         });
+    }
+
+    function irACategoria(cat) {
+        filtroActual = cat;
+        cambiarTab('pantalla-closet', document.querySelectorAll('.nav-item')[2]);
     }
 
     window.cerrarIA = function() { 

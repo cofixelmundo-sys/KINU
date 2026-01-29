@@ -55,9 +55,11 @@
             0% { box-shadow: 0 0 0 0 rgba(45, 70, 54, 0.6); }
             100% { box-shadow: 0 0 0 25px rgba(45, 70, 54, 0); }
         }
-        .camara-animada { 
+        /* Esta clase se activa cuando el popup está abierto */
+        .camara-resaltada { 
             animation: latido-camara 0.8s infinite alternate ease-in-out, eco-ondas 1.2s infinite ease-out; 
-            z-index: 6001 !important;
+            z-index: 10001 !important; /* Por encima del popup que tiene 9999 */
+            position: relative;
         }
 
         header { padding: env(safe-area-inset-top) 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
@@ -82,6 +84,7 @@
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; text-transform: uppercase; font-weight: bold; }
 
+        /* --- POPUP --- */
         .kinu-popup { 
             display: none; position: fixed; inset: 0; 
             background: rgba(0,0,0,0.7); z-index: 9999; 
@@ -179,10 +182,8 @@
             </div>
             <h3 style="color:var(--verde); margin:0 0 5px; font-size: 18px;">SOLICITAR RETIRO</h3>
             <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Coordinaremos el retiro de tus donaciones.</p>
-            
             <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
             <input type="text" id="don-direccion" class="form-input" placeholder="Dirección de recojo">
-            
             <button onclick="enviarDonacionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
                 <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
             </button>
@@ -203,8 +204,10 @@
 
     function manejarBotonAgregar() { 
         if (!botonListo) {
+            // Mostramos el popup
             document.getElementById('popup-recordatorio-camara').style.display = 'flex';
-            document.getElementById('circulo-camara').classList.add('camara-animada');
+            // RESALTE DE CÁMARA: Le ponemos la clase que la sube de capa y la hace latir
+            document.getElementById('circulo-camara').classList.add('camara-resaltada');
         } else {
             subirPrendaFinal(); 
         }
@@ -212,7 +215,8 @@
 
     function cerrarRecordatorio() {
         document.getElementById('popup-recordatorio-camara').style.display = 'none';
-        document.getElementById('circulo-camara').classList.remove('camara-animada');
+        // Quitamos el resalte al cerrar el popup
+        document.getElementById('circulo-camara').classList.remove('camara-resaltada');
     }
 
     function abrirModalDonar() { document.getElementById('modal-donar').style.display = 'flex'; }
@@ -221,9 +225,7 @@
         const nombre = document.getElementById('don-nombre').value;
         const direccion = document.getElementById('don-direccion').value;
         const cantidadPrendas = todasLasPrendas.filter(p => p.name.includes('_DONAR_')).length;
-        
         if(!nombre || !direccion) return alert("Completa los datos");
-
         const mensaje = `*NUEVA SOLICITUD DE DONACIÓN*%0A%0A👤 *Donante:* ${nombre}%0A📍 *Dirección:* ${direccion}%0A📦 *Prendas:* ${cantidadPrendas}%0A%0A_Enviado desde KINU Smart Closet_`;
         window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
         document.getElementById('modal-donar').style.display = 'none';
@@ -268,9 +270,7 @@
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
         const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
-        
         document.getElementById('area-donar-control').style.display = (filtroActual === 'DONAR' && filtradas.length > 0) ? 'block' : 'none';
-
         filtradas.forEach(f => {
             const card = document.createElement('div'); card.className = 'prenda-card';
             card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;

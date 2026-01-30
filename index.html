@@ -15,6 +15,9 @@
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         :root { 
             --verde: #2D4636; 
@@ -92,7 +95,7 @@
 
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
         .prenda-card { background: white; border-radius: 18px; height: 180px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; }
+        .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; pointer-events: none; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; text-transform: uppercase; font-weight: bold; }
 
         .kinu-popup { 
@@ -231,10 +234,22 @@
                 <option value="Tarde (14:00 - 18:00)">Tarde (14:00 - 18:00)</option>
             </select>
 
-            <button onclick="enviarColaboracionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
+            <button id="btn-enviar-whatsapp" onclick="enviarColaboracionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
                 <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
             </button>
             <button onclick="document.getElementById('modal-colaborar').style.display='none'" style="background:none; border:none; color:#999; margin-top:15px; font-size:11px; font-weight:bold;">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="popup-confirmar-colaborar" class="kinu-popup">
+        <div class="popup-content">
+            <i class="ph ph-question" style="font-size:45px; color:var(--verde);"></i>
+            <h3 style="margin:15px 0 10px; color:var(--verde);">¿COLABORAR CON ESTE ARTÍCULO?</h3>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">La prenda se moverá a tu sección de Colaborar.</p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="cerrarPopupColaborar()" class="btn-accion" style="background:#eee; color:#666;">NO</button>
+                <button id="btn-confirmar-mover" class="btn-accion ready">SÍ, COLABORAR</button>
+            </div>
         </div>
     </div>
 
@@ -255,6 +270,7 @@
 <script>
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
     let imagenProcesada = null, botonListo = false, fechaPropuestaGlobal = "";
+    let itemParaColaborar = null;
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
@@ -282,37 +298,111 @@
         }
     }
 
-    function enviarColaboracionWhatsApp() {
+    async function enviarColaboracionWhatsApp() {
         const nombre = document.getElementById('don-nombre').value;
         const celular = document.getElementById('don-celular').value;
         const direccion = document.getElementById('don-direccion').value;
         const horario = document.getElementById('don-horario').value;
+        const btn = document.getElementById('btn-enviar-whatsapp');
         
         const prendasColaborar = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_'));
         const cantidadPrendas = prendasColaborar.length;
 
         if(!nombre || !celular || !direccion || !horario) return alert("Completa todos los campos");
 
-        let detalleArticulos = "";
-        prendasColaborar.forEach((p, index) => {
-            const nombreLimpio = p.name.split('_')[2] || "Prenda";
-            detalleArticulos += `${index + 1}. ${nombreLimpio}%0A`;
-        });
+        btn.disabled = true;
+        btn.innerHTML = "GENERANDO PLANILLA...";
 
-        const mensaje = `*NUEVA SOLICITUD DE RETIRO (COLABORACIÓN)*%0A%0A` +
-                        `👤 *Nombre:* ${nombre}%0A` +
-                        `📱 *Celular:* ${celular}%0A` +
-                        `📍 *Dirección:* ${direccion}%0A` +
-                        `⏰ *Horario:* ${horario}%0A` +
-                        `📅 *Fecha:* ${fechaPropuestaGlobal}%0A%0A` +
-                        `📦 *ARTÍCULOS A RETIRAR (${cantidadPrendas}):*%0A${detalleArticulos}%0A` +
-                        `_Enviado desde KINU Smart Closet_`;
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(18);
+            doc.text("PLANILLA DE RETIRO - KINU", 14, 22);
+            doc.setFontSize(10);
+            doc.text(`Solicitante: ${nombre} | Tel: ${celular}`, 14, 32);
+            doc.text(`Dirección: ${direccion}`, 14, 37);
 
-        document.getElementById('modal-colaborar').style.display = 'none';
-        document.getElementById('popup-exito-retiro').style.display = 'flex';
-        
-        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
+            const tablaDatos = [];
+            for (let i = 0; i < prendasColaborar.length; i++) {
+                const p = prendasColaborar[i];
+                let imgData = "";
+                try {
+                    const res = await fetch(p.thumbnailLink.replace('=s220', '=s150'));
+                    const blob = await res.blob();
+                    imgData = await new Promise(r => { const reader = new FileReader(); reader.onloadend = () => r(reader.result); reader.readAsDataURL(blob); });
+                } catch(e) {}
+                tablaDatos.push([i+1, p.name.split('_')[2] || "Prenda", imgData]);
+            }
+
+            doc.autoTable({
+                startY: 45,
+                head: [['#', 'Artículo', 'Foto']],
+                body: tablaDatos,
+                didDrawCell: (data) => {
+                    if (data.section === 'body' && data.column.index === 2 && data.cell.raw) {
+                        doc.addImage(data.cell.raw, 'PNG', data.cell.x + 2, data.cell.y + 2, 12, 12);
+                    }
+                },
+                columnStyles: { 2: { cellWidth: 20, minCellHeight: 18 } },
+                headStyles: { fillColor: [45, 70, 54] }
+            });
+
+            const pdfBlob = doc.output('blob');
+            const meta = { name: `Planilla_${nombre}_${Date.now()}.pdf`, parents: [folderId] };
+            const formData = new FormData();
+            formData.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+            formData.append('file', pdfBlob);
+
+            const upload = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', { 
+                method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: formData 
+            });
+            const file = await upload.json();
+
+            await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}/permissions`, {
+                method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role: 'reader', type: 'anyone' })
+            });
+
+            const mensaje = `*NUEVA SOLICITUD DE RETIRO*%0A👤 ${nombre}%0A📍 ${direccion}%0A📦 Prendas: ${cantidadPrendas}%0A📄 Planilla: ${file.webViewLink}`;
+            window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
+            
+            document.getElementById('modal-colaborar').style.display = 'none';
+            document.getElementById('popup-exito-retiro').style.display = 'flex';
+        } catch(e) { alert("Error generando PDF"); }
+        btn.disabled = false; btn.innerHTML = '<i class="ph ph-whatsapp-logo"></i> ENVIAR SOLICITUD';
     }
+
+    // --- FUNCIONALIDAD LONG PRESS (3 SEG) ---
+    function cerrarPopupColaborar() {
+        document.getElementById('popup-confirmar-colaborar').style.display = 'none';
+        itemParaColaborar = null;
+    }
+
+    async function moverAColaborar() {
+        if(!itemParaColaborar) return;
+        const btn = document.getElementById('btn-confirmar-mover');
+        btn.innerText = "PROCESANDO...";
+        btn.disabled = true;
+
+        const partes = itemParaColaborar.name.split('_');
+        partes[1] = 'COLABORAR';
+        const nuevoNombre = partes.join('_');
+
+        try {
+            await fetch(`https://www.googleapis.com/drive/v3/files/${itemParaColaborar.id}`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: nuevoNombre })
+            });
+            cerrarPopupColaborar();
+            cargarFotos();
+        } catch(e) { alert("Error al mover el artículo"); }
+        btn.innerText = "SÍ, COLABORAR";
+        btn.disabled = false;
+    }
+
+    document.getElementById('btn-confirmar-mover').onclick = moverAColaborar;
 
     // --- DRIVE CORE ---
     function manejarAccionDrive() { 
@@ -381,11 +471,11 @@
     }
 
     // --- NAVEGACIÓN Y CARGA ---
-    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSesion)); }
+    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
-            scope: 'https://www.googleapis.com/auth/drive.file',
+            scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.install',
             callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); }
         });
     }
@@ -422,9 +512,30 @@
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
         const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
         document.getElementById('area-colaborar-control').style.display = (filtroActual === 'COLABORAR' && filtradas.length > 0) ? 'block' : 'none';
+        
         filtradas.forEach(f => {
-            const card = document.createElement('div'); card.className = 'prenda-card';
+            const card = document.createElement('div'); 
+            card.className = 'prenda-card';
             card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
+            
+            // Lógica de 3 segundos (Long Press)
+            let timer;
+            const startTimer = () => {
+                timer = setTimeout(() => {
+                    if (!f.name.includes('_COLABORAR_')) {
+                        itemParaColaborar = f;
+                        document.getElementById('popup-confirmar-colaborar').style.display = 'flex';
+                    }
+                }, 3000);
+            };
+            const cancelTimer = () => clearTimeout(timer);
+
+            card.addEventListener('touchstart', startTimer);
+            card.addEventListener('touchend', cancelTimer);
+            card.addEventListener('mousedown', startTimer);
+            card.addEventListener('mouseup', cancelTimer);
+            card.addEventListener('mouseleave', cancelTimer);
+
             gal.appendChild(card);
         });
     }

@@ -176,9 +176,7 @@
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
 
-    <div id="camara-clone" class="camara-fantasma">
-        <i class="ph ph-camera" style="color:white; font-size:26px;"></i>
-    </div>
+    <div id="camara-clone" class="camara-fantasma"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
 
     <div id="popup-logout-drive" class="kinu-popup">
         <div class="popup-content">
@@ -207,7 +205,7 @@
                 <i class="ph ph-truck" style="color:var(--whatsapp); font-size:35px;"></i>
             </div>
             <h3 style="color:var(--verde); margin:0 0 5px; font-size: 18px;">SOLICITAR RETIRO</h3>
-            <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Organizaremos la recogida en tu domicilio.</p>
+            <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Mínimo 10 artículos para coordinar retiro gratuito.</p>
             
             <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
             <input type="tel" id="don-celular" class="form-input" placeholder="Teléfono celular">
@@ -235,7 +233,7 @@
         <div class="popup-content">
             <i class="ph ph-check-circle" style="font-size:45px; color:var(--verde);"></i>
             <h3 style="margin:15px 0 10px; color:var(--verde);">RETIRO COORDINADO</h3>
-            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Tu solicitud ha sido enviada con éxito.</p>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Tu solicitud ha sido enviada con éxito. Revisaremos el detalle de tus prendas.</p>
             <button onclick="document.getElementById('popup-exito-retiro').style.display='none'" class="btn-accion ready">CERRAR</button>
         </div>
     </div>
@@ -251,22 +249,7 @@
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
-    // --- MANEJO DE PRENDAS ---
-    function manejarBotonAgregar() { 
-        if (!botonListo) {
-            document.getElementById('popup-recordatorio-camara').style.display = 'flex';
-            document.getElementById('camara-clone').style.display = 'flex';
-        } else {
-            subirPrendaFinal(); 
-        }
-    }
-
-    function cerrarRecordatorio() {
-        document.getElementById('popup-recordatorio-camara').style.display = 'none';
-        document.getElementById('camara-clone').style.display = 'none';
-    }
-
-    // --- RETIROS ---
+    // --- LÓGICA DE RETIRO Y VALIDACIÓN ---
     function calcularFechaPropuesta() {
         let fecha = new Date();
         let diasParaMiercoles = (3 - fecha.getDay() + 7) % 7;
@@ -287,17 +270,32 @@
         const celular = document.getElementById('don-celular').value;
         const direccion = document.getElementById('don-direccion').value;
         const horario = document.getElementById('don-horario').value;
-        const cantidadPrendas = todasLasPrendas.filter(p => p.name.includes('_DONAR_')).length;
+        
+        // Obtenemos solo las prendas de donación
+        const prendasDonar = todasLasPrendas.filter(p => p.name.includes('_DONAR_'));
+        const cantidadPrendas = prendasDonar.length;
+
+        // VALIDACIÓN: Mínimo 10 artículos
+        if (cantidadPrendas < 10) {
+            return alert(`Lo sentimos, necesitas al menos 10 artículos para solicitar un retiro gratuito. Actualmente tienes ${cantidadPrendas}. ¡Sigue limpiando tu closet!`);
+        }
 
         if(!nombre || !celular || !direccion || !horario) return alert("Completa todos los campos");
+
+        // Construcción del detalle de artículos
+        let detalleArticulos = "";
+        prendasDonar.forEach((p, index) => {
+            const nombreLimpio = p.name.split('_')[2] || "Prenda";
+            detalleArticulos += `${index + 1}. ${nombreLimpio}%0A`;
+        });
 
         const mensaje = `*NUEVA SOLICITUD DE RETIRO*%0A%0A` +
                         `👤 *Nombre:* ${nombre}%0A` +
                         `📱 *Celular:* ${celular}%0A` +
                         `📍 *Dirección:* ${direccion}%0A` +
                         `⏰ *Horario:* ${horario}%0A` +
-                        `📅 *Fecha:* ${fechaPropuestaGlobal}%0A` +
-                        `📦 *Artículos:* ${cantidadPrendas}%0A%0A` +
+                        `📅 *Fecha:* ${fechaPropuestaGlobal}%0A%0A` +
+                        `📦 *ARTÍCULOS A RETIRAR (${cantidadPrendas}):*%0A${detalleArticulos}%0A` +
                         `_Enviado desde KINU Smart Closet_`;
 
         document.getElementById('modal-donar').style.display = 'none';
@@ -320,6 +318,20 @@
         btn.style.background = "var(--google-blue)";
         btn.innerHTML = 'VINCULAR DRIVE';
         filtrarGaleria();
+    }
+
+    function manejarBotonAgregar() { 
+        if (!botonListo) {
+            document.getElementById('popup-recordatorio-camara').style.display = 'flex';
+            document.getElementById('camara-clone').style.display = 'flex';
+        } else {
+            subirPrendaFinal(); 
+        }
+    }
+
+    function cerrarRecordatorio() {
+        document.getElementById('popup-recordatorio-camara').style.display = 'none';
+        document.getElementById('camara-clone').style.display = 'none';
     }
 
     function abrirEditor(file) { 

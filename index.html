@@ -59,12 +59,14 @@
 
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
         
-        /* Ajuste para evitar selección de texto al dejar pulsado */
+        /* Bloqueo de selección para evitar conflictos con el long-press */
         .prenda-card { 
             background: white; border-radius: 18px; height: 180px; position: relative; 
             display: flex; align-items: center; justify-content: center; overflow: hidden; 
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
         
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; pointer-events: none; }
@@ -174,7 +176,7 @@
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
-    // Lógica Long Press 3 segundos
+    // Manejo del Popup
     function cerrarPopupColaborar() {
         document.getElementById('popup-confirmar-colaborar').style.display = 'none';
         itemParaColaborar = null;
@@ -241,10 +243,8 @@
             const card = document.createElement('div'); card.className = 'prenda-card';
             card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
             
-            // Lógica de detección de 3 segundos
             let timer;
-            const startTimer = (e) => {
-                if(e.type === 'touchstart') e.preventDefault();
+            const startTimer = () => {
                 timer = setTimeout(() => {
                     if (!f.name.includes('_COLABORAR_')) {
                         itemParaColaborar = f;
@@ -254,10 +254,10 @@
             };
             const cancelTimer = () => clearTimeout(timer);
 
-            card.addEventListener('touchstart', startTimer, {passive: false});
-            card.addEventListener('touchend', cancelTimer);
-            card.addEventListener('mousedown', startTimer);
-            card.addEventListener('mouseup', cancelTimer);
+            // Eventos simplificados para evitar bloqueos
+            card.onpointerdown = startTimer;
+            card.onpointerup = cancelTimer;
+            card.onpointerleave = cancelTimer;
 
             gal.appendChild(card);
         });
@@ -273,9 +273,7 @@
     function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', null); }
 
     function manejarBotonAgregar() { if(botonListo) subirPrendaFinal(); else document.getElementById('input-camara').click(); }
-
     function abrirEditor(file) { if (!file) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
-
     window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } };
 
     async function subirPrendaFinal() {

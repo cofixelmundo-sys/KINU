@@ -199,13 +199,22 @@
         </div>
     </div>
 
+    <div id="popup-minimo-donar" class="kinu-popup">
+        <div class="popup-content">
+            <i class="ph ph-hand-heart" style="font-size:45px; color:var(--gris-suave);"></i>
+            <h3 style="margin:15px 0 10px; color:var(--verde);">MÍNIMO 10 PRENDAS</h3>
+            <p id="texto-minimo-donar" style="font-size:12px; color:var(--gris-suave); margin-bottom:20px; line-height: 1.5;">Necesitas al menos 10 artículos para solicitar un retiro gratuito.</p>
+            <button onclick="document.getElementById('popup-minimo-donar').style.display='none'" class="btn-accion ready">CONTINUAR LIMPIEZA</button>
+        </div>
+    </div>
+
     <div id="modal-donar" class="kinu-popup">
         <div class="popup-content" style="border-top: 8px solid var(--whatsapp);">
             <div style="background: #e8f9ef; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -55px auto 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
                 <i class="ph ph-truck" style="color:var(--whatsapp); font-size:35px;"></i>
             </div>
             <h3 style="color:var(--verde); margin:0 0 5px; font-size: 18px;">SOLICITAR RETIRO</h3>
-            <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Mínimo 10 artículos para coordinar retiro gratuito.</p>
+            <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Organizaremos la recogida en tu domicilio.</p>
             
             <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
             <input type="tel" id="don-celular" class="form-input" placeholder="Teléfono celular">
@@ -261,8 +270,16 @@
     }
 
     function abrirModalDonar() { 
-        calcularFechaPropuesta();
-        document.getElementById('modal-donar').style.display = 'flex'; 
+        const prendasDonar = todasLasPrendas.filter(p => p.name.includes('_DONAR_'));
+        const cantidad = prendasDonar.length;
+
+        if (cantidad < 10) {
+            document.getElementById('texto-minimo-donar').innerText = `Actualmente tienes ${cantidad} artículos en tu sección de donación. ¡Faltan ${10 - cantidad} más para coordinar tu retiro gratuito!`;
+            document.getElementById('popup-minimo-donar').style.display = 'flex';
+        } else {
+            calcularFechaPropuesta();
+            document.getElementById('modal-donar').style.display = 'flex'; 
+        }
     }
 
     function enviarDonacionWhatsApp() {
@@ -271,18 +288,11 @@
         const direccion = document.getElementById('don-direccion').value;
         const horario = document.getElementById('don-horario').value;
         
-        // Obtenemos solo las prendas de donación
         const prendasDonar = todasLasPrendas.filter(p => p.name.includes('_DONAR_'));
         const cantidadPrendas = prendasDonar.length;
 
-        // VALIDACIÓN: Mínimo 10 artículos
-        if (cantidadPrendas < 10) {
-            return alert(`Lo sentimos, necesitas al menos 10 artículos para solicitar un retiro gratuito. Actualmente tienes ${cantidadPrendas}. ¡Sigue limpiando tu closet!`);
-        }
-
         if(!nombre || !celular || !direccion || !horario) return alert("Completa todos los campos");
 
-        // Construcción del detalle de artículos
         let detalleArticulos = "";
         prendasDonar.forEach((p, index) => {
             const nombreLimpio = p.name.split('_')[2] || "Prenda";

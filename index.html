@@ -15,9 +15,6 @@
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    
     <style>
         :root { 
             --verde: #2D4636; 
@@ -187,7 +184,7 @@
         <div class="popup-content">
             <i class="ph ph-warning-circle" style="font-size:45px; color:var(--rojo);"></i>
             <h3 style="margin:15px 0 10px; color:var(--verde);">¿DESVINCULAR DRIVE?</h3>
-            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Dejarás de tener acceso a tu closet en la nube hasta que vuelvas a vincularte.</p>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Dejarás de tener acceso a tu closet en la nube.</p>
             <div style="display:flex; gap:10px;">
                 <button onclick="document.getElementById('popup-logout-drive').style.display='none'" class="btn-accion" style="background:#eee; color:#666;">CANCELAR</button>
                 <button onclick="confirmarDesvinculacion()" class="btn-accion" style="background:var(--rojo);">DESVINCULAR</button>
@@ -233,7 +230,7 @@
         <div class="popup-content">
             <i class="ph ph-check-circle" style="font-size:45px; color:var(--verde);"></i>
             <h3 style="margin:15px 0 10px; color:var(--verde);">RETIRO COORDINADO</h3>
-            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Tu solicitud ha sido enviada. Nos pondremos en contacto pronto para confirmar.</p>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Tu solicitud ha sido enviada. Nos pondremos en contacto para confirmar.</p>
             <button onclick="document.getElementById('popup-exito-retiro').style.display='none'" class="btn-accion ready">CERRAR</button>
         </div>
     </div>
@@ -249,23 +246,55 @@
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
-    function manejarAccionDrive() { 
-        if(accessToken) {
-            document.getElementById('popup-logout-drive').style.display = 'flex';
-        } else {
-            tokenClient.requestAccessToken(); 
+    // --- LÓGICA DE RETIRO ---
+    function enviarDonacionWhatsApp() {
+        const nombre = document.getElementById('don-nombre').value;
+        const celular = document.getElementById('don-celular').value;
+        const direccion = document.getElementById('don-direccion').value;
+        const horario = document.getElementById('don-horario').value;
+        const cantidadPrendas = todasLasPrendas.filter(p => p.name.includes('_DONAR_')).length;
+
+        if(!nombre || !celular || !direccion || !horario) {
+            return alert("Por favor, completa todos los campos.");
         }
+
+        // CÁLCULO DE FECHA: Próximo Miércoles
+        let fecha = new Date();
+        let diasParaMiercoles = (3 - fecha.getDay() + 7) % 7;
+        if(diasParaMiercoles === 0) diasParaMiercoles = 7; // Si hoy es miércoles, al próximo
+        fecha.setDate(fecha.getDate() + diasParaMiercoles);
+        
+        const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
+        const fechaTexto = fecha.toLocaleDateString('es-ES', opciones);
+
+        const mensaje = `*NUEVA SOLICITUD DE RETIRO*%0A%0A` +
+                        `👤 *Nombre:* ${nombre}%0A` +
+                        `📱 *Celular:* ${celular}%0A` +
+                        `📍 *Dirección:* ${direccion}%0A` +
+                        `⏰ *Horario:* ${horario}%0A` +
+                        `📅 *Fecha Propuesta:* ${fechaTexto}%0A` +
+                        `📦 *Artículos:* ${cantidadPrendas}%0A%0A` +
+                        `_Enviado desde KINU Smart Closet_`;
+
+        // Cerrar modal y mostrar éxito en la app ANTES de abrir WhatsApp para "tapar" el salto
+        document.getElementById('modal-donar').style.display = 'none';
+        document.getElementById('popup-exito-retiro').style.display = 'flex';
+
+        // Disparar WhatsApp
+        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
     }
 
+    function abrirModalDonar() { document.getElementById('modal-donar').style.display = 'flex'; }
+
+    // --- DRIVE & CORE ---
+    function manejarAccionDrive() { if(accessToken) { document.getElementById('popup-logout-drive').style.display = 'flex'; } else { tokenClient.requestAccessToken(); } }
+    
     function confirmarDesvinculacion() {
-        accessToken = null;
-        folderId = null;
-        todasLasPrendas = [];
+        accessToken = null; folderId = null; todasLasPrendas = [];
         localStorage.removeItem('kinu_token');
         document.getElementById('popup-logout-drive').style.display = 'none';
-        const authBtn = document.getElementById('auth-btn');
-        authBtn.style.background = "var(--google-blue)";
-        authBtn.innerHTML = 'VINCULAR DRIVE';
+        document.getElementById('auth-btn').style.background = "var(--google-blue)";
+        document.getElementById('auth-btn').innerHTML = 'VINCULAR DRIVE';
         filtrarGaleria();
     }
 
@@ -273,51 +302,12 @@
         if (!botonListo) {
             document.getElementById('popup-recordatorio-camara').style.display = 'flex';
             document.getElementById('camara-clone').style.display = 'flex';
-        } else {
-            subirPrendaFinal(); 
-        }
+        } else { subirPrendaFinal(); }
     }
 
     function cerrarRecordatorio() {
         document.getElementById('popup-recordatorio-camara').style.display = 'none';
         document.getElementById('camara-clone').style.display = 'none';
-    }
-
-    function abrirModalDonar() { document.getElementById('modal-donar').style.display = 'flex'; }
-
-    function enviarDonacionWhatsApp() {
-        const nombre = document.getElementById('don-nombre').value;
-        const celular = document.getElementById('don-celular').value;
-        const direccion = document.getElementById('don-direccion').value;
-        const horario = document.getElementById('don-horario').value;
-        
-        const cantidadPrendas = todasLasPrendas.filter(p => p.name.includes('_DONAR_')).length;
-
-        if(!nombre || !celular || !direccion || !horario) {
-            return alert("Por favor, completa todos los campos para coordinar el retiro.");
-        }
-
-        // KINU propone la fecha (7 días después de hoy)
-        const hoy = new Date();
-        const fechaPropuesta = new Date(hoy.setDate(hoy.getDate() + 7)).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-
-        const mensaje = `*NUEVA SOLICITUD DE RETIRO*%0A%0A` +
-                        `👤 *Nombre:* ${nombre}%0A` +
-                        `📱 *Celular:* ${celular}%0A` +
-                        `📍 *Dirección:* ${direccion}%0A` +
-                        `⏰ *Horario:* ${horario}%0A` +
-                        `📅 *Fecha propuesta:* ${fechaPropuesta}%0A` +
-                        `📦 *Artículos listos:* ${cantidadPrendas}%0A%0A` +
-                        `_Enviado desde KINU Smart Closet_`;
-
-        // Abrir WhatsApp
-        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
-        
-        // Interfaz de KINU: Cerrar modal y mostrar éxito
-        document.getElementById('modal-donar').style.display = 'none';
-        setTimeout(() => {
-            document.getElementById('popup-exito-retiro').style.display = 'flex';
-        }, 500);
     }
 
     function abrirEditor(file) { 
@@ -327,7 +317,7 @@
         document.getElementById('modal-ia').style.display = 'flex'; 
     }
 
-    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
+    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSesion)); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
@@ -342,9 +332,8 @@
         const d = await r.json(); 
         if (d.files.length) { 
             folderId = d.files[0].id; 
-            const authBtn = document.getElementById('auth-btn');
-            authBtn.style.background = "var(--verde)";
-            authBtn.innerHTML = '<i class="ph ph-check-circle"></i> VINCULADO';
+            document.getElementById('auth-btn').style.background = "var(--verde)";
+            document.getElementById('auth-btn').innerHTML = '<i class="ph ph-check-circle"></i> VINCULADO';
             cargarFotos(); 
         }
     }

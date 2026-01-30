@@ -40,6 +40,42 @@
         
         .main-container { width: 100%; height: 100%; background: var(--fondo); display: flex; flex-direction: column; position: relative; overflow: hidden; }
 
+        /* --- ANIMACIONES --- */
+        @keyframes pulso-blanco {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+        .btn-pulso { animation: pulso-blanco 2s infinite; }
+
+        @keyframes latido-camara {
+            from { transform: translateX(-50%) scale(1); }
+            to { transform: translateX(-50%) scale(1.15); }
+        }
+        @keyframes eco-ondas {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6); }
+            100% { box-shadow: 0 0 0 25px rgba(255, 255, 255, 0); }
+        }
+
+        .camara-fantasma {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom) + 22px); 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 58px;
+            height: 58px;
+            background: var(--verde);
+            border-radius: 50%;
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 10000; 
+            animation: latido-camara 0.8s infinite alternate ease-in-out, eco-ondas 1.2s infinite ease-out;
+            pointer-events: none; 
+        }
+
         header { padding: env(safe-area-inset-top) 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         
         nav { 
@@ -58,17 +94,7 @@
         .cat-label { font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--gris-suave); }
 
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
-        
-        /* Bloqueo de selección para evitar conflictos con el long-press */
-        .prenda-card { 
-            background: white; border-radius: 18px; height: 180px; position: relative; 
-            display: flex; align-items: center; justify-content: center; overflow: hidden; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-        }
-        
+        .prenda-card { background: white; border-radius: 18px; height: 180px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; pointer-events: none; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; text-transform: uppercase; font-weight: bold; }
 
@@ -92,7 +118,7 @@
 <div class="main-container">
     <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         <img src="https://i.imgur.com/yTIrTq2.png" style="width:130px; margin-bottom:30px;">
-        <button onclick="entrarApp()" style="background:white; color:var(--verde); padding:16px 65px; border-radius:35px; border:none; font-weight:800; letter-spacing:2px;">ENTRAR</button>
+        <button onclick="entrarApp()" class="btn-pulso" style="background:white; color:var(--verde); padding:16px 65px; border-radius:35px; border:none; font-weight:800; letter-spacing:2px;">ENTRAR</button>
     </div>
 
     <div id="main-app" style="display:none; flex-direction:column; height:100%;">
@@ -143,14 +169,76 @@
             </div>
         </div>
 
-        <nav>
+        <nav id="bottom-nav">
             <div class="nav-item" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house" style="font-size:24px;"></i></div>
             <div class="nav-item" onclick="document.getElementById('input-camara').click()">
-                <div class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
+                <div id="circulo-camara" class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
             </div>
             <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i></div>
         </nav>
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
+    </div>
+
+    <div id="camara-clone" class="camara-fantasma"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
+
+    <div id="popup-logout-drive" class="kinu-popup">
+        <div class="popup-content">
+            <i class="ph ph-warning-circle" style="font-size:45px; color:var(--rojo);"></i>
+            <h3 style="margin:15px 0 10px; color:var(--verde);">¿DESVINCULAR DRIVE?</h3>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Dejarás de tener acceso a tu closet en la nube.</p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="document.getElementById('popup-logout-drive').style.display='none'" class="btn-accion" style="background:#eee; color:#666;">CANCELAR</button>
+                <button onclick="confirmarDesvinculacion()" class="btn-accion" style="background:var(--rojo);">DESVINCULAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="popup-recordatorio-camara" class="kinu-popup">
+        <div class="popup-content">
+            <i class="ph ph-camera-rotate" style="font-size:45px; color:var(--verde);"></i>
+            <h3 style="margin:15px 0 10px; color:var(--verde);">¡FALTA LA FOTO!</h3>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Primero captura la prenda usando la cámara.</p>
+            <button onclick="cerrarRecordatorio()" class="btn-accion ready">ENTENDIDO</button>
+        </div>
+    </div>
+
+    <div id="popup-minimo-colaborar" class="kinu-popup">
+        <div class="popup-content">
+            <i class="ph ph-hand-heart" style="font-size:45px; color:var(--gris-suave);"></i>
+            <h3 style="margin:15px 0 10px; color:var(--verde);">MÍNIMO 10 PRENDAS</h3>
+            <p id="texto-minimo-colaborar" style="font-size:12px; color:var(--gris-suave); margin-bottom:20px; line-height: 1.5;">Necesitas al menos 10 artículos en la sección Colaborar para solicitar un retiro gratuito.</p>
+            <button onclick="document.getElementById('popup-minimo-colaborar').style.display='none'" class="btn-accion ready">CONTINUAR LIMPIEZA</button>
+        </div>
+    </div>
+
+    <div id="modal-colaborar" class="kinu-popup">
+        <div class="popup-content" style="border-top: 8px solid var(--whatsapp);">
+            <div style="background: #e8f9ef; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -55px auto 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <i class="ph ph-truck" style="color:var(--whatsapp); font-size:35px;"></i>
+            </div>
+            <h3 style="color:var(--verde); margin:0 0 5px; font-size: 18px;">SOLICITAR RETIRO</h3>
+            <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Organizaremos la recogida en tu domicilio.</p>
+            
+            <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
+            <input type="tel" id="don-celular" class="form-input" placeholder="Teléfono celular">
+            <input type="text" id="don-direccion" class="form-input" placeholder="Dirección de recojo">
+            
+            <div style="text-align: left; margin-bottom: 12px; padding: 0 5px;">
+                <label style="font-size: 10px; font-weight: bold; color: var(--verde); text-transform: uppercase;">Próximo retiro disponible:</label>
+                <input type="text" id="don-fecha-visual" class="form-input" style="background: #f9f9f9; color: #555; border: 1px dashed #ccc; margin-top: 4px;" readonly>
+            </div>
+
+            <select id="don-horario" class="form-input">
+                <option value="" disabled selected>Preferencia de horario</option>
+                <option value="Mañana (9:00 - 13:00)">Mañana (9:00 - 13:00)</option>
+                <option value="Tarde (14:00 - 18:00)">Tarde (14:00 - 18:00)</option>
+            </select>
+
+            <button id="btn-enviar-whatsapp" onclick="enviarColaboracionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
+                <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
+            </button>
+            <button onclick="document.getElementById('modal-colaborar').style.display='none'" style="background:none; border:none; color:#999; margin-top:15px; font-size:11px; font-weight:bold;">CANCELAR</button>
+        </div>
     </div>
 
     <div id="popup-confirmar-colaborar" class="kinu-popup">
@@ -165,6 +253,15 @@
         </div>
     </div>
 
+    <div id="popup-exito-retiro" class="kinu-popup">
+        <div class="popup-content">
+            <i class="ph ph-check-circle" style="font-size:45px; color:var(--verde);"></i>
+            <h3 style="margin:15px 0 10px; color:var(--verde);">RETIRO COORDINADO</h3>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Tu solicitud ha sido enviada con éxito. Revisaremos el detalle de tus prendas.</p>
+            <button onclick="document.getElementById('popup-exito-retiro').style.display='none'" class="btn-accion ready">CERRAR</button>
+        </div>
+    </div>
+
     <div id="modal-ia" style="display:none; position:absolute; inset:0; background:white; z-index:2000; flex-direction:column;">
         <iframe id="iframe-ia" style="width:100%; flex-grow:1; border:none;"></iframe>
     </div>
@@ -172,11 +269,111 @@
 
 <script>
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
-    let imagenProcesada = null, botonListo = false, itemParaColaborar = null;
+    let imagenProcesada = null, botonListo = false, fechaPropuestaGlobal = "";
+    let itemParaColaborar = null;
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
-    // Manejo del Popup
+    // --- LÓGICA DE RETIRO Y VALIDACIÓN ---
+    function calcularFechaPropuesta() {
+        let fecha = new Date();
+        let diasParaMiercoles = (3 - fecha.getDay() + 7) % 7;
+        if(diasParaMiercoles === 0) diasParaMiercoles = 7;
+        fecha.setDate(fecha.getDate() + diasParaMiercoles);
+        const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
+        fechaPropuestaGlobal = fecha.toLocaleDateString('es-ES', opciones);
+        document.getElementById('don-fecha-visual').value = fechaPropuestaGlobal.charAt(0).toUpperCase() + fechaPropuestaGlobal.slice(1);
+    }
+
+    function abrirModalColaborar() { 
+        const prendasColaborar = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_'));
+        const cantidad = prendasColaborar.length;
+
+        if (cantidad < 10) {
+            document.getElementById('texto-minimo-colaborar').innerText = `Actualmente tienes ${cantidad} artículos en tu sección de Colaborar. ¡Faltan ${10 - cantidad} más para coordinar tu retiro gratuito!`;
+            document.getElementById('popup-minimo-colaborar').style.display = 'flex';
+        } else {
+            calcularFechaPropuesta();
+            document.getElementById('modal-colaborar').style.display = 'flex'; 
+        }
+    }
+
+    async function enviarColaboracionWhatsApp() {
+        const nombre = document.getElementById('don-nombre').value;
+        const celular = document.getElementById('don-celular').value;
+        const direccion = document.getElementById('don-direccion').value;
+        const horario = document.getElementById('don-horario').value;
+        const btn = document.getElementById('btn-enviar-whatsapp');
+        
+        const prendasColaborar = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_'));
+        const cantidadPrendas = prendasColaborar.length;
+
+        if(!nombre || !celular || !direccion || !horario) return alert("Completa todos los campos");
+
+        btn.disabled = true;
+        btn.innerHTML = "GENERANDO PLANILLA...";
+
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(18);
+            doc.text("PLANILLA DE RETIRO - KINU", 14, 22);
+            doc.setFontSize(10);
+            doc.text(`Solicitante: ${nombre} | Tel: ${celular}`, 14, 32);
+            doc.text(`Dirección: ${direccion}`, 14, 37);
+
+            const tablaDatos = [];
+            for (let i = 0; i < prendasColaborar.length; i++) {
+                const p = prendasColaborar[i];
+                let imgData = "";
+                try {
+                    const res = await fetch(p.thumbnailLink.replace('=s220', '=s150'));
+                    const blob = await res.blob();
+                    imgData = await new Promise(r => { const reader = new FileReader(); reader.onloadend = () => r(reader.result); reader.readAsDataURL(blob); });
+                } catch(e) {}
+                tablaDatos.push([i+1, p.name.split('_')[2] || "Prenda", imgData]);
+            }
+
+            doc.autoTable({
+                startY: 45,
+                head: [['#', 'Artículo', 'Foto']],
+                body: tablaDatos,
+                didDrawCell: (data) => {
+                    if (data.section === 'body' && data.column.index === 2 && data.cell.raw) {
+                        doc.addImage(data.cell.raw, 'PNG', data.cell.x + 2, data.cell.y + 2, 12, 12);
+                    }
+                },
+                columnStyles: { 2: { cellWidth: 20, minCellHeight: 18 } },
+                headStyles: { fillColor: [45, 70, 54] }
+            });
+
+            const pdfBlob = doc.output('blob');
+            const meta = { name: `Planilla_${nombre}_${Date.now()}.pdf`, parents: [folderId] };
+            const formData = new FormData();
+            formData.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+            formData.append('file', pdfBlob);
+
+            const upload = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', { 
+                method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: formData 
+            });
+            const file = await upload.json();
+
+            await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}/permissions`, {
+                method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role: 'reader', type: 'anyone' })
+            });
+
+            const mensaje = `*NUEVA SOLICITUD DE RETIRO*%0A👤 ${nombre}%0A📍 ${direccion}%0A📦 Prendas: ${cantidadPrendas}%0A📄 Planilla: ${file.webViewLink}`;
+            window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
+            
+            document.getElementById('modal-colaborar').style.display = 'none';
+            document.getElementById('popup-exito-retiro').style.display = 'flex';
+        } catch(e) { alert("Error generando PDF"); }
+        btn.disabled = false; btn.innerHTML = '<i class="ph ph-whatsapp-logo"></i> ENVIAR SOLICITUD';
+    }
+
+    // --- FUNCIONALIDAD LONG PRESS (3 SEG) ---
     function cerrarPopupColaborar() {
         document.getElementById('popup-confirmar-colaborar').style.display = 'none';
         itemParaColaborar = null;
@@ -207,24 +404,91 @@
 
     document.getElementById('btn-confirmar-mover').onclick = moverAColaborar;
 
-    // Drive Core
+    // --- DRIVE CORE ---
+    function manejarAccionDrive() { 
+        if(accessToken) document.getElementById('popup-logout-drive').style.display = 'flex';
+        else tokenClient.requestAccessToken(); 
+    }
+
+    function confirmarDesvinculacion() {
+        accessToken = null; folderId = null; todasLasPrendas = [];
+        localStorage.removeItem('kinu_token');
+        document.getElementById('popup-logout-drive').style.display = 'none';
+        const btn = document.getElementById('auth-btn');
+        btn.style.background = "var(--google-blue)";
+        btn.innerHTML = 'VINCULAR DRIVE';
+        filtrarGaleria();
+    }
+
+    function manejarBotonAgregar() { 
+        if (!botonListo) {
+            document.getElementById('popup-recordatorio-camara').style.display = 'flex';
+            document.getElementById('camara-clone').style.display = 'flex';
+        } else {
+            subirPrendaFinal(); 
+        }
+    }
+
+    function cerrarRecordatorio() {
+        document.getElementById('popup-recordatorio-camara').style.display = 'none';
+        document.getElementById('camara-clone').style.display = 'none';
+    }
+
+    function abrirEditor(file) { 
+        if (!file) return; 
+        sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); 
+        document.getElementById('iframe-ia').src = 'photo_studio.html'; 
+        document.getElementById('modal-ia').style.display = 'flex'; 
+    }
+
+    window.cerrarIA = function() { 
+        document.getElementById('modal-ia').style.display = 'none'; 
+        const proc = sessionStorage.getItem('imagen_procesada'); 
+        if (proc) { 
+            imagenProcesada = proc; botonListo = true; 
+            document.getElementById('btn-final').classList.add('ready'); 
+            document.getElementById('btn-text').innerText = "SUBIR AHORA"; 
+        } 
+    };
+
+    async function subirPrendaFinal() {
+        if(!accessToken) return alert("Vincula Google Drive");
+        const cat = document.getElementById('main-cat').value;
+        const nom = document.getElementById('sub-cat').value || "Prenda";
+        const meta = { name: `KINU_${cat}_${nom}_${Date.now()}.png`, parents: [folderId] };
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+        form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
+        
+        await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { 
+            method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form 
+        });
+
+        botonListo = false; imagenProcesada = null;
+        document.getElementById('btn-final').classList.remove('ready');
+        document.getElementById('btn-text').innerText = "AGREGAR PRENDA";
+        cargarFotos();
+    }
+
+    // --- NAVEGACIÓN Y CARGA ---
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
-            scope: 'https://www.googleapis.com/auth/drive.file',
+            scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.install',
             callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); }
         });
     }
-    function verificarSession() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }
+    function verificarSesion() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }
     
     async function obtenerOCrearCarpeta() {
         const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } });
         const d = await r.json(); 
         if (d.files.length) { 
             folderId = d.files[0].id; 
-            document.getElementById('auth-btn').style.background = "var(--verde)";
-            document.getElementById('auth-btn').innerText = "VINCULADO";
+            const btn = document.getElementById('auth-btn');
+            btn.style.background = "var(--verde)";
+            btn.innerHTML = '<i class="ph ph-check-circle"></i> VINCULADO';
             cargarFotos(); 
         }
     }
@@ -233,34 +497,6 @@
         if(!folderId) return;
         const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
         const d = await r.json(); todasLasPrendas = d.files || []; filtrarGaleria();
-    }
-
-    function filtrarGaleria() {
-        const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
-        const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
-        
-        filtradas.forEach(f => {
-            const card = document.createElement('div'); card.className = 'prenda-card';
-            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
-            
-            let timer;
-            const startTimer = () => {
-                timer = setTimeout(() => {
-                    if (!f.name.includes('_COLABORAR_')) {
-                        itemParaColaborar = f;
-                        document.getElementById('popup-confirmar-colaborar').style.display = 'flex';
-                    }
-                }, 3000);
-            };
-            const cancelTimer = () => clearTimeout(timer);
-
-            // Eventos simplificados para evitar bloqueos
-            card.onpointerdown = startTimer;
-            card.onpointerup = cancelTimer;
-            card.onpointerleave = cancelTimer;
-
-            gal.appendChild(card);
-        });
     }
 
     function cambiarTab(id, el, reset=false) {
@@ -272,22 +508,36 @@
 
     function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', null); }
 
-    function manejarBotonAgregar() { if(botonListo) subirPrendaFinal(); else document.getElementById('input-camara').click(); }
-    function abrirEditor(file) { if (!file) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
-    window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } };
+    function filtrarGaleria() {
+        const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
+        const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
+        document.getElementById('area-colaborar-control').style.display = (filtroActual === 'COLABORAR' && filtradas.length > 0) ? 'block' : 'none';
+        
+        filtradas.forEach(f => {
+            const card = document.createElement('div'); 
+            card.className = 'prenda-card';
+            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
+            
+            // Lógica de 3 segundos (Long Press)
+            let timer;
+            const startTimer = () => {
+                timer = setTimeout(() => {
+                    if (!f.name.includes('_COLABORAR_')) {
+                        itemParaColaborar = f;
+                        document.getElementById('popup-confirmar-colaborar').style.display = 'flex';
+                    }
+                }, 3000);
+            };
+            const cancelTimer = () => clearTimeout(timer);
 
-    async function subirPrendaFinal() {
-        const cat = document.getElementById('main-cat').value;
-        const nom = document.getElementById('sub-cat').value || "Prenda";
-        const meta = { name: `KINU_${cat}_${nom}_${Date.now()}.png`, parents: [folderId] };
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
-        form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
-        await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-        botonListo = false; imagenProcesada = null;
-        document.getElementById('btn-final').classList.remove('ready');
-        document.getElementById('btn-text').innerText = "AGREGAR PRENDA";
-        cargarFotos();
+            card.addEventListener('touchstart', startTimer);
+            card.addEventListener('touchend', cancelTimer);
+            card.addEventListener('mousedown', startTimer);
+            card.addEventListener('mouseup', cancelTimer);
+            card.addEventListener('mouseleave', cancelTimer);
+
+            gal.appendChild(card);
+        });
     }
 </script>
 

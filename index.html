@@ -135,7 +135,7 @@
                     <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
                     <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
                     <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
-                    <div class="cat-item" onclick="irACategoria('DONAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
+                    <div class="cat-item" onclick="irACategoria('COLABORAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Colaborar</span></div>
                 </div>
 
                 <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px;">
@@ -149,7 +149,7 @@
                         <option value="VINTAGE">Vintage</option>
                         <option value="DEPORTE">Deporte</option>
                         <option value="DORMIR">Dormir</option>
-                        <option value="DONAR">Donar</option>
+                        <option value="COLABORAR">Colaborar</option>
                     </select>
                     <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
                     <button id="btn-final" class="btn-accion" onclick="manejarBotonAgregar()"><span id="btn-text">AGREGAR PRENDA</span></button>
@@ -157,8 +157,8 @@
             </div>
 
             <div id="pantalla-closet" class="screen" style="display:none;">
-                <div id="area-donar-control" style="display: none; margin-bottom: 15px;">
-                    <button onclick="abrirModalDonar()" class="btn-accion" style="background: var(--verde);">
+                <div id="area-colaborar-control" style="display: none; margin-bottom: 15px;">
+                    <button onclick="abrirModalColaborar()" class="btn-accion" style="background: var(--verde);">
                         <i class="ph ph-truck"></i> COORDINAR RETIRO
                     </button>
                 </div>
@@ -199,16 +199,16 @@
         </div>
     </div>
 
-    <div id="popup-minimo-donar" class="kinu-popup">
+    <div id="popup-minimo-colaborar" class="kinu-popup">
         <div class="popup-content">
             <i class="ph ph-hand-heart" style="font-size:45px; color:var(--gris-suave);"></i>
             <h3 style="margin:15px 0 10px; color:var(--verde);">MÍNIMO 10 PRENDAS</h3>
-            <p id="texto-minimo-donar" style="font-size:12px; color:var(--gris-suave); margin-bottom:20px; line-height: 1.5;">Necesitas al menos 10 artículos para solicitar un retiro gratuito.</p>
-            <button onclick="document.getElementById('popup-minimo-donar').style.display='none'" class="btn-accion ready">CONTINUAR LIMPIEZA</button>
+            <p id="texto-minimo-colaborar" style="font-size:12px; color:var(--gris-suave); margin-bottom:20px; line-height: 1.5;">Necesitas al menos 10 artículos en la sección Colaborar para solicitar un retiro gratuito.</p>
+            <button onclick="document.getElementById('popup-minimo-colaborar').style.display='none'" class="btn-accion ready">CONTINUAR LIMPIEZA</button>
         </div>
     </div>
 
-    <div id="modal-donar" class="kinu-popup">
+    <div id="modal-colaborar" class="kinu-popup">
         <div class="popup-content" style="border-top: 8px solid var(--whatsapp);">
             <div style="background: #e8f9ef; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -55px auto 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
                 <i class="ph ph-truck" style="color:var(--whatsapp); font-size:35px;"></i>
@@ -231,10 +231,10 @@
                 <option value="Tarde (14:00 - 18:00)">Tarde (14:00 - 18:00)</option>
             </select>
 
-            <button onclick="enviarDonacionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
+            <button onclick="enviarColaboracionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
                 <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
             </button>
-            <button onclick="document.getElementById('modal-donar').style.display='none'" style="background:none; border:none; color:#999; margin-top:15px; font-size:11px; font-weight:bold;">CANCELAR</button>
+            <button onclick="document.getElementById('modal-colaborar').style.display='none'" style="background:none; border:none; color:#999; margin-top:15px; font-size:11px; font-weight:bold;">CANCELAR</button>
         </div>
     </div>
 
@@ -269,37 +269,37 @@
         document.getElementById('don-fecha-visual').value = fechaPropuestaGlobal.charAt(0).toUpperCase() + fechaPropuestaGlobal.slice(1);
     }
 
-    function abrirModalDonar() { 
-        const prendasDonar = todasLasPrendas.filter(p => p.name.includes('_DONAR_'));
-        const cantidad = prendasDonar.length;
+    function abrirModalColaborar() { 
+        const prendasColaborar = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_'));
+        const cantidad = prendasColaborar.length;
 
         if (cantidad < 10) {
-            document.getElementById('texto-minimo-donar').innerText = `Actualmente tienes ${cantidad} artículos en tu sección de donación. ¡Faltan ${10 - cantidad} más para coordinar tu retiro gratuito!`;
-            document.getElementById('popup-minimo-donar').style.display = 'flex';
+            document.getElementById('texto-minimo-colaborar').innerText = `Actualmente tienes ${cantidad} artículos en tu sección de Colaborar. ¡Faltan ${10 - cantidad} más para coordinar tu retiro gratuito!`;
+            document.getElementById('popup-minimo-colaborar').style.display = 'flex';
         } else {
             calcularFechaPropuesta();
-            document.getElementById('modal-donar').style.display = 'flex'; 
+            document.getElementById('modal-colaborar').style.display = 'flex'; 
         }
     }
 
-    function enviarDonacionWhatsApp() {
+    function enviarColaboracionWhatsApp() {
         const nombre = document.getElementById('don-nombre').value;
         const celular = document.getElementById('don-celular').value;
         const direccion = document.getElementById('don-direccion').value;
         const horario = document.getElementById('don-horario').value;
         
-        const prendasDonar = todasLasPrendas.filter(p => p.name.includes('_DONAR_'));
-        const cantidadPrendas = prendasDonar.length;
+        const prendasColaborar = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_'));
+        const cantidadPrendas = prendasColaborar.length;
 
         if(!nombre || !celular || !direccion || !horario) return alert("Completa todos los campos");
 
         let detalleArticulos = "";
-        prendasDonar.forEach((p, index) => {
+        prendasColaborar.forEach((p, index) => {
             const nombreLimpio = p.name.split('_')[2] || "Prenda";
             detalleArticulos += `${index + 1}. ${nombreLimpio}%0A`;
         });
 
-        const mensaje = `*NUEVA SOLICITUD DE RETIRO*%0A%0A` +
+        const mensaje = `*NUEVA SOLICITUD DE RETIRO (COLABORACIÓN)*%0A%0A` +
                         `👤 *Nombre:* ${nombre}%0A` +
                         `📱 *Celular:* ${celular}%0A` +
                         `📍 *Dirección:* ${direccion}%0A` +
@@ -308,7 +308,7 @@
                         `📦 *ARTÍCULOS A RETIRAR (${cantidadPrendas}):*%0A${detalleArticulos}%0A` +
                         `_Enviado desde KINU Smart Closet_`;
 
-        document.getElementById('modal-donar').style.display = 'none';
+        document.getElementById('modal-colaborar').style.display = 'none';
         document.getElementById('popup-exito-retiro').style.display = 'flex';
         
         window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
@@ -421,7 +421,7 @@
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
         const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
-        document.getElementById('area-donar-control').style.display = (filtroActual === 'DONAR' && filtradas.length > 0) ? 'block' : 'none';
+        document.getElementById('area-colaborar-control').style.display = (filtroActual === 'COLABORAR' && filtradas.length > 0) ? 'block' : 'none';
         filtradas.forEach(f => {
             const card = document.createElement('div'); card.className = 'prenda-card';
             card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;

@@ -210,9 +210,19 @@
                 <i class="ph ph-truck" style="color:var(--whatsapp); font-size:35px;"></i>
             </div>
             <h3 style="color:var(--verde); margin:0 0 5px; font-size: 18px;">SOLICITAR RETIRO</h3>
-            <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Coordinaremos el retiro de tus donaciones.</p>
+            <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Organizaremos la recogida de tus artículos en el domicilio.</p>
+            
             <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
+            <input type="tel" id="don-celular" class="form-input" placeholder="Teléfono celular">
             <input type="text" id="don-direccion" class="form-input" placeholder="Dirección de recojo">
+            
+            <select id="don-horario" class="form-input">
+                <option value="" disabled selected>Preferencia de horario</option>
+                <option value="Mañana (9:00 - 13:00)">Mañana (9:00 - 13:00)</option>
+                <option value="Tarde (14:00 - 18:00)">Tarde (14:00 - 18:00)</option>
+                <option value="Indiferente">Indiferente</option>
+            </select>
+
             <button onclick="enviarDonacionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
                 <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
             </button>
@@ -231,7 +241,6 @@
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
 
-    // Lógica Drive: Vincular o Abrir Alerta de Desvinculación
     function manejarAccionDrive() { 
         if(accessToken) {
             document.getElementById('popup-logout-drive').style.display = 'flex';
@@ -268,12 +277,27 @@
 
     function abrirModalDonar() { document.getElementById('modal-donar').style.display = 'flex'; }
 
+    // FUNCIÓN DE WHATSAPP ACTUALIZADA
     function enviarDonacionWhatsApp() {
         const nombre = document.getElementById('don-nombre').value;
+        const celular = document.getElementById('don-celular').value;
         const direccion = document.getElementById('don-direccion').value;
+        const horario = document.getElementById('don-horario').value;
+        
         const cantidadPrendas = todasLasPrendas.filter(p => p.name.includes('_DONAR_')).length;
-        if(!nombre || !direccion) return alert("Completa los datos");
-        const mensaje = `*NUEVA SOLICITUD DE DONACIÓN*%0A%0A👤 *Donante:* ${nombre}%0A📍 *Dirección:* ${direccion}%0A📦 *Prendas:* ${cantidadPrendas}%0A%0A_Enviado desde KINU Smart Closet_`;
+
+        if(!nombre || !celular || !direccion || !horario) {
+            return alert("Por favor, completa todos los campos para coordinar el retiro.");
+        }
+
+        const mensaje = `*NUEVA SOLICITUD DE RETIRO*%0A%0A` +
+                        `👤 *Nombre:* ${nombre}%0A` +
+                        `📱 *Celular:* ${celular}%0A` +
+                        `📍 *Dirección:* ${direccion}%0A` +
+                        `⏰ *Horario:* ${horario}%0A` +
+                        `📦 *Artículos listos:* ${cantidadPrendas}%0A%0A` +
+                        `_Enviado desde KINU Smart Closet_`;
+
         window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
         document.getElementById('modal-donar').style.display = 'none';
     }

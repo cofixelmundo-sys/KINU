@@ -220,13 +220,21 @@
                 <option value="" disabled selected>Preferencia de horario</option>
                 <option value="Mañana (9:00 - 13:00)">Mañana (9:00 - 13:00)</option>
                 <option value="Tarde (14:00 - 18:00)">Tarde (14:00 - 18:00)</option>
-                <option value="Indiferente">Indiferente</option>
             </select>
 
             <button onclick="enviarDonacionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
                 <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
             </button>
             <button onclick="document.getElementById('modal-donar').style.display='none'" style="background:none; border:none; color:#999; margin-top:15px; font-size:11px; font-weight:bold;">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="popup-exito-retiro" class="kinu-popup">
+        <div class="popup-content">
+            <i class="ph ph-check-circle" style="font-size:45px; color:var(--verde);"></i>
+            <h3 style="margin:15px 0 10px; color:var(--verde);">RETIRO COORDINADO</h3>
+            <p style="font-size:12px; color:var(--gris-suave); margin-bottom:20px;">Tu solicitud ha sido enviada. Nos pondremos en contacto pronto para confirmar.</p>
+            <button onclick="document.getElementById('popup-exito-retiro').style.display='none'" class="btn-accion ready">CERRAR</button>
         </div>
     </div>
 
@@ -277,7 +285,6 @@
 
     function abrirModalDonar() { document.getElementById('modal-donar').style.display = 'flex'; }
 
-    // FUNCIÓN DE WHATSAPP ACTUALIZADA
     function enviarDonacionWhatsApp() {
         const nombre = document.getElementById('don-nombre').value;
         const celular = document.getElementById('don-celular').value;
@@ -290,16 +297,27 @@
             return alert("Por favor, completa todos los campos para coordinar el retiro.");
         }
 
+        // KINU propone la fecha (7 días después de hoy)
+        const hoy = new Date();
+        const fechaPropuesta = new Date(hoy.setDate(hoy.getDate() + 7)).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+
         const mensaje = `*NUEVA SOLICITUD DE RETIRO*%0A%0A` +
                         `👤 *Nombre:* ${nombre}%0A` +
                         `📱 *Celular:* ${celular}%0A` +
                         `📍 *Dirección:* ${direccion}%0A` +
                         `⏰ *Horario:* ${horario}%0A` +
+                        `📅 *Fecha propuesta:* ${fechaPropuesta}%0A` +
                         `📦 *Artículos listos:* ${cantidadPrendas}%0A%0A` +
                         `_Enviado desde KINU Smart Closet_`;
 
+        // Abrir WhatsApp
         window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
+        
+        // Interfaz de KINU: Cerrar modal y mostrar éxito
         document.getElementById('modal-donar').style.display = 'none';
+        setTimeout(() => {
+            document.getElementById('popup-exito-retiro').style.display = 'flex';
+        }, 500);
     }
 
     function abrirEditor(file) { 
@@ -309,7 +327,7 @@
         document.getElementById('modal-ia').style.display = 'flex'; 
     }
 
-    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSesion)); }
+    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',

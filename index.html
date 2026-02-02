@@ -28,7 +28,15 @@
             --rojo: #C0392B;
         }
 
-        * { box-sizing: border-box; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
+        /* BLOQUEO DE SELECCIÓN Y MENÚ CONTEXTUAL */
+        * { 
+            box-sizing: border-box; 
+            transition: all 0.3s ease; 
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none; /* Bloquea menú de "Guardar imagen" */
+            -webkit-user-select: none;   /* Bloquea selección de texto en iOS */
+            user-select: none;           /* Bloquea selección en otros navegadores */
+        }
         
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
@@ -57,7 +65,7 @@
         .cat-label { font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--gris-suave); }
 
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
-        .prenda-card { background: white; border-radius: 18px; height: 180px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); user-select: none; }
+        .prenda-card { background: white; border-radius: 18px; height: 180px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; pointer-events: none; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; text-transform: uppercase; font-weight: bold; }
 
@@ -69,16 +77,17 @@
         }
         .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; }
         
-        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; }
+        .form-input { 
+            width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; 
+            -webkit-user-select: text; user-select: text; /* Permite escribir en los inputs */
+        }
         .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-accion.ready { background: var(--verde); }
 
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body>
-
-<div class="main-container">
+<body oncontextmenu="return false;"> <div class="main-container">
     <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         <img src="https://i.imgur.com/yTIrTq2.png" style="width:130px; margin-bottom:30px;">
         <button onclick="entrarApp()" style="background:white; color:var(--verde); padding:16px 65px; border-radius:35px; border:none; font-weight:800; letter-spacing:2px;">ENTRAR</button>
@@ -212,7 +221,6 @@
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
     function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); itemSeleccionado = null; }
 
-    // --- LÓGICA DE RETIRO ---
     function validarYAbrirRetiro() {
         const prendasColab = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_')).length;
         if (prendasColab < 10) {
@@ -228,14 +236,12 @@
         const celular = document.getElementById('don-celular').value;
         const direccion = document.getElementById('don-direccion').value;
         if(!nombre || !celular || !direccion) return alert("Completa los datos");
-        
         const prendasColab = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_'));
         const mensaje = `*SOLICITUD RETIRO KINU*%0A👤 ${nombre}%0A📍 ${direccion}%0A📦 Prendas: ${prendasColab.length}`;
         window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
         cerrarPopups();
     }
 
-    // --- DRIVE & GALERIA ---
     async function cargarFotos() {
         if(!folderId) return;
         const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
@@ -256,20 +262,31 @@
             const isColaborar = f.name.includes('_COLABORAR_');
             const tiempo = isColaborar ? 1200 : 800; // 0.8s colab, 1.2s delete
 
-            card.onpointerdown = () => {
-                pressTimer = setTimeout(() => {
-                    itemSeleccionado = f;
-                    if(isColaborar) document.getElementById('popup-confirmar-eliminar').style.display = 'flex';
-                    else document.getElementById('popup-confirmar-colaborar').style.display = 'flex';
-                }, tiempo);
+            const start = (e) => {
+                // Evita que el navegador maneje eventos por defecto (selección/menú)
+                if (e.type === 'touchstart') {
+                    // Solo permitimos el inicio si es un toque simple
+                    pressTimer = setTimeout(() => {
+                        itemSeleccionado = f;
+                        if(isColaborar) document.getElementById('popup-confirmar-eliminar').style.display = 'flex';
+                        else document.getElementById('popup-confirmar-colaborar').style.display = 'flex';
+                    }, tiempo);
+                }
             };
-            card.onpointerup = () => clearTimeout(pressTimer);
-            card.onpointerleave = () => clearTimeout(pressTimer);
+
+            const cancel = () => {
+                clearTimeout(pressTimer);
+            };
+
+            // Eventos táctiles para móviles
+            card.addEventListener('touchstart', start, { passive: true });
+            card.addEventListener('touchend', cancel);
+            card.addEventListener('touchmove', cancel); // Cancela si se hace scroll
+
             gal.appendChild(card);
         });
     }
 
-    // --- ACCIONES DRIVE ---
     document.getElementById('btn-confirmar-mover').onclick = async () => {
         const partes = itemSeleccionado.name.split('_');
         partes[1] = 'COLABORAR';
@@ -289,7 +306,6 @@
         cerrarPopups(); cargarFotos();
     };
 
-    // --- SUBIDA ---
     async function subirPrendaFinal() {
         const cat = document.getElementById('main-cat').value;
         const nom = document.getElementById('sub-cat').value || "Prenda";
@@ -298,7 +314,6 @@
         form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
         form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
         await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-        
         botonListo = false;
         document.getElementById('btn-final').classList.remove('ready');
         document.getElementById('btn-text').innerText = "AGREGAR PRENDA";
@@ -306,7 +321,6 @@
         cargarFotos();
     }
 
-    // --- NAVEGACIÓN BASICA ---
     function cambiarTab(id, el, reset=false) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
@@ -318,7 +332,6 @@
     function abrirEditor(file) { if (!file) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
     window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } };
     
-    // --- INIT DRIVE ---
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
     function gisLoaded() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com', scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); } }); }
     function verificarSession() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }

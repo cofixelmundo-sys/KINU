@@ -14,6 +14,8 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
     <style>
         :root { 
@@ -55,14 +57,7 @@
         .cat-label { font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--gris-suave); }
 
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
-        
-        .prenda-card { 
-            background: white; border-radius: 18px; height: 180px; position: relative; 
-            display: flex; align-items: center; justify-content: center; overflow: hidden; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
-        }
-        
+        .prenda-card { background: white; border-radius: 18px; height: 180px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); user-select: none; }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; pointer-events: none; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; text-transform: uppercase; font-weight: bold; }
 
@@ -129,7 +124,7 @@
 
             <div id="pantalla-closet" class="screen" style="display:none;">
                 <div id="area-colaborar-control" style="display: none; margin-bottom: 15px;">
-                    <button id="btn-coordinar" onclick="validarRetiro()" class="btn-accion ready">
+                    <button onclick="validarYAbrirRetiro()" class="btn-accion ready">
                         <i class="ph ph-truck"></i> COORDINAR RETIRO
                     </button>
                 </div>
@@ -153,7 +148,7 @@
             <h3>¿Colaborar con esta prenda?</h3>
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button>
-                <button id="btn-confirmar-colab" class="btn-accion ready">SÍ, COLABORAR</button>
+                <button id="btn-confirmar-mover" class="btn-accion ready">SÍ, COLABORAR</button>
             </div>
         </div>
     </div>
@@ -169,12 +164,31 @@
         </div>
     </div>
 
-    <div id="popup-minimo" class="kinu-popup">
+    <div id="popup-minimo-colaborar" class="kinu-popup">
         <div class="popup-content">
             <i class="ph ph-warning-circle" style="font-size:45px; color:var(--gris-suave);"></i>
             <h3>MÍNIMO 10 PRENDAS</h3>
-            <p id="txt-minimo" style="font-size:13px; color:#666; margin: 15px 0;"></p>
+            <p id="texto-minimo-colaborar" style="font-size:12px; color:#666; margin: 15px 0;"></p>
             <button onclick="cerrarPopups()" class="btn-accion ready">CONTINUAR LIMPIEZA</button>
+        </div>
+    </div>
+
+    <div id="modal-colaborar" class="kinu-popup">
+        <div class="popup-content" style="border-top: 8px solid var(--whatsapp);">
+            <h3 style="color:var(--verde); margin-bottom: 5px;">SOLICITAR RETIRO</h3>
+            <p style="font-size: 11px; color: #666; margin-bottom: 20px;">Organizaremos la recogida en tu domicilio.</p>
+            <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
+            <input type="tel" id="don-celular" class="form-input" placeholder="Teléfono celular">
+            <input type="text" id="don-direccion" class="form-input" placeholder="Dirección de recojo">
+            <select id="don-horario" class="form-input">
+                <option value="" disabled selected>Preferencia de horario</option>
+                <option value="Mañana (9:00 - 13:00)">Mañana (9:00 - 13:00)</option>
+                <option value="Tarde (14:00 - 18:00)">Tarde (14:00 - 18:00)</option>
+            </select>
+            <button id="btn-enviar-whatsapp" onclick="enviarColaboracionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
+                <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
+            </button>
+            <button onclick="cerrarPopups()" style="background:none; border:none; color:#999; margin-top:15px; font-weight:bold;">CANCELAR</button>
         </div>
     </div>
 
@@ -198,28 +212,30 @@
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
     function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); itemSeleccionado = null; }
 
-    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
-    function gisLoaded() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
-            scope: 'https://www.googleapis.com/auth/drive.file',
-            callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); }
-        });
-    }
-    function verificarSession() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }
-    
-    async function obtenerOCrearCarpeta() {
-        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const d = await r.json(); 
-        if (d.files.length) { 
-            folderId = d.files[0].id; 
-            const btn = document.getElementById('auth-btn');
-            btn.style.background = "var(--verde)";
-            btn.innerHTML = '<i class="ph ph-check-circle"></i> VINCULADO';
-            cargarFotos(); 
+    // --- LÓGICA DE RETIRO ---
+    function validarYAbrirRetiro() {
+        const prendasColab = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_')).length;
+        if (prendasColab < 10) {
+            document.getElementById('texto-minimo-colaborar').innerText = `Actualmente tienes ${prendasColab} artículos. ¡Faltan ${10 - prendasColab} más para coordinar tu retiro gratuito!`;
+            document.getElementById('popup-minimo-colaborar').style.display = 'flex';
+        } else {
+            document.getElementById('modal-colaborar').style.display = 'flex';
         }
     }
 
+    async function enviarColaboracionWhatsApp() {
+        const nombre = document.getElementById('don-nombre').value;
+        const celular = document.getElementById('don-celular').value;
+        const direccion = document.getElementById('don-direccion').value;
+        if(!nombre || !celular || !direccion) return alert("Completa los datos");
+        
+        const prendasColab = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_'));
+        const mensaje = `*SOLICITUD RETIRO KINU*%0A👤 ${nombre}%0A📍 ${direccion}%0A📦 Prendas: ${prendasColab.length}`;
+        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
+        cerrarPopups();
+    }
+
+    // --- DRIVE & GALERIA ---
     async function cargarFotos() {
         if(!folderId) return;
         const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
@@ -229,8 +245,6 @@
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
         const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
-        
-        // Mostrar botón de coordinar solo en sección colaborar
         document.getElementById('area-colaborar-control').style.display = (filtroActual === 'COLABORAR') ? 'block' : 'none';
 
         filtradas.forEach(f => {
@@ -240,38 +254,23 @@
             
             let pressTimer;
             const isColaborar = f.name.includes('_COLABORAR_');
-            const tiempo = isColaborar ? 1200 : 800; 
+            const tiempo = isColaborar ? 1200 : 800; // 0.8s colab, 1.2s delete
 
-            const start = () => {
+            card.onpointerdown = () => {
                 pressTimer = setTimeout(() => {
                     itemSeleccionado = f;
                     if(isColaborar) document.getElementById('popup-confirmar-eliminar').style.display = 'flex';
                     else document.getElementById('popup-confirmar-colaborar').style.display = 'flex';
                 }, tiempo);
             };
-
-            const stop = () => clearTimeout(pressTimer);
-            card.onpointerdown = start;
-            card.onpointerup = stop;
-            card.onpointerleave = stop;
-            card.onpointermove = (e) => { if(Math.abs(e.movementX) > 2 || Math.abs(e.movementY) > 2) stop(); };
+            card.onpointerup = () => clearTimeout(pressTimer);
+            card.onpointerleave = () => clearTimeout(pressTimer);
             gal.appendChild(card);
         });
     }
 
-    // Lógica de validación de 10 prendas
-    function validarRetiro() {
-        const prendasColab = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_')).length;
-        if (prendasColab < 10) {
-            const faltan = 10 - prendasColab;
-            document.getElementById('txt-minimo').innerText = `Te faltan ${faltan} prendas para poder coordinar un retiro. El servicio se activa con un mínimo de 10 artículos.`;
-            document.getElementById('popup-minimo').style.display = 'flex';
-        } else {
-            alert("Redirigiendo a coordinación de retiro..."); // Aquí iría tu lógica de WhatsApp o formulario
-        }
-    }
-
-    document.getElementById('btn-confirmar-colab').onclick = async () => {
+    // --- ACCIONES DRIVE ---
+    document.getElementById('btn-confirmar-mover').onclick = async () => {
         const partes = itemSeleccionado.name.split('_');
         partes[1] = 'COLABORAR';
         await fetch(`https://www.googleapis.com/drive/v3/files/${itemSeleccionado.id}`, {
@@ -290,29 +289,7 @@
         cerrarPopups(); cargarFotos();
     };
 
-    function cambiarTab(id, el, reset=false) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-        if(reset) filtroActual = 'TODO';
-        filtrarGaleria();
-    }
-    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', null); }
-    function manejarAccionDrive() { if(!accessToken) tokenClient.requestAccessToken(); }
-    function manejarBotonAgregar() { if(botonListo) subirPrendaFinal(); else document.getElementById('input-camara').click(); }
-
-    function abrirEditor(file) { 
-        if (!file) return; 
-        sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); 
-        document.getElementById('iframe-ia').src = 'photo_studio.html'; 
-        document.getElementById('modal-ia').style.display = 'flex'; 
-    }
-
-    window.cerrarIA = function() { 
-        document.getElementById('modal-ia').style.display = 'none'; 
-        const proc = sessionStorage.getItem('imagen_procesada'); 
-        if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } 
-    };
-
+    // --- SUBIDA ---
     async function subirPrendaFinal() {
         const cat = document.getElementById('main-cat').value;
         const nom = document.getElementById('sub-cat').value || "Prenda";
@@ -321,12 +298,32 @@
         form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
         form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
         await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-        botonListo = false; imagenProcesada = null;
+        
+        botonListo = false;
         document.getElementById('btn-final').classList.remove('ready');
         document.getElementById('btn-text').innerText = "AGREGAR PRENDA";
         document.getElementById('popup-exito').style.display = 'flex';
         cargarFotos();
     }
+
+    // --- NAVEGACIÓN BASICA ---
+    function cambiarTab(id, el, reset=false) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        if(reset) filtroActual = 'TODO';
+        filtrarGaleria();
+    }
+    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', null); }
+    function manejarBotonAgregar() { if(botonListo) subirPrendaFinal(); else document.getElementById('input-camara').click(); }
+    function abrirEditor(file) { if (!file) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
+    window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } };
+    
+    // --- INIT DRIVE ---
+    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
+    function gisLoaded() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com', scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); } }); }
+    function verificarSession() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }
+    async function obtenerOCrearCarpeta() { const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } }); const d = await r.json(); if (d.files.length) { folderId = d.files[0].id; document.getElementById('auth-btn').style.background = "var(--verde)"; document.getElementById('auth-btn').innerHTML = '<i class="ph ph-check-circle"></i> VINCULADO'; cargarFotos(); } }
+    function manejarAccionDrive() { if(!accessToken) tokenClient.requestAccessToken(); }
 </script>
 
 <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>

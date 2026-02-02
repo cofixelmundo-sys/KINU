@@ -129,7 +129,9 @@
 
             <div id="pantalla-closet" class="screen" style="display:none;">
                 <div id="area-colaborar-control" style="display: none; margin-bottom: 15px;">
-                    <button class="btn-accion ready">COORDINAR RETIRO</button>
+                    <button id="btn-coordinar" onclick="validarRetiro()" class="btn-accion ready">
+                        <i class="ph ph-truck"></i> COORDINAR RETIRO
+                    </button>
                 </div>
                 <div id="galeria-real" class="galeria-grid"></div>
             </div>
@@ -167,6 +169,15 @@
         </div>
     </div>
 
+    <div id="popup-minimo" class="kinu-popup">
+        <div class="popup-content">
+            <i class="ph ph-warning-circle" style="font-size:45px; color:var(--gris-suave);"></i>
+            <h3>MÍNIMO 10 PRENDAS</h3>
+            <p id="txt-minimo" style="font-size:13px; color:#666; margin: 15px 0;"></p>
+            <button onclick="cerrarPopups()" class="btn-accion ready">CONTINUAR LIMPIEZA</button>
+        </div>
+    </div>
+
     <div id="popup-exito" class="kinu-popup">
         <div class="popup-content">
             <i class="ph ph-check-circle" style="font-size:45px; color:var(--verde);"></i>
@@ -187,7 +198,6 @@
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
     function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); itemSeleccionado = null; }
 
-    // Drive Core
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({
@@ -219,7 +229,9 @@
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
         const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
-        document.getElementById('area-colaborar-control').style.display = (filtroActual === 'COLABORAR' && filtradas.length > 0) ? 'block' : 'none';
+        
+        // Mostrar botón de coordinar solo en sección colaborar
+        document.getElementById('area-colaborar-control').style.display = (filtroActual === 'COLABORAR') ? 'block' : 'none';
 
         filtradas.forEach(f => {
             const card = document.createElement('div'); 
@@ -228,7 +240,7 @@
             
             let pressTimer;
             const isColaborar = f.name.includes('_COLABORAR_');
-            const tiempo = isColaborar ? 1200 : 800; // 0.8s para colab, 1.2s para borrar
+            const tiempo = isColaborar ? 1200 : 800; 
 
             const start = () => {
                 pressTimer = setTimeout(() => {
@@ -239,17 +251,26 @@
             };
 
             const stop = () => clearTimeout(pressTimer);
-
             card.onpointerdown = start;
             card.onpointerup = stop;
             card.onpointerleave = stop;
             card.onpointermove = (e) => { if(Math.abs(e.movementX) > 2 || Math.abs(e.movementY) > 2) stop(); };
-            
             gal.appendChild(card);
         });
     }
 
-    // Handlers Drive
+    // Lógica de validación de 10 prendas
+    function validarRetiro() {
+        const prendasColab = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_')).length;
+        if (prendasColab < 10) {
+            const faltan = 10 - prendasColab;
+            document.getElementById('txt-minimo').innerText = `Te faltan ${faltan} prendas para poder coordinar un retiro. El servicio se activa con un mínimo de 10 artículos.`;
+            document.getElementById('popup-minimo').style.display = 'flex';
+        } else {
+            alert("Redirigiendo a coordinación de retiro..."); // Aquí iría tu lógica de WhatsApp o formulario
+        }
+    }
+
     document.getElementById('btn-confirmar-colab').onclick = async () => {
         const partes = itemSeleccionado.name.split('_');
         partes[1] = 'COLABORAR';
@@ -299,13 +320,7 @@
         const form = new FormData();
         form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
         form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
-        
-        await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { 
-            method: 'POST', 
-            headers: { Authorization: `Bearer ${accessToken}` }, 
-            body: form 
-        });
-
+        await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
         botonListo = false; imagenProcesada = null;
         document.getElementById('btn-final').classList.remove('ready');
         document.getElementById('btn-text').innerText = "AGREGAR PRENDA";

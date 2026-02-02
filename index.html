@@ -129,7 +129,7 @@
 
             <div id="pantalla-closet" class="screen" style="display:none;">
                 <div id="area-colaborar-control" style="display: none; margin-bottom: 15px;">
-                    <button class="btn-accion" style="background: var(--verde);">COORDINAR RETIRO</button>
+                    <button class="btn-accion ready">COORDINAR RETIRO</button>
                 </div>
                 <div id="galeria-real" class="galeria-grid"></div>
             </div>
@@ -159,7 +159,7 @@
     <div id="popup-confirmar-eliminar" class="kinu-popup">
         <div class="popup-content">
             <i class="ph ph-trash" style="font-size:45px; color:var(--rojo);"></i>
-            <h3>¿Eliminar esta prenda?</h3>
+            <h3>¿Eliminar definitivamente?</h3>
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button>
                 <button id="btn-confirmar-del" class="btn-accion" style="background:var(--rojo);">SÍ, ELIMINAR</button>
@@ -170,7 +170,7 @@
     <div id="popup-exito" class="kinu-popup">
         <div class="popup-content">
             <i class="ph ph-check-circle" style="font-size:45px; color:var(--verde);"></i>
-            <h3 id="exito-mensaje">Prenda agregada con éxito</h3>
+            <h3>¡Prenda agregada con éxito!</h3>
             <button onclick="cerrarPopups()" class="btn-accion ready" style="margin-top:20px;">Aceptar</button>
         </div>
     </div>
@@ -185,12 +185,9 @@
     let imagenProcesada = null, botonListo = false, itemSeleccionado = null;
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
-    function cerrarPopups() { 
-        document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); 
-        itemSeleccionado = null; 
-    }
+    function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); itemSeleccionado = null; }
 
-    // Drive & Auth
+    // Drive Core
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
     function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({
@@ -222,7 +219,8 @@
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
         const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
-        
+        document.getElementById('area-colaborar-control').style.display = (filtroActual === 'COLABORAR' && filtradas.length > 0) ? 'block' : 'none';
+
         filtradas.forEach(f => {
             const card = document.createElement('div'); 
             card.className = 'prenda-card';
@@ -230,17 +228,14 @@
             
             let pressTimer;
             const isColaborar = f.name.includes('_COLABORAR_');
-            const tiempoNecesario = isColaborar ? 2000 : 1500; // 2s para borrar en colab, 1.5s para mover
+            const tiempo = isColaborar ? 1200 : 800; // 0.8s para colab, 1.2s para borrar
 
             const start = () => {
                 pressTimer = setTimeout(() => {
                     itemSeleccionado = f;
-                    if(isColaborar) {
-                        document.getElementById('popup-confirmar-eliminar').style.display = 'flex';
-                    } else {
-                        document.getElementById('popup-confirmar-colaborar').style.display = 'flex';
-                    }
-                }, tiempoNecesario);
+                    if(isColaborar) document.getElementById('popup-confirmar-eliminar').style.display = 'flex';
+                    else document.getElementById('popup-confirmar-colaborar').style.display = 'flex';
+                }, tiempo);
             };
 
             const stop = () => clearTimeout(pressTimer);
@@ -248,11 +243,13 @@
             card.onpointerdown = start;
             card.onpointerup = stop;
             card.onpointerleave = stop;
+            card.onpointermove = (e) => { if(Math.abs(e.movementX) > 2 || Math.abs(e.movementY) > 2) stop(); };
+            
             gal.appendChild(card);
         });
     }
 
-    // Acciones de Archivo
+    // Handlers Drive
     document.getElementById('btn-confirmar-colab').onclick = async () => {
         const partes = itemSeleccionado.name.split('_');
         partes[1] = 'COLABORAR';
@@ -261,8 +258,7 @@
             headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: partes.join('_') })
         });
-        cerrarPopups();
-        cargarFotos();
+        cerrarPopups(); cargarFotos();
     };
 
     document.getElementById('btn-confirmar-del').onclick = async () => {
@@ -270,8 +266,7 @@
             method: 'DELETE',
             headers: { Authorization: `Bearer ${accessToken}` }
         });
-        cerrarPopups();
-        cargarFotos();
+        cerrarPopups(); cargarFotos();
     };
 
     function cambiarTab(id, el, reset=false) {
@@ -294,12 +289,7 @@
     window.cerrarIA = function() { 
         document.getElementById('modal-ia').style.display = 'none'; 
         const proc = sessionStorage.getItem('imagen_procesada'); 
-        if (proc) { 
-            imagenProcesada = proc; 
-            botonListo = true; 
-            document.getElementById('btn-final').classList.add('ready'); 
-            document.getElementById('btn-text').innerText = "SUBIR AHORA"; 
-        } 
+        if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } 
     };
 
     async function subirPrendaFinal() {
@@ -316,12 +306,9 @@
             body: form 
         });
 
-        // Reset y Notificación
-        botonListo = false; 
-        imagenProcesada = null;
+        botonListo = false; imagenProcesada = null;
         document.getElementById('btn-final').classList.remove('ready');
         document.getElementById('btn-text').innerText = "AGREGAR PRENDA";
-        document.getElementById('exito-mensaje').innerText = "Prenda agregada con éxito";
         document.getElementById('popup-exito').style.display = 'flex';
         cargarFotos();
     }

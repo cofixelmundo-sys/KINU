@@ -30,8 +30,6 @@
             box-sizing: border-box; 
             transition: all 0.2s ease; 
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none !important;
-            -webkit-user-select: none !important;
             user-select: none !important;
         }
         
@@ -55,26 +53,21 @@
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
 
-        /* CATEGORIAS SUPERIORES */
+        /* CATEGORIAS */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; cursor: pointer; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; }
         .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
         .cat-circle i { font-size: 28px; color: var(--gris-suave); }
         .cat-label { font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--gris-suave); }
 
         /* VIDRIERA */
-        .vidriera-container { margin: 15px 0; background: #eee; border-radius: 20px; padding: 10px; }
-        .carousel { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-        .carousel-item { min-width: 100px; height: 120px; background: white; border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; }
+        .vidriera-container { margin: 10px 0; background: #f0f0f0; border-radius: 20px; padding: 15px; }
+        .vidriera-info { font-size: 10px; font-weight: 800; color: var(--verde); margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .carousel { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .carousel-item { min-width: 110px; height: 130px; background: white; border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; }
         .carousel-item img { width: 85%; height: 85%; object-fit: contain; }
 
-        /* GRID CLOSET */
-        .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
-        .prenda-card { background: white; border-radius: 18px; height: 180px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transform-origin: center; }
-        .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; pointer-events: none; }
-        .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; text-transform: uppercase; font-weight: bold; }
-
-        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; -webkit-user-select: text !important; user-select: text !important; }
+        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; }
 
         .btn-accion { background: #E0E0E0; color: #999; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-accion.ready { background: var(--verde); color: white; }
@@ -84,7 +77,7 @@
         .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
 <div class="main-container">
     <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
@@ -103,12 +96,6 @@
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                     <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
                     <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
-                    <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
-                    <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
-                    <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
-                    <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
-                    <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
-                    <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
                     <div class="cat-item" onclick="irACategoria('COLABORAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Colaborar</span></div>
                 </div>
 
@@ -117,18 +104,16 @@
                         <option value="SUPERIOR">Superior</option>
                         <option value="INFERIOR">Inferior</option>
                         <option value="ABRIGOS">Abrigo</option>
-                        <option value="ENTERIZOS">Enterizos</option>
-                        <option value="CALZADO">Calzado</option>
-                        <option value="ACCESORIOS">Accesorios</option>
-                        <option value="VINTAGE">Vintage</option>
-                        <option value="DEPORTE">Deporte</option>
-                        <option value="DORMIR">Dormir</option>
                         <option value="COLABORAR">Colaborar</option>
                     </select>
                     <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
                 </div>
 
                 <div id="vidriera-clima" class="vidriera-container" style="display: none;">
+                    <div class="vidriera-info">
+                        <span id="clima-txt">RECOMENDADO PARA HOY</span>
+                        <span id="clima-temp">22°C</span>
+                    </div>
                     <div id="carousel-items" class="carousel"></div>
                 </div>
 
@@ -143,7 +128,7 @@
                         <i class="ph ph-truck"></i> COORDINAR RETIRO
                     </button>
                 </div>
-                <div id="galeria-real" class="galeria-grid"></div>
+                <div id="galeria-real" class="galeria-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"></div>
             </div>
         </div>
 
@@ -159,19 +144,18 @@
 
     <div id="popup-advertencia-foto" class="kinu-popup">
         <div class="popup-content">
-            <i class="ph ph-camera-slash" style="font-size:45px; color:var(--gris-suave);"></i>
+            <i class="ph ph-camera-slash" style="font-size:45px;"></i>
             <h3>FALTA LA FOTO</h3>
-            <p style="font-size:13px; color:#666; margin: 15px 0;">Captura la prenda primero con la cámara.</p>
-            <button onclick="cerrarPopups()" class="btn-accion ready">ENTENDIDO</button>
+            <button onclick="cerrarPopups()" class="btn-accion ready">OK</button>
         </div>
     </div>
 
-    <div id="popup-minimo" class="kinu-popup">
+    <div id="modal-colaborar" class="kinu-popup">
         <div class="popup-content">
-            <i class="ph ph-warning-circle" style="font-size:45px; color:var(--gris-suave);"></i>
-            <h3>MÍNIMO 10 PRENDAS</h3>
-            <p id="txt-minimo" style="font-size:13px; color:#666; margin:15px 0;"></p>
-            <button onclick="cerrarPopups()" class="btn-accion ready">OK</button>
+            <h3>COORDINAR RETIRO</h3>
+            <input type="text" id="don-nombre" class="form-input" placeholder="Tu nombre">
+            <button onclick="enviarWhatsApp()" class="btn-accion ready" style="background:var(--whatsapp);">WHATSAPP</button>
+            <button onclick="cerrarPopups()" style="background:none; border:none; margin-top:10px;">CERRAR</button>
         </div>
     </div>
 
@@ -202,20 +186,38 @@
     }
 
     function actualizarVidriera() {
-        const vidriera = document.getElementById('vidriera-clima');
         const carousel = document.getElementById('carousel-items');
-        const prendasCloset = todasLasPrendas.filter(p => !p.name.includes('_COLABORAR_'));
+        const temp = 22; // Simulación clima
+        document.getElementById('clima-temp').innerText = `${temp}°C`;
 
-        if (prendasCloset.length > 0) {
-            vidriera.style.display = 'block';
+        // Filtrar según clima: si temp < 20 Abrigos, si no Superior
+        const recomendadas = todasLasPrendas.filter(p => {
+            const esColab = p.name.includes('_COLABORAR_');
+            if(esColab) return false;
+            return temp < 20 ? p.name.includes('_ABRIGOS_') : p.name.includes('_SUPERIOR_');
+        });
+
+        if (recomendadas.length > 0) {
+            document.getElementById('vidriera-clima').style.display = 'block';
             carousel.innerHTML = '';
-            prendasCloset.forEach(p => {
+            recomendadas.forEach(p => {
                 const item = document.createElement('div');
                 item.className = 'carousel-item';
                 item.innerHTML = `<img src="${p.thumbnailLink.replace('=s220', '=s600')}">`;
                 carousel.appendChild(item);
             });
+        } else {
+            document.getElementById('vidriera-clima').style.display = 'none';
         }
+    }
+
+    function validarYAbrirRetiro() {
+        document.getElementById('modal-colaborar').style.display = 'flex';
+    }
+
+    function enviarWhatsApp() {
+        const n = document.getElementById('don-nombre').value;
+        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=Solicitud Retiro: ${n}`);
     }
 
     function filtrarGaleria() {
@@ -226,29 +228,17 @@
         filtradas.forEach(f => {
             const card = document.createElement('div'); 
             card.className = 'prenda-card';
-            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
+            card.style.cssText = "background:white; border-radius:18px; height:180px; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;";
+            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" style="width:85%; height:85%; object-fit:contain;"><div class="tag-sub" style="position:absolute; bottom:0; width:100%; background:var(--verde); color:white; font-size:9px; padding:5px; text-align:center;">${f.name.split('_')[2]}</div>`;
             
-            let pressTimer;
+            let timer;
             card.addEventListener('touchstart', () => {
-                card.style.transform = "scale(0.94)";
-                pressTimer = setTimeout(() => {
-                    itemSeleccionado = f;
-                    // Abrir popup según corresponda...
-                }, 800);
+                card.style.transform = "scale(0.95)";
+                timer = setTimeout(() => { alert("Opción eliminar/colaborar proximamente"); }, 800);
             });
-            card.addEventListener('touchend', () => { clearTimeout(pressTimer); card.style.transform = "scale(1)"; });
+            card.addEventListener('touchend', () => { clearTimeout(timer); card.style.transform = "scale(1)"; });
             gal.appendChild(card);
         });
-    }
-
-    function validarYAbrirRetiro() {
-        const count = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_')).length;
-        if (count < 10) {
-            document.getElementById('txt-minimo').innerText = `Llevas ${count} prendas. Necesitas al menos 10.`;
-            document.getElementById('popup-minimo').style.display = 'flex';
-        } else {
-            // Abrir modal de WhatsApp...
-        }
     }
 
     function cambiarTab(id, reset=false) {
@@ -258,19 +248,35 @@
         filtrarGaleria();
     }
 
-    function irACategoria(cat) { 
-        filtroActual = cat; 
-        cambiarTab('pantalla-closet'); 
-    }
+    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet'); }
 
     function abrirEditor(file) { if(!file) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
     window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if(proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); } };
 
-    // Lógica Drive...
+    async function subirPrendaFinal() {
+        const cat = document.getElementById('main-cat').value;
+        const nom = document.getElementById('sub-cat').value || "Prenda";
+        const meta = { name: `KINU_${cat}_${nom}_${Date.now()}.png`, parents: [folderId] };
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+        form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
+        await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
+        botonListo = false; document.getElementById('btn-final').classList.remove('ready'); cargarFotos();
+    }
+
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
     function gisLoaded() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com', scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); } }); }
     function verificarSession() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }
-    async function obtenerOCrearCarpeta() { const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } }); const d = await r.json(); if (d.files.length) { folderId = d.files[0].id; cargarFotos(); } }
+    async function obtenerOCrearCarpeta() { 
+        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } }); 
+        const d = await r.json(); 
+        if (d.files.length) { 
+            folderId = d.files[0].id; 
+            document.getElementById('auth-btn').innerText = "VINCULADO";
+            document.getElementById('auth-btn').style.background = "var(--verde)";
+            cargarFotos(); 
+        } 
+    }
     function manejarAccionDrive() { if(!accessToken) tokenClient.requestAccessToken(); }
 </script>
 

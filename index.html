@@ -52,9 +52,8 @@
         header { padding: env(safe-area-inset-top) 20px 10px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .logo-header { width: 40px; margin-bottom: 5px; }
 
-        /* NAV MÁS ANGOSTA */
         nav { 
-            height: calc(55px + env(safe-area-inset-bottom)); /* Altura reducida */
+            height: calc(55px + env(safe-area-inset-bottom)); 
             background: white; border-top: 1px solid #eee; 
             display: flex; justify-content: space-around; align-items: center; 
             padding-bottom: env(safe-area-inset-bottom); z-index: 100; 
@@ -78,8 +77,6 @@
 
         .btn-accion { background: #E0E0E0; color: #999; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-accion.ready { background: var(--verde); color: white; }
-        
-        /* CÁMARA AJUSTADA PARA BARRA ANGOSTA */
         .nav-camera { width: 56px; height: 56px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -30px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
         .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
@@ -179,36 +176,61 @@
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
     let imagenProcesada = null, botonListo = false, itemSeleccionado = null;
 
-    window.onload = () => {
-        const t = localStorage.getItem('kinu_token');
-        if(t) {
-            accessToken = t;
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'flex';
-            gapi.load('client', () => {
-                gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(() => {
+    // --- CARGA DE LIBRERÍAS Y AUTO-LOGIN ---
+    function gapiLoaded() {
+        gapi.load('client', () => {
+            gapi.client.init({
+                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+            }).then(() => {
+                const t = localStorage.getItem('kinu_token');
+                if(t) {
+                    accessToken = t;
                     gapi.client.setToken({access_token: t});
+                    document.getElementById('auth-screen').style.display = 'none';
+                    document.getElementById('main-app').style.display = 'flex';
                     obtenerOCrearCarpeta();
-                });
+                }
             });
-        }
-    };
-
-    function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
-    function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); itemSeleccionado = null; }
-
-    function manejarBotonAgregar() {
-        if(botonListo) subirPrendaFinal();
-        else document.getElementById('popup-advertencia-foto').style.display = 'flex';
+        });
     }
+
+    function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
+            scope: 'https://www.googleapis.com/auth/drive.file',
+            callback: (resp) => {
+                if (resp.error) return;
+                accessToken = resp.access_token;
+                localStorage.setItem('kinu_token', accessToken);
+                obtenerOCrearCarpeta();
+            }
+        });
+    }
+
+    function manejarAccionDrive() {
+        if(tokenClient) {
+            tokenClient.requestAccessToken();
+        } else {
+            alert("Cargando servicios de Google... intenta en un segundo.");
+        }
+    }
+
+    function entrarApp() { 
+        document.getElementById('auth-screen').style.display = 'none'; 
+        document.getElementById('main-app').style.display = 'flex'; 
+    }
+
+    function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); itemSeleccionado = null; }
 
     async function cargarFotos() {
         if(!folderId) return;
-        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const d = await r.json(); 
-        todasLasPrendas = d.files || []; 
-        filtrarGaleria();
-        actualizarVidriera();
+        try {
+            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
+            const d = await r.json(); 
+            todasLasPrendas = d.files || []; 
+            filtrarGaleria();
+            actualizarVidriera();
+        } catch(e) { console.error("Error cargando fotos", e); }
     }
 
     function actualizarVidriera() {
@@ -263,12 +285,6 @@
         cerrarPopups(); cargarFotos();
     }
 
-    function validarYAbrirRetiro() { document.getElementById('modal-colaborar').style.display = 'flex'; }
-    function enviarWhatsApp() {
-        const n = document.getElementById('don-nombre').value;
-        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=Solicitud Retiro: ${n}`);
-    }
-
     function cambiarTab(id, reset=false) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
@@ -291,18 +307,26 @@
         botonListo = false; document.getElementById('btn-final').classList.remove('ready'); cargarFotos();
     }
 
-    function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] })); }
-    function gisLoaded() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com', scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); } }); }
     async function obtenerOCrearCarpeta() { 
-        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } }); 
+        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } }); 
         const d = await r.json(); 
-        if (d.files.length) { 
+        if (d.files && d.files.length) { 
             folderId = d.files[0].id; 
             document.getElementById('auth-btn').innerText = "VINCULADO"; document.getElementById('auth-btn').style.background = "var(--verde)";
             cargarFotos(); 
         } 
     }
-    function manejarAccionDrive() { if(!accessToken) tokenClient.requestAccessToken(); }
+
+    function validarYAbrirRetiro() { document.getElementById('modal-colaborar').style.display = 'flex'; }
+    function enviarWhatsApp() {
+        const n = document.getElementById('don-nombre').value;
+        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=Solicitud Retiro: ${n}`);
+    }
+
+    function manejarBotonAgregar() {
+        if(botonListo) subirPrendaFinal();
+        else document.getElementById('popup-advertencia-foto').style.display = 'flex';
+    }
 </script>
 
 <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>

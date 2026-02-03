@@ -31,7 +31,6 @@
             transition: all 0.2s ease; 
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none !important;
-            -webkit-user-select: none !important;
             user-select: none !important;
         }
         
@@ -55,7 +54,7 @@
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
 
-        /* CATEGORIAS ORIGINALES */
+        /* CATEGORIAS */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; cursor: pointer; }
         .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
@@ -63,7 +62,8 @@
         .cat-label { font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--gris-suave); }
 
         /* VIDRIERA */
-        .vidriera-container { margin: 10px 0; background: #EBEAE8; border-radius: 20px; padding: 12px; }
+        .vidriera-container { margin: 10px 0; background: #EBEAE8; border-radius: 20px; padding: 15px; }
+        .vidriera-header { font-size: 10px; font-weight: 800; color: var(--verde); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .carousel { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
         .carousel-item { min-width: 100px; height: 120px; background: white; border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; }
         .carousel-item img { width: 85%; height: 85%; object-fit: contain; }
@@ -123,6 +123,7 @@
                 </div>
 
                 <div id="vidriera-clima" class="vidriera-container" style="display: none;">
+                    <div id="clima-txt-dinamico" class="vidriera-header"></div>
                     <div id="carousel-items" class="carousel"></div>
                 </div>
 
@@ -137,7 +138,7 @@
                         <i class="ph ph-truck"></i> COORDINAR RETIRO
                     </button>
                 </div>
-                <div id="galeria-real" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"></div>
+                <div id="galeria-real" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px;"></div>
             </div>
         </div>
 
@@ -151,30 +152,21 @@
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
 
-    <div id="popup-advertencia-foto" class="kinu-popup">
-        <div class="popup-content">
-            <i class="ph ph-camera-slash" style="font-size:45px; color:var(--gris-suave);"></i>
-            <h3>FALTA LA FOTO</h3>
-            <p style="font-size:13px; color:#666; margin: 15px 0;">Para agregar una prenda primero debes capturar su imagen con la cámara.</p>
-            <button onclick="cerrarPopups()" class="btn-accion ready">ENTENDIDO</button>
-        </div>
-    </div>
+    <div id="popup-advertencia-foto" class="kinu-popup"><div class="popup-content"><i class="ph ph-camera-slash" style="font-size:45px; color:var(--gris-suave);"></i><h3>FALTA LA FOTO</h3><p style="font-size:13px; color:#666; margin: 15px 0;">Captura la imagen con la cámara primero.</p><button onclick="cerrarPopups()" class="btn-accion ready">ENTENDIDO</button></div></div>
+
+    <div id="popup-confirmar-colaborar" class="kinu-popup"><div class="popup-content"><i class="ph ph-hand-heart" style="font-size:45px; color:var(--verde);"></i><h3>¿COLABORAR CON ESTA PRENDA?</h3><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button><button onclick="confirmarEnviarAColaborar()" class="btn-accion ready">SÍ, COLABORAR</button></div></div></div>
+
+    <div id="popup-confirmar-eliminar" class="kinu-popup"><div class="popup-content"><i class="ph ph-trash" style="font-size:45px; color:var(--rojo);"></i><h3>¿ELIMINAR DEFINITIVAMENTE?</h3><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button><button onclick="confirmarEliminar()" class="btn-accion ready" style="background:var(--rojo);">SÍ, ELIMINAR</button></div></div></div>
 
     <div id="modal-colaborar" class="kinu-popup">
         <div class="popup-content" style="border-top: 8px solid var(--whatsapp);">
-            <h3 style="color:var(--verde); margin-bottom: 5px;">SOLICITAR RETIRO</h3>
+            <h3 style="color:var(--verde);">SOLICITAR RETIRO</h3>
             <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
-            <input type="tel" id="don-celular" class="form-input" placeholder="Teléfono celular">
-            <input type="text" id="don-direccion" class="form-input" placeholder="Dirección de recojo">
-            <select id="don-horario" class="form-input">
-                <option value="" disabled selected>Preferencia de horario</option>
-                <option value="Mañana (9:00 - 13:00)">Mañana (9:00 - 13:00)</option>
-                <option value="Tarde (14:00 - 18:00)">Tarde (14:00 - 18:00)</option>
-            </select>
-            <button onclick="enviarWhatsApp()" class="btn-accion ready" style="background: var(--whatsapp);">
-                <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
-            </button>
-            <button onclick="cerrarPopups()" style="background:none; border:none; color:#999; margin-top:15px; font-weight:bold; cursor:pointer;">CANCELAR</button>
+            <input type="tel" id="don-celular" class="form-input" placeholder="Celular">
+            <input type="text" id="don-direccion" class="form-input" placeholder="Dirección">
+            <select id="don-horario" class="form-input"><option value="Mañana">Mañana (9:00 - 13:00)</option><option value="Tarde">Tarde (14:00 - 18:00)</option></select>
+            <button onclick="enviarWhatsApp()" class="btn-accion ready" style="background: var(--whatsapp);">ENVIAR SOLICITUD</button>
+            <button onclick="cerrarPopups()" style="background:none; border:none; color:#999; margin-top:10px;">CANCELAR</button>
         </div>
     </div>
 
@@ -185,10 +177,10 @@
 
 <script>
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
-    let imagenProcesada = null, botonListo = false;
+    let imagenProcesada = null, botonListo = false, itemSeleccionado = null;
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
-    function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); }
+    function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); itemSeleccionado = null; }
 
     function manejarBotonAgregar() {
         if(botonListo) subirPrendaFinal();
@@ -206,7 +198,10 @@
 
     function actualizarVidriera() {
         const carousel = document.getElementById('carousel-items');
-        const temp = 22; // Montevideo Feb suele ser > 20
+        const txtLabel = document.getElementById('clima-txt-dinamico');
+        const temp = 24; // Temperatura dinámica
+        txtLabel.innerText = `CON ${temp}° TE RECOMIENDO ESTAS PRENDAS:`;
+
         const recomendadas = todasLasPrendas.filter(p => {
             if(p.name.includes('_COLABORAR_')) return false;
             return temp < 20 ? p.name.includes('_ABRIGOS_') : p.name.includes('_SUPERIOR_');
@@ -224,18 +219,6 @@
         } else { document.getElementById('vidriera-clima').style.display = 'none'; }
     }
 
-    function validarYAbrirRetiro() { document.getElementById('modal-colaborar').style.display = 'flex'; }
-
-    function enviarWhatsApp() {
-        const n = document.getElementById('don-nombre').value;
-        const c = document.getElementById('don-celular').value;
-        const d = document.getElementById('don-direccion').value;
-        const h = document.getElementById('don-horario').value;
-        if(!n || !c || !d) return alert("Por favor completa los datos");
-        const msg = `SOLICITUD RETIRO KINU%0A%0ANombre: ${n}%0ACelular: ${c}%0ADirección: ${d}%0AHorario: ${h}`;
-        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${msg}`);
-    }
-
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
         const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
@@ -245,8 +228,39 @@
             const card = document.createElement('div');
             card.style.cssText = "background:white; border-radius:18px; height:180px; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);";
             card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" style="width:90%; height:90%; object-fit:contain; padding-bottom:30px;"><div style="position:absolute; bottom:0; width:100%; background:var(--verde); color:white; font-size:9px; padding:8px; text-align:center; font-weight:bold;">${f.name.split('_')[2]}</div>`;
+            
+            let pressTimer;
+            const isColab = f.name.includes('_COLABORAR_');
+            card.addEventListener('touchstart', () => {
+                card.style.transform = "scale(0.94)";
+                pressTimer = setTimeout(() => {
+                    itemSeleccionado = f;
+                    document.getElementById(isColab ? 'popup-confirmar-eliminar' : 'popup-confirmar-colaborar').style.display = 'flex';
+                }, 800);
+            });
+            card.addEventListener('touchend', () => { clearTimeout(pressTimer); card.style.transform = "scale(1)"; });
             gal.appendChild(card);
         });
+    }
+
+    async function confirmarEnviarAColaborar() {
+        const partes = itemSeleccionado.name.split('_');
+        partes[1] = 'COLABORAR';
+        const nuevoNombre = partes.join('_');
+        await fetch(`https://www.googleapis.com/drive/v3/files/${itemSeleccionado.id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: nuevoNombre }) });
+        cerrarPopups(); cargarFotos();
+    }
+
+    async function confirmarEliminar() {
+        await fetch(`https://www.googleapis.com/drive/v3/files/${itemSeleccionado.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } });
+        cerrarPopups(); cargarFotos();
+    }
+
+    function validarYAbrirRetiro() { document.getElementById('modal-colaborar').style.display = 'flex'; }
+    function enviarWhatsApp() {
+        const n = document.getElementById('don-nombre').value;
+        const msg = `SOLICITUD RETIRO KINU - Nombre: ${n}`;
+        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${encodeURIComponent(msg)}`);
     }
 
     function cambiarTab(id, reset=false) {
@@ -279,8 +293,7 @@
         const d = await r.json(); 
         if (d.files.length) { 
             folderId = d.files[0].id; 
-            const btn = document.getElementById('auth-btn');
-            btn.innerText = "VINCULADO"; btn.style.background = "var(--verde)";
+            document.getElementById('auth-btn').innerText = "VINCULADO"; document.getElementById('auth-btn').style.background = "var(--verde)";
             cargarFotos(); 
         } 
     }

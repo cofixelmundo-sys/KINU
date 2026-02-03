@@ -26,7 +26,7 @@
             --rojo: #C0392B;
         }
 
-        /* BLOQUEO DE SELECCIÓN Y MENÚS NATIVOS */
+        /* BLOQUEO SELECCIÓN */
         * { 
             box-sizing: border-box; 
             transition: all 0.2s ease; 
@@ -51,43 +51,34 @@
             height: calc(85px + env(safe-area-inset-bottom)); 
             background: white; border-top: 1px solid #eee; 
             display: flex; justify-content: space-around; align-items: center; 
-            padding-bottom: env(safe-area-inset-bottom); z-index: 100; position: relative; 
+            padding-bottom: env(safe-area-inset-bottom); z-index: 100; 
         }
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
 
+        /* VIDRIERA */
+        .vidriera-container { margin-bottom: 20px; background: white; border-radius: 25px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .vidriera-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .vidriera-header span { font-size: 10px; font-weight: 800; color: var(--verde); text-transform: uppercase; }
+        
+        .carousel { display: flex; gap: 15px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 5px 0; -webkit-overflow-scrolling: touch; }
+        .carousel-item { min-width: 120px; height: 150px; background: #f9f9f9; border-radius: 15px; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; border: 1px solid #f0f0f0; }
+        .carousel-item img { width: 85%; height: 85%; object-fit: contain; }
+
+        /* GRID CLOSET */
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
-        .prenda-card { 
-            background: white; border-radius: 18px; height: 180px; position: relative; 
-            display: flex; align-items: center; justify-content: center; overflow: hidden; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transform-origin: center;
-        }
+        .prenda-card { background: white; border-radius: 18px; height: 180px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transform-origin: center; }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; pointer-events: none; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; text-transform: uppercase; font-weight: bold; }
 
-        .kinu-popup { 
-            display: none; position: fixed; inset: 0; 
-            background: rgba(0,0,0,0.7); z-index: 9999; 
-            align-items: center; justify-content: center; padding: 20px; 
-            backdrop-filter: blur(5px);
-        }
-        .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; }
-        
-        .form-input { 
-            width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; 
-            -webkit-user-select: text !important; user-select: text !important;
-        }
+        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; -webkit-user-select: text !important; user-select: text !important; }
 
         .btn-accion { background: #E0E0E0; color: #999; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-accion.ready { background: var(--verde); color: white; }
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; cursor: pointer; }
-        .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
-        .cat-circle i { font-size: 28px; color: var(--gris-suave); }
-        .cat-label { font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--gris-suave); }
+        .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
+        .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -105,17 +96,12 @@
             <div id="pantalla-home" class="screen">
                 <button id="auth-btn" onclick="manejarAccionDrive()" class="btn-accion" style="background:var(--google-blue); color:white; margin-bottom:15px;">VINCULAR DRIVE</button>
                 
-                <div class="filter-scroll">
-                    <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
-                    <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
-                    <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
-                    <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
-                    <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
-                    <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
-                    <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
-                    <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
-                    <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
-                    <div class="cat-item" onclick="irACategoria('COLABORAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Colaborar</span></div>
+                <div id="vidriera-clima" class="vidriera-container" style="display: none;">
+                    <div class="vidriera-header">
+                        <span id="clima-texto">HOY ESTÁ PARA...</span>
+                        <span id="clima-temp">--°C</span>
+                    </div>
+                    <div id="carousel-items" class="carousel"></div>
                 </div>
 
                 <div style="background:white; padding:15px; border-radius:20px;">
@@ -147,11 +133,11 @@
         </div>
 
         <nav>
-            <div class="nav-item" onclick="cambiarTab('pantalla-home', this)"><i class="ph ph-house" style="font-size:24px;"></i></div>
-            <div class="nav-item" onclick="document.getElementById('input-camara').click()">
+            <div onclick="cambiarTab('pantalla-home')"><i class="ph ph-house" style="font-size:24px;"></i></div>
+            <div onclick="document.getElementById('input-camara').click()">
                 <div class="nav-camera"><i class="ph ph-camera" style="color:white; font-size:26px;"></i></div>
             </div>
-            <div class="nav-item" onclick="cambiarTab('pantalla-closet', this, true)"><i class="ph ph-archive" style="font-size:24px;"></i></div>
+            <div onclick="cambiarTab('pantalla-closet', true)"><i class="ph ph-archive" style="font-size:24px;"></i></div>
         </nav>
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
@@ -160,8 +146,29 @@
         <div class="popup-content">
             <i class="ph ph-camera-slash" style="font-size:45px; color:var(--gris-suave);"></i>
             <h3>FALTA LA FOTO</h3>
-            <p style="font-size:13px; color:#666; margin: 15px 0;">Para agregar una prenda primero debes capturar su imagen con la cámara.</p>
+            <p style="font-size:13px; color:#666; margin: 15px 0;">Captura la prenda primero con la cámara.</p>
             <button onclick="cerrarPopups()" class="btn-accion ready">ENTENDIDO</button>
+        </div>
+    </div>
+
+    <div id="popup-minimo" class="kinu-popup">
+        <div class="popup-content">
+            <i class="ph ph-warning-circle" style="font-size:45px; color:var(--gris-suave);"></i>
+            <h3>MÍNIMO 10 PRENDAS</h3>
+            <p id="txt-minimo" style="font-size:13px; color:#666; margin:15px 0;"></p>
+            <button onclick="cerrarPopups()" class="btn-accion ready">OK</button>
+        </div>
+    </div>
+
+    <div id="modal-colaborar" class="kinu-popup">
+        <div class="popup-content">
+            <h3>SOLICITAR RETIRO</h3>
+            <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
+            <input type="tel" id="don-celular" class="form-input" placeholder="Celular">
+            <input type="text" id="don-direccion" class="form-input" placeholder="Dirección">
+            <select id="don-horario" class="form-input"><option value="Mañana">Mañana</option><option value="Tarde">Tarde</option></select>
+            <button onclick="enviarColaboracionWhatsApp()" class="btn-accion ready" style="background:var(--whatsapp);">ENVIAR WHATSAPP</button>
+            <button onclick="cerrarPopups()" style="background:none; border:none; color:#999; margin-top:10px;">CANCELAR</button>
         </div>
     </div>
 
@@ -171,7 +178,7 @@
             <h3>¿Colaborar con esta prenda?</h3>
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button>
-                <button id="btn-confirmar-colab" class="btn-accion ready">SÍ, COLABORAR</button>
+                <button id="btn-confirmar-colab" class="btn-accion ready">SÍ</button>
             </div>
         </div>
     </div>
@@ -179,37 +186,11 @@
     <div id="popup-confirmar-eliminar" class="kinu-popup">
         <div class="popup-content">
             <i class="ph ph-trash" style="font-size:45px; color:var(--rojo);"></i>
-            <h3>¿Eliminar definitivamente?</h3>
+            <h3>¿Eliminar de la lista?</h3>
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button>
-                <button id="btn-confirmar-del" class="btn-accion ready" style="background:var(--rojo);">SÍ, ELIMINAR</button>
+                <button id="btn-confirmar-del" class="btn-accion ready" style="background:var(--rojo);">ELIMINAR</button>
             </div>
-        </div>
-    </div>
-
-    <div id="modal-colaborar" class="kinu-popup">
-        <div class="popup-content" style="border-top: 8px solid var(--whatsapp);">
-            <h3 style="color:var(--verde); margin-bottom: 5px;">SOLICITAR RETIRO</h3>
-            <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
-            <input type="tel" id="don-celular" class="form-input" placeholder="Teléfono celular">
-            <input type="text" id="don-direccion" class="form-input" placeholder="Dirección de recojo">
-            <select id="don-horario" class="form-input">
-                <option value="" disabled selected>Preferencia de horario</option>
-                <option value="Mañana (9:00 - 13:00)">Mañana (9:00 - 13:00)</option>
-                <option value="Tarde (14:00 - 18:00)">Tarde (14:00 - 18:00)</option>
-            </select>
-            <button onclick="enviarColaboracionWhatsApp()" class="btn-accion ready" style="background: var(--whatsapp);">
-                <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
-            </button>
-            <button onclick="cerrarPopups()" style="background:none; border:none; color:#999; margin-top:15px; font-weight:bold; cursor:pointer;">CANCELAR</button>
-        </div>
-    </div>
-
-    <div id="popup-exito" class="kinu-popup">
-        <div class="popup-content">
-            <i class="ph ph-check-circle" style="font-size:45px; color:var(--verde);"></i>
-            <h3>¡Prenda agregada!</h3>
-            <button onclick="cerrarPopups()" class="btn-accion ready" style="margin-top:20px;">ACEPTAR</button>
         </div>
     </div>
 
@@ -223,26 +204,47 @@
     let imagenProcesada = null, botonListo = false, itemSeleccionado = null;
 
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
-    function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); itemSeleccionado = null; }
+    function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); }
 
-    // Manejo del botón de agregar con advertencia
     function manejarBotonAgregar() {
-        if(botonListo) {
-            subirPrendaFinal();
-        } else {
-            document.getElementById('popup-advertencia-foto').style.display = 'flex';
-        }
+        if(botonListo) subirPrendaFinal();
+        else document.getElementById('popup-advertencia-foto').style.display = 'flex';
     }
 
     async function cargarFotos() {
         if(!folderId) return;
-        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const d = await r.json(); todasLasPrendas = d.files || []; filtrarGaleria();
+        try {
+            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
+            const d = await r.json(); 
+            todasLasPrendas = d.files || []; 
+            filtrarGaleria();
+            actualizarVidriera();
+        } catch(e) { console.error(e); }
+    }
+
+    function actualizarVidriera() {
+        const vidriera = document.getElementById('vidriera-clima');
+        const carousel = document.getElementById('carousel-items');
+        const prendasCloset = todasLasPrendas.filter(p => !p.name.includes('_COLABORAR_'));
+
+        if (prendasCloset.length > 0) {
+            vidriera.style.display = 'block';
+            carousel.innerHTML = '';
+            prendasCloset.slice(0, 10).forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'carousel-item';
+                item.innerHTML = `<img src="${p.thumbnailLink.replace('=s220', '=s600')}">`;
+                carousel.appendChild(item);
+            });
+            document.getElementById('clima-temp').innerText = "24°C";
+        }
     }
 
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
         const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
+        
+        // CORRECCIÓN BOTÓN RETIRO
         document.getElementById('area-colaborar-control').style.display = (filtroActual === 'COLABORAR') ? 'block' : 'none';
 
         filtradas.forEach(f => {
@@ -251,32 +253,37 @@
             card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" class="prenda-img"><div class="tag-sub">${f.name.split('_')[2]}</div>`;
             
             let pressTimer;
-            const isColaborar = f.name.includes('_COLABORAR_');
-            const tiempo = isColaborar ? 1200 : 800;
-
-            const start = () => {
+            const isColab = f.name.includes('_COLABORAR_');
+            
+            card.addEventListener('touchstart', () => {
                 card.style.transform = "scale(0.94)";
-                card.style.filter = "brightness(0.8)";
                 pressTimer = setTimeout(() => {
-                    card.style.transform = "scale(1)";
-                    card.style.filter = "brightness(1)";
                     itemSeleccionado = f;
-                    if(isColaborar) document.getElementById('popup-confirmar-eliminar').style.display = 'flex';
+                    if(isColab) document.getElementById('popup-confirmar-eliminar').style.display = 'flex';
                     else document.getElementById('popup-confirmar-colaborar').style.display = 'flex';
-                }, tiempo);
-            };
-
-            const cancel = () => {
-                clearTimeout(pressTimer);
-                card.style.transform = "scale(1)";
-                card.style.filter = "brightness(1)";
-            };
-
-            card.addEventListener('touchstart', start, { passive: true });
-            card.addEventListener('touchend', cancel);
-            card.addEventListener('touchmove', cancel);
+                }, 800);
+            });
+            card.addEventListener('touchend', () => { clearTimeout(pressTimer); card.style.transform = "scale(1)"; });
             gal.appendChild(card);
         });
+    }
+
+    function validarYAbrirRetiro() {
+        const count = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_')).length;
+        if (count < 10) {
+            document.getElementById('txt-minimo').innerText = `Llevas ${count} prendas. Necesitas al menos 10 para solicitar retiro.`;
+            document.getElementById('popup-minimo').style.display = 'flex';
+        } else {
+            document.getElementById('modal-colaborar').style.display = 'flex';
+        }
+    }
+
+    async function enviarColaboracionWhatsApp() {
+        const n = document.getElementById('don-nombre').value;
+        if(!n) return alert("Completa los datos");
+        const count = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_')).length;
+        const msg = `SOLICITUD RETIRO KINU - ${n} - ${count} prendas.`;
+        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${encodeURIComponent(msg)}`);
     }
 
     async function subirPrendaFinal() {
@@ -287,65 +294,34 @@
         form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
         form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
         await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-        
-        // Reset del botón
-        botonListo = false;
-        document.getElementById('btn-final').classList.remove('ready');
-        document.getElementById('btn-text').innerText = "AGREGAR PRENDA";
-        document.getElementById('popup-exito').style.display = 'flex';
-        cargarFotos();
+        botonListo = false; document.getElementById('btn-final').classList.remove('ready'); cargarFotos();
     }
 
-    function abrirEditor(file) { 
-        if (!file) return; 
-        sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); 
-        document.getElementById('iframe-ia').src = 'photo_studio.html'; 
-        document.getElementById('modal-ia').style.display = 'flex'; 
-    }
-
-    window.cerrarIA = function() { 
-        document.getElementById('modal-ia').style.display = 'none'; 
-        const proc = sessionStorage.getItem('imagen_procesada'); 
-        if (proc) { 
-            imagenProcesada = proc; 
-            botonListo = true; 
-            document.getElementById('btn-final').classList.add('ready'); 
-            document.getElementById('btn-text').innerText = "SUBIR AHORA"; 
-        } 
-    };
-
-    // Resto de lógica de Drive y Navegación...
-    function cambiarTab(id, el, reset=false) {
+    function cambiarTab(id, reset=false) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
         if(reset) filtroActual = 'TODO';
         filtrarGaleria();
     }
-    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', null); }
 
     document.getElementById('btn-confirmar-colab').onclick = async () => {
-        const partes = itemSeleccionado.name.split('_');
-        partes[1] = 'COLABORAR';
-        await fetch(`https://www.googleapis.com/drive/v3/files/${itemSeleccionado.id}`, {
-            method: 'PATCH',
-            headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: partes.join('_') })
-        });
+        const p = itemSeleccionado.name.split('_'); p[1] = 'COLABORAR';
+        await fetch(`https://www.googleapis.com/drive/v3/files/${itemSeleccionado.id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: p.join('_') }) });
         cerrarPopups(); cargarFotos();
     };
 
     document.getElementById('btn-confirmar-del').onclick = async () => {
-        await fetch(`https://www.googleapis.com/drive/v3/files/${itemSeleccionado.id}`, {
-            method: 'DELETE',
-            headers: { Authorization: `Bearer ${accessToken}` }
-        });
+        await fetch(`https://www.googleapis.com/drive/v3/files/${itemSeleccionado.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } });
         cerrarPopups(); cargarFotos();
     };
+
+    function abrirEditor(file) { if(!file) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
+    window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if(proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); } };
 
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
     function gisLoaded() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com', scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); } }); }
     function verificarSession() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }
-    async function obtenerOCrearCarpeta() { const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } }); const d = await r.json(); if (d.files.length) { folderId = d.files[0].id; document.getElementById('auth-btn').style.background = "var(--verde)"; document.getElementById('auth-btn').innerHTML = '<i class="ph ph-check-circle"></i> VINCULADO'; cargarFotos(); } }
+    async function obtenerOCrearCarpeta() { const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } }); const d = await r.json(); if (d.files.length) { folderId = d.files[0].id; document.getElementById('auth-btn').style.background = "var(--verde)"; cargarFotos(); } }
     function manejarAccionDrive() { if(!accessToken) tokenClient.requestAccessToken(); }
 </script>
 

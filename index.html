@@ -14,8 +14,6 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
     <style>
         :root { 
@@ -28,14 +26,14 @@
             --rojo: #C0392B;
         }
 
-        /* BLOQUEO DE SELECCIÓN Y MENÚ CONTEXTUAL */
+        /* BLOQUEO DE SELECCIÓN Y MENÚ NATIVO */
         * { 
             box-sizing: border-box; 
             transition: all 0.3s ease; 
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none; /* Bloquea menú de "Guardar imagen" */
-            -webkit-user-select: none;   /* Bloquea selección de texto en iOS */
-            user-select: none;           /* Bloquea selección en otros navegadores */
+            -webkit-touch-callout: none !important; /* Bloquea menú de guardar imagen en iOS */
+            -webkit-user-select: none !important;   /* Bloquea selección de texto */
+            user-select: none !important;
         }
         
         body { 
@@ -79,7 +77,7 @@
         
         .form-input { 
             width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; 
-            -webkit-user-select: text; user-select: text; /* Permite escribir en los inputs */
+            -webkit-user-select: text !important; user-select: text !important; /* Necesario para que el usuario pueda escribir */
         }
         .btn-accion { background: var(--gris-suave); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-accion.ready { background: var(--verde); }
@@ -87,7 +85,9 @@
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body oncontextmenu="return false;"> <div class="main-container">
+<body oncontextmenu="return false;">
+
+<div class="main-container">
     <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         <img src="https://i.imgur.com/yTIrTq2.png" style="width:130px; margin-bottom:30px;">
         <button onclick="entrarApp()" style="background:white; color:var(--verde); padding:16px 65px; border-radius:35px; border:none; font-weight:800; letter-spacing:2px;">ENTRAR</button>
@@ -133,7 +133,7 @@
 
             <div id="pantalla-closet" class="screen" style="display:none;">
                 <div id="area-colaborar-control" style="display: none; margin-bottom: 15px;">
-                    <button onclick="validarYAbrirRetiro()" class="btn-accion ready">
+                    <button id="btn-coordinar" onclick="validarYAbrirRetiro()" class="btn-accion ready">
                         <i class="ph ph-truck"></i> COORDINAR RETIRO
                     </button>
                 </div>
@@ -157,7 +157,7 @@
             <h3>¿Colaborar con esta prenda?</h3>
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button>
-                <button id="btn-confirmar-mover" class="btn-accion ready">SÍ, COLABORAR</button>
+                <button id="btn-confirmar-colab" class="btn-accion ready">SÍ, COLABORAR</button>
             </div>
         </div>
     </div>
@@ -173,11 +173,11 @@
         </div>
     </div>
 
-    <div id="popup-minimo-colaborar" class="kinu-popup">
+    <div id="popup-minimo" class="kinu-popup">
         <div class="popup-content">
             <i class="ph ph-warning-circle" style="font-size:45px; color:var(--gris-suave);"></i>
             <h3>MÍNIMO 10 PRENDAS</h3>
-            <p id="texto-minimo-colaborar" style="font-size:12px; color:#666; margin: 15px 0;"></p>
+            <p id="txt-minimo" style="font-size:13px; color:#666; margin: 15px 0;"></p>
             <button onclick="cerrarPopups()" class="btn-accion ready">CONTINUAR LIMPIEZA</button>
         </div>
     </div>
@@ -194,10 +194,10 @@
                 <option value="Mañana (9:00 - 13:00)">Mañana (9:00 - 13:00)</option>
                 <option value="Tarde (14:00 - 18:00)">Tarde (14:00 - 18:00)</option>
             </select>
-            <button id="btn-enviar-whatsapp" onclick="enviarColaboracionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
+            <button onclick="enviarColaboracionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
                 <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
             </button>
-            <button onclick="cerrarPopups()" style="background:none; border:none; color:#999; margin-top:15px; font-weight:bold;">CANCELAR</button>
+            <button onclick="cerrarPopups()" style="background:none; border:none; color:#999; margin-top:15px; font-weight:bold; cursor:pointer;">CANCELAR</button>
         </div>
     </div>
 
@@ -224,8 +224,9 @@
     function validarYAbrirRetiro() {
         const prendasColab = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_')).length;
         if (prendasColab < 10) {
-            document.getElementById('texto-minimo-colaborar').innerText = `Actualmente tienes ${prendasColab} artículos. ¡Faltan ${10 - prendasColab} más para coordinar tu retiro gratuito!`;
-            document.getElementById('popup-minimo-colaborar').style.display = 'flex';
+            const faltan = 10 - prendasColab;
+            document.getElementById('txt-minimo').innerText = `Te faltan ${faltan} prendas para poder coordinar un retiro. El servicio se activa con un mínimo de 10 artículos.`;
+            document.getElementById('popup-minimo').style.display = 'flex';
         } else {
             document.getElementById('modal-colaborar').style.display = 'flex';
         }
@@ -260,34 +261,31 @@
             
             let pressTimer;
             const isColaborar = f.name.includes('_COLABORAR_');
-            const tiempo = isColaborar ? 1200 : 800; // 0.8s colab, 1.2s delete
+            const tiempo = isColaborar ? 1200 : 800; // 0.8s para colab, 1.2s para borrar
 
             const start = (e) => {
-                // Evita que el navegador maneje eventos por defecto (selección/menú)
-                if (e.type === 'touchstart') {
-                    // Solo permitimos el inicio si es un toque simple
-                    pressTimer = setTimeout(() => {
-                        itemSeleccionado = f;
-                        if(isColaborar) document.getElementById('popup-confirmar-eliminar').style.display = 'flex';
-                        else document.getElementById('popup-confirmar-colaborar').style.display = 'flex';
-                    }, tiempo);
-                }
+                pressTimer = setTimeout(() => {
+                    // Vibración háptica de confirmación (si el dispositivo lo soporta)
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    
+                    itemSeleccionado = f;
+                    if(isColaborar) document.getElementById('popup-confirmar-eliminar').style.display = 'flex';
+                    else document.getElementById('popup-confirmar-colaborar').style.display = 'flex';
+                }, tiempo);
             };
 
-            const cancel = () => {
-                clearTimeout(pressTimer);
-            };
+            const cancel = () => clearTimeout(pressTimer);
 
-            // Eventos táctiles para móviles
+            // Eventos Táctiles con bloqueo de selección
             card.addEventListener('touchstart', start, { passive: true });
             card.addEventListener('touchend', cancel);
-            card.addEventListener('touchmove', cancel); // Cancela si se hace scroll
+            card.addEventListener('touchmove', cancel); // Cancela si el usuario hace scroll
 
             gal.appendChild(card);
         });
     }
 
-    document.getElementById('btn-confirmar-mover').onclick = async () => {
+    document.getElementById('btn-confirmar-colab').onclick = async () => {
         const partes = itemSeleccionado.name.split('_');
         partes[1] = 'COLABORAR';
         await fetch(`https://www.googleapis.com/drive/v3/files/${itemSeleccionado.id}`, {
@@ -306,6 +304,30 @@
         cerrarPopups(); cargarFotos();
     };
 
+    // Navegación y Drive
+    function cambiarTab(id, el, reset=false) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        if(reset) filtroActual = 'TODO';
+        filtrarGaleria();
+    }
+    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', null); }
+    function manejarAccionDrive() { if(!accessToken) tokenClient.requestAccessToken(); }
+    function manejarBotonAgregar() { if(botonListo) subirPrendaFinal(); else document.getElementById('input-camara').click(); }
+
+    function abrirEditor(file) { 
+        if (!file) return; 
+        sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); 
+        document.getElementById('iframe-ia').src = 'photo_studio.html'; 
+        document.getElementById('modal-ia').style.display = 'flex'; 
+    }
+
+    window.cerrarIA = function() { 
+        document.getElementById('modal-ia').style.display = 'none'; 
+        const proc = sessionStorage.getItem('imagen_procesada'); 
+        if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } 
+    };
+
     async function subirPrendaFinal() {
         const cat = document.getElementById('main-cat').value;
         const nom = document.getElementById('sub-cat').value || "Prenda";
@@ -321,22 +343,26 @@
         cargarFotos();
     }
 
-    function cambiarTab(id, el, reset=false) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-        if(reset) filtroActual = 'TODO';
-        filtrarGaleria();
-    }
-    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', null); }
-    function manejarBotonAgregar() { if(botonListo) subirPrendaFinal(); else document.getElementById('input-camara').click(); }
-    function abrirEditor(file) { if (!file) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
-    window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } };
-    
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
-    function gisLoaded() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com', scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); } }); }
+    function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
+            scope: 'https://www.googleapis.com/auth/drive.file',
+            callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); }
+        });
+    }
     function verificarSession() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }
-    async function obtenerOCrearCarpeta() { const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } }); const d = await r.json(); if (d.files.length) { folderId = d.files[0].id; document.getElementById('auth-btn').style.background = "var(--verde)"; document.getElementById('auth-btn').innerHTML = '<i class="ph ph-check-circle"></i> VINCULADO'; cargarFotos(); } }
-    function manejarAccionDrive() { if(!accessToken) tokenClient.requestAccessToken(); }
+    async function obtenerOCrearCarpeta() {
+        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET'`, { headers: { Authorization: `Bearer ${accessToken}` } });
+        const d = await r.json(); 
+        if (d.files.length) { 
+            folderId = d.files[0].id; 
+            const btn = document.getElementById('auth-btn');
+            btn.style.background = "var(--verde)";
+            btn.innerHTML = '<i class="ph ph-check-circle"></i> VINCULADO';
+            cargarFotos(); 
+        }
+    }
 </script>
 
 <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>

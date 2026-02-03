@@ -33,13 +33,9 @@
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none !important;
             -webkit-user-select: none !important;
-            -khtml-user-select: none !important;
-            -moz-user-select: none !important;
-            -ms-user-select: none !important;
             user-select: none !important;
         }
 
-        /* Permitir selección solo en inputs para poder escribir */
         input, select, textarea {
             -webkit-user-select: text !important;
             user-select: text !important;
@@ -66,7 +62,7 @@
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
 
-        /* CATEGORIAS */
+        /* CATEGORIAS COMPLETAS */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; cursor: pointer; }
         .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
@@ -87,7 +83,7 @@
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
         .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
-        .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; pointer-events: auto; }
+        .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -112,6 +108,12 @@
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                     <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
                     <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
+                    <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
+                    <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
+                    <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
+                    <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
+                    <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
+                    <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
                     <div class="cat-item" onclick="irACategoria('COLABORAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Colaborar</span></div>
                 </div>
 
@@ -120,6 +122,12 @@
                         <option value="SUPERIOR">Superior</option>
                         <option value="INFERIOR">Inferior</option>
                         <option value="ABRIGOS">Abrigo</option>
+                        <option value="ENTERIZOS">Enterizos</option>
+                        <option value="CALZADO">Calzado</option>
+                        <option value="ACCESORIOS">Accesorios</option>
+                        <option value="VINTAGE">Vintage</option>
+                        <option value="DEPORTE">Deporte</option>
+                        <option value="DORMIR">Dormir</option>
                         <option value="COLABORAR">Colaborar</option>
                     </select>
                     <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
@@ -137,9 +145,7 @@
 
             <div id="pantalla-closet" class="screen" style="display:none;">
                 <div id="area-colaborar-control" style="display: none; margin-bottom: 15px;">
-                    <button onclick="validarYAbrirRetiro()" class="btn-accion ready">
-                        <i class="ph ph-truck"></i> COORDINAR RETIRO
-                    </button>
+                    <button onclick="validarYAbrirRetiro()" class="btn-accion ready"><i class="ph ph-truck"></i> COORDINAR RETIRO</button>
                 </div>
                 <div id="galeria-real" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px;"></div>
             </div>
@@ -156,11 +162,8 @@
     </div>
 
     <div id="popup-advertencia-foto" class="kinu-popup"><div class="popup-content"><i class="ph ph-camera-slash" style="font-size:45px; color:var(--gris-suave);"></i><h3>FALTA LA FOTO</h3><button onclick="cerrarPopups()" class="btn-accion ready">ENTENDIDO</button></div></div>
-
     <div id="popup-confirmar-colaborar" class="kinu-popup"><div class="popup-content"><i class="ph ph-hand-heart" style="font-size:45px; color:var(--verde);"></i><h3>¿COLABORAR?</h3><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button><button onclick="confirmarEnviarAColaborar()" class="btn-accion ready">SÍ</button></div></div></div>
-
     <div id="popup-confirmar-eliminar" class="kinu-popup"><div class="popup-content"><i class="ph ph-trash" style="font-size:45px; color:var(--rojo);"></i><h3>¿ELIMINAR?</h3><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button><button onclick="confirmarEliminar()" class="btn-accion ready" style="background:var(--rojo);">SÍ</button></div></div></div>
-
     <div id="modal-colaborar" class="kinu-popup">
         <div class="popup-content" style="border-top: 8px solid var(--whatsapp);">
             <h3>SOLICITAR RETIRO</h3>
@@ -169,10 +172,7 @@
             <button onclick="cerrarPopups()" style="background:none; border:none; color:#999; margin-top:10px;">CANCELAR</button>
         </div>
     </div>
-
-    <div id="modal-ia" style="display:none; position:absolute; inset:0; background:white; z-index:2000; flex-direction:column;">
-        <iframe id="iframe-ia" style="width:100%; flex-grow:1; border:none;"></iframe>
-    </div>
+    <div id="modal-ia" style="display:none; position:absolute; inset:0; background:white; z-index:2000; flex-direction:column;"><iframe id="iframe-ia" style="width:100%; flex-grow:1; border:none;"></iframe></div>
 </div>
 
 <script>
@@ -201,9 +201,7 @@
         const txtLabel = document.getElementById('clima-txt-dinamico');
         const temp = 24;
         txtLabel.innerText = `CON ${temp}° TE RECOMIENDO ESTAS PRENDAS:`;
-
         const recomendadas = todasLasPrendas.filter(p => !p.name.includes('_COLABORAR_') && (temp < 20 ? p.name.includes('_ABRIGOS_') : p.name.includes('_SUPERIOR_')));
-
         if (recomendadas.length > 0) {
             document.getElementById('vidriera-clima').style.display = 'block';
             carousel.innerHTML = '';
@@ -220,22 +218,18 @@
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
         const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
         document.getElementById('area-colaborar-control').style.display = (filtroActual === 'COLABORAR') ? 'block' : 'none';
-
         filtradas.forEach(f => {
             const card = document.createElement('div');
             card.style.cssText = "background:white; border-radius:18px; height:180px; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);";
             card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" style="width:90%; height:90%; object-fit:contain; padding-bottom:30px;"><div style="position:absolute; bottom:0; width:100%; background:var(--verde); color:white; font-size:9px; padding:8px; text-align:center; font-weight:bold;">${f.name.split('_')[2]}</div>`;
-            
             let pressTimer;
             const isColab = f.name.includes('_COLABORAR_');
-            
-            card.addEventListener('touchstart', (e) => {
+            card.addEventListener('touchstart', () => {
                 pressTimer = setTimeout(() => {
                     itemSeleccionado = f;
                     document.getElementById(isColab ? 'popup-confirmar-eliminar' : 'popup-confirmar-colaborar').style.display = 'flex';
                 }, 750);
             }, {passive: true});
-            
             card.addEventListener('touchend', () => clearTimeout(pressTimer));
             card.addEventListener('touchmove', () => clearTimeout(pressTimer));
             gal.appendChild(card);

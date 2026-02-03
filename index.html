@@ -77,7 +77,9 @@
 
         .btn-accion { background: #E0E0E0; color: #999; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-accion.ready { background: var(--verde); color: white; }
-        .nav-camera { width: 56px; height: 56px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -30px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        /* ICONO DE CÁMARA MÁS ABAJO */
+        .nav-camera { width: 56px; height: 56px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -22px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
         .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
         .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; }
@@ -176,7 +178,6 @@
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
     let imagenProcesada = null, botonListo = false, itemSeleccionado = null;
 
-    // --- CARGA DE LIBRERÍAS Y AUTO-LOGIN ---
     function gapiLoaded() {
         gapi.load('client', () => {
             gapi.client.init({
@@ -210,8 +211,6 @@
     function manejarAccionDrive() {
         if(tokenClient) {
             tokenClient.requestAccessToken();
-        } else {
-            alert("Cargando servicios de Google... intenta en un segundo.");
         }
     }
 
@@ -230,7 +229,7 @@
             todasLasPrendas = d.files || []; 
             filtrarGaleria();
             actualizarVidriera();
-        } catch(e) { console.error("Error cargando fotos", e); }
+        } catch(e) { console.error(e); }
     }
 
     function actualizarVidriera() {

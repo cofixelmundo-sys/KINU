@@ -30,6 +30,14 @@
             box-sizing: border-box; 
             transition: all 0.2s ease; 
             -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none !important;
+            -webkit-user-select: none !important;
+            user-select: none !important;
+        }
+
+        input, select, textarea {
+            -webkit-user-select: text !important;
+            user-select: text !important;
         }
         
         body { 
@@ -39,40 +47,39 @@
             position: fixed; width: 100%;
         }
         
-        .main-container { 
-            width: 100%; 
-            height: 100%; 
-            background: var(--fondo); 
-            display: flex; 
-            flex-direction: column; 
-            position: relative; 
-            overflow: hidden; 
-            /* Esto crea el espacio verde abajo */
-            margin-bottom: 0;
-            padding-bottom: 25px; 
-        }
+        .main-container { width: 100%; height: 100%; background: var(--fondo); display: flex; flex-direction: column; position: relative; overflow: hidden; }
 
         header { padding: env(safe-area-inset-top) 20px 10px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .logo-header { width: 40px; margin-bottom: 5px; }
 
-        /* NAV SUBIDA PARA REVELAR EL VERDE */
         nav { 
-            height: 55px; 
-            background: white; 
-            border-top: 1px solid #eee; 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            position: relative;
-            z-index: 100;
-            /* Subimos la barra para que el margen inferior de la pantalla sea verde */
-            margin-bottom: 0; 
-            overflow: visible;
+            height: calc(55px + env(safe-area-inset-bottom)); 
+            background: white; border-top: 1px solid #eee; 
+            display: flex; justify-content: space-around; align-items: center; 
+            padding-bottom: env(safe-area-inset-bottom); z-index: 100;
+            overflow: visible; /* IMPORTANTE: para que la cámara pueda sobresalir */
         }
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
 
-        /* ICONO CÁMARA FLOTANDO SOBRE EL LÍMITE BLANCO/VERDE */
+        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; cursor: pointer; }
+        .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
+        .cat-circle i { font-size: 28px; color: var(--gris-suave); }
+        .cat-label { font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--gris-suave); }
+
+        .vidriera-container { margin: 10px 0; background: #EBEAE8; border-radius: 20px; padding: 15px; }
+        .vidriera-header { font-size: 10px; font-weight: 800; color: var(--verde); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .carousel { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
+        .carousel-item { min-width: 100px; height: 120px; background: white; border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; }
+        .carousel-item img { width: 85%; height: 85%; object-fit: contain; }
+
+        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; }
+
+        .btn-accion { background: #E0E0E0; color: #999; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-accion.ready { background: var(--verde); color: white; }
+        
+        /* CÁMARA FLOTANDO SOBRE EL VERDE */
         .nav-camera { 
             width: 58px; 
             height: 58px; 
@@ -82,28 +89,17 @@
             align-items: center; 
             justify-content: center; 
             border: 5px solid white; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            /* Baja 25px para quedar mitad y mitad */
-            transform: translateY(25px); 
-            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateY(20px); /* Esto la empuja hacia el verde del fondo */
             position: relative;
+            z-index: 101;
         }
-
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; cursor: pointer; }
-        .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
-        .cat-circle i { font-size: 28px; color: var(--gris-suave); }
-        .cat-label { font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--gris-suave); }
-
-        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; }
-        .btn-accion { background: #E0E0E0; color: #999; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-accion.ready { background: var(--verde); color: white; }
 
         .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
         .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
 <div class="main-container">
     <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
@@ -120,26 +116,51 @@
         <div class="content">
             <div id="pantalla-home" class="screen">
                 <button id="auth-btn" onclick="manejarAccionDrive()" class="btn-accion" style="background:var(--google-blue); color:white; margin-bottom:15px;">VINCULAR DRIVE</button>
+                
                 <div class="filter-scroll">
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                     <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
                     <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
                     <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
                     <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
+                    <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
+                    <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
+                    <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
+                    <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
+                    <div class="cat-item" onclick="irACategoria('COLABORAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Colaborar</span></div>
                 </div>
-                <div style="background:white; padding:15px; border-radius:20px;">
+
+                <div style="background:white; padding:15px; border-radius:20px 20px 0 0;">
                     <select id="main-cat" class="form-input">
                         <option value="SUPERIOR">Superior</option>
                         <option value="INFERIOR">Inferior</option>
                         <option value="ABRIGOS">Abrigo</option>
+                        <option value="ENTERIZOS">Enterizos</option>
+                        <option value="CALZADO">Calzado</option>
+                        <option value="ACCESORIOS">Accesorios</option>
+                        <option value="VINTAGE">Vintage</option>
+                        <option value="DEPORTE">Deporte</option>
+                        <option value="DORMIR">Dormir</option>
+                        <option value="COLABORAR">Colaborar</option>
                     </select>
                     <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
-                    <button id="btn-final" class="btn-accion" onclick="manejarBotonAgregar()">AGREGAR PRENDA</button>
+                </div>
+
+                <div id="vidriera-clima" class="vidriera-container" style="display: none;">
+                    <div id="clima-txt-dinamico" class="vidriera-header"></div>
+                    <div id="carousel-items" class="carousel"></div>
+                </div>
+
+                <div style="background:white; padding:15px; border-radius:0 0 20px 20px;">
+                    <button id="btn-final" class="btn-accion" onclick="manejarBotonAgregar()"><span id="btn-text">AGREGAR PRENDA</span></button>
                 </div>
             </div>
 
             <div id="pantalla-closet" class="screen" style="display:none;">
-                <div id="galeria-real" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"></div>
+                <div id="area-colaborar-control" style="display: none; margin-bottom: 15px;">
+                    <button onclick="validarYAbrirRetiro()" class="btn-accion ready"><i class="ph ph-truck"></i> COORDINAR RETIRO</button>
+                </div>
+                <div id="galeria-real" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px;"></div>
             </div>
         </div>
 
@@ -153,47 +174,94 @@
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
 
+    <div id="popup-advertencia-foto" class="kinu-popup"><div class="popup-content"><i class="ph ph-camera-slash" style="font-size:45px; color:var(--gris-suave);"></i><h3>FALTA LA FOTO</h3><button onclick="cerrarPopups()" class="btn-accion ready">ENTENDIDO</button></div></div>
+    <div id="popup-confirmar-colaborar" class="kinu-popup"><div class="popup-content"><i class="ph ph-hand-heart" style="font-size:45px; color:var(--verde);"></i><h3>¿COLABORAR?</h3><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button><button onclick="confirmarEnviarAColaborar()" class="btn-accion ready">SÍ</button></div></div></div>
+    <div id="popup-confirmar-eliminar" class="kinu-popup"><div class="popup-content"><i class="ph ph-trash" style="font-size:45px; color:var(--rojo);"></i><h3>¿ELIMINAR?</h3><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button><button onclick="confirmarEliminar()" class="btn-accion ready" style="background:var(--rojo);">SÍ</button></div></div></div>
+    <div id="modal-colaborar" class="kinu-popup">
+        <div class="popup-content" style="border-top: 8px solid var(--whatsapp);">
+            <h3>SOLICITAR RETIRO</h3>
+            <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
+            <button onclick="enviarWhatsApp()" class="btn-accion ready" style="background: var(--whatsapp);">ENVIAR SOLICITUD</button>
+            <button onclick="cerrarPopups()" style="background:none; border:none; color:#999; margin-top:10px;">CANCELAR</button>
+        </div>
+    </div>
     <div id="modal-ia" style="display:none; position:absolute; inset:0; background:white; z-index:2000; flex-direction:column;"><iframe id="iframe-ia" style="width:100%; flex-grow:1; border:none;"></iframe></div>
 </div>
 
 <script>
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
-    let imagenProcesada = null, botonListo = false;
+    let imagenProcesada = null, botonListo = false, itemSeleccionado = null;
 
-    function gapiLoaded() { gapi.load('client', () => { gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(() => { const t = localStorage.getItem('kinu_token'); if(t) { accessToken = t; gapi.client.setToken({access_token: t}); entrarApp(); obtenerOCrearCarpeta(); } }); }); }
-    function gisLoaded() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com', scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); } }); }
+    function gapiLoaded() {
+        gapi.load('client', () => {
+            gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(() => {
+                const t = localStorage.getItem('kinu_token');
+                if(t) {
+                    accessToken = t;
+                    gapi.client.setToken({access_token: t});
+                    document.getElementById('auth-screen').style.display = 'none';
+                    document.getElementById('main-app').style.display = 'flex';
+                    obtenerOCrearCarpeta();
+                }
+            });
+        });
+    }
+
+    function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com',
+            scope: 'https://www.googleapis.com/auth/drive.file',
+            callback: (resp) => {
+                if (resp.error) return;
+                accessToken = resp.access_token;
+                localStorage.setItem('kinu_token', accessToken);
+                obtenerOCrearCarpeta();
+            }
+        });
+    }
+
     function manejarAccionDrive() { if(tokenClient) tokenClient.requestAccessToken(); }
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
-    function cambiarTab(id, reset=false) { document.querySelectorAll('.screen').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = 'block'; if(reset) filtrarGaleria(); }
-    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', true); }
-    
-    async function obtenerOCrearCarpeta() { 
-        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } }); 
-        const d = await r.json(); 
-        if (d.files && d.files.length) { folderId = d.files[0].id; document.getElementById('auth-btn').innerText = "VINCULADO"; cargarFotos(); } 
-    }
+    function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); itemSeleccionado = null; }
 
     async function cargarFotos() {
         if(!folderId) return;
-        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        const d = await r.json(); todasLasPrendas = d.files || []; filtrarGaleria();
+        try {
+            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
+            const d = await r.json(); 
+            todasLasPrendas = d.files || []; 
+            filtrarGaleria();
+            actualizarVidriera();
+        } catch(e) { console.error(e); }
     }
 
     function filtrarGaleria() {
         const gal = document.getElementById('galeria-real'); gal.innerHTML = '';
         const filtradas = todasLasPrendas.filter(p => (filtroActual === 'TODO' || p.name.includes(`_${filtroActual}_`)));
+        document.getElementById('area-colaborar-control').style.display = (filtroActual === 'COLABORAR') ? 'block' : 'none';
         filtradas.forEach(f => {
             const card = document.createElement('div');
-            card.style.cssText = "background:white; border-radius:15px; height:150px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;";
-            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" style="width:80%; height:80%; object-fit:contain;">`;
+            card.style.cssText = "background:white; border-radius:18px; height:180px; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);";
+            card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220', '=s600')}" style="width:90%; height:90%; object-fit:contain; padding-bottom:30px;"><div style="position:absolute; bottom:0; width:100%; background:var(--verde); color:white; font-size:9px; padding:8px; text-align:center; font-weight:bold;">${f.name.split('_')[2]}</div>`;
+            let pressTimer;
+            const isColab = f.name.includes('_COLABORAR_');
+            card.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { itemSeleccionado = f; document.getElementById(isColab ? 'popup-confirmar-eliminar' : 'popup-confirmar-colaborar').style.display = 'flex'; }, 750); }, {passive: true});
+            card.addEventListener('touchend', () => clearTimeout(pressTimer));
+            card.addEventListener('touchmove', () => clearTimeout(pressTimer));
             gal.appendChild(card);
         });
     }
 
+    function cambiarTab(id, reset=false) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        if(reset) filtroActual = 'TODO';
+        filtrarGaleria();
+    }
+    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet'); }
+
     function abrirEditor(file) { if(!file) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
     window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if(proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); } };
-    
-    function manejarBotonAgregar() { if(botonListo) subirPrendaFinal(); else alert("Saca una foto primero"); }
 
     async function subirPrendaFinal() {
         const cat = document.getElementById('main-cat').value;
@@ -203,8 +271,17 @@
         form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
         form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
         await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-        cargarFotos();
+        botonListo = false; document.getElementById('btn-final').classList.remove('ready'); cargarFotos();
     }
+
+    async function obtenerOCrearCarpeta() { 
+        const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='KINU_CLOSET' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } }); 
+        const d = await r.json(); 
+        if (d.files && d.files.length) { folderId = d.files[0].id; document.getElementById('auth-btn').innerText = "VINCULADO"; document.getElementById('auth-btn').style.background = "var(--verde)"; cargarFotos(); } 
+    }
+    
+    function manejarBotonAgregar() { if(botonListo) subirPrendaFinal(); else document.getElementById('popup-advertencia-foto').style.display = 'flex'; }
+    function enviarWhatsApp() { const n = document.getElementById('don-nombre').value; window.open(`https://api.whatsapp.com/send?phone=59892199199&text=Solicitud Retiro: ${n}`); }
 </script>
 
 <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>

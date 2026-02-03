@@ -26,12 +26,23 @@
             --rojo: #C0392B;
         }
 
+        /* BLOQUEO TOTAL DE SELECCIÓN DE TEXTO */
         * { 
             box-sizing: border-box; 
             transition: all 0.2s ease; 
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none !important;
+            -webkit-user-select: none !important;
+            -khtml-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
             user-select: none !important;
+        }
+
+        /* Permitir selección solo en inputs para poder escribir */
+        input, select, textarea {
+            -webkit-user-select: text !important;
+            user-select: text !important;
         }
         
         body { 
@@ -44,7 +55,8 @@
         .main-container { width: 100%; height: 100%; background: var(--fondo); display: flex; flex-direction: column; position: relative; overflow: hidden; }
 
         header { padding: env(safe-area-inset-top) 20px 15px; background: white; display: flex; flex-direction: column; align-items: center; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        
+        .logo-header { width: 40px; margin-bottom: 5px; }
+
         nav { 
             height: calc(85px + env(safe-area-inset-bottom)); 
             background: white; border-top: 1px solid #eee; 
@@ -68,17 +80,17 @@
         .carousel-item { min-width: 100px; height: 120px; background: white; border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; }
         .carousel-item img { width: 85%; height: 85%; object-fit: contain; }
 
-        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; -webkit-user-select: text !important; user-select: text !important; }
+        .form-input { width: 100%; height: 48px; padding: 0 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 14px; outline: none; }
 
         .btn-accion { background: #E0E0E0; color: #999; border: none; padding: 16px; border-radius: 20px; width: 100%; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-accion.ready { background: var(--verde); color: white; }
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
         .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
-        .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; }
+        .popup-content { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 350px; text-align: center; pointer-events: auto; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
 <div class="main-container">
     <div id="auth-screen" style="position:absolute; inset:0; background:var(--verde); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
@@ -87,7 +99,10 @@
     </div>
 
     <div id="main-app" style="display:none; flex-direction:column; height:100%;">
-        <header><div style="color:var(--verde); letter-spacing:4px; font-weight:bold; font-size:14px;">KINU</div></header>
+        <header>
+            <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
+            <div style="color:var(--verde); letter-spacing:4px; font-weight:bold; font-size:14px;">KINU</div>
+        </header>
         
         <div class="content">
             <div id="pantalla-home" class="screen">
@@ -97,12 +112,6 @@
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                     <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
                     <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
-                    <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
-                    <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
-                    <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
-                    <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
-                    <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
-                    <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
                     <div class="cat-item" onclick="irACategoria('COLABORAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Colaborar</span></div>
                 </div>
 
@@ -111,12 +120,6 @@
                         <option value="SUPERIOR">Superior</option>
                         <option value="INFERIOR">Inferior</option>
                         <option value="ABRIGOS">Abrigo</option>
-                        <option value="ENTERIZOS">Enterizos</option>
-                        <option value="CALZADO">Calzado</option>
-                        <option value="ACCESORIOS">Accesorios</option>
-                        <option value="VINTAGE">Vintage</option>
-                        <option value="DEPORTE">Deporte</option>
-                        <option value="DORMIR">Dormir</option>
                         <option value="COLABORAR">Colaborar</option>
                     </select>
                     <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
@@ -152,19 +155,16 @@
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
 
-    <div id="popup-advertencia-foto" class="kinu-popup"><div class="popup-content"><i class="ph ph-camera-slash" style="font-size:45px; color:var(--gris-suave);"></i><h3>FALTA LA FOTO</h3><p style="font-size:13px; color:#666; margin: 15px 0;">Captura la imagen con la cámara primero.</p><button onclick="cerrarPopups()" class="btn-accion ready">ENTENDIDO</button></div></div>
+    <div id="popup-advertencia-foto" class="kinu-popup"><div class="popup-content"><i class="ph ph-camera-slash" style="font-size:45px; color:var(--gris-suave);"></i><h3>FALTA LA FOTO</h3><button onclick="cerrarPopups()" class="btn-accion ready">ENTENDIDO</button></div></div>
 
-    <div id="popup-confirmar-colaborar" class="kinu-popup"><div class="popup-content"><i class="ph ph-hand-heart" style="font-size:45px; color:var(--verde);"></i><h3>¿COLABORAR CON ESTA PRENDA?</h3><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button><button onclick="confirmarEnviarAColaborar()" class="btn-accion ready">SÍ, COLABORAR</button></div></div></div>
+    <div id="popup-confirmar-colaborar" class="kinu-popup"><div class="popup-content"><i class="ph ph-hand-heart" style="font-size:45px; color:var(--verde);"></i><h3>¿COLABORAR?</h3><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button><button onclick="confirmarEnviarAColaborar()" class="btn-accion ready">SÍ</button></div></div></div>
 
-    <div id="popup-confirmar-eliminar" class="kinu-popup"><div class="popup-content"><i class="ph ph-trash" style="font-size:45px; color:var(--rojo);"></i><h3>¿ELIMINAR DEFINITIVAMENTE?</h3><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button><button onclick="confirmarEliminar()" class="btn-accion ready" style="background:var(--rojo);">SÍ, ELIMINAR</button></div></div></div>
+    <div id="popup-confirmar-eliminar" class="kinu-popup"><div class="popup-content"><i class="ph ph-trash" style="font-size:45px; color:var(--rojo);"></i><h3>¿ELIMINAR?</h3><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarPopups()" class="btn-accion" style="background:#eee; color:#666;">NO</button><button onclick="confirmarEliminar()" class="btn-accion ready" style="background:var(--rojo);">SÍ</button></div></div></div>
 
     <div id="modal-colaborar" class="kinu-popup">
         <div class="popup-content" style="border-top: 8px solid var(--whatsapp);">
-            <h3 style="color:var(--verde);">SOLICITAR RETIRO</h3>
+            <h3>SOLICITAR RETIRO</h3>
             <input type="text" id="don-nombre" class="form-input" placeholder="Nombre completo">
-            <input type="tel" id="don-celular" class="form-input" placeholder="Celular">
-            <input type="text" id="don-direccion" class="form-input" placeholder="Dirección">
-            <select id="don-horario" class="form-input"><option value="Mañana">Mañana (9:00 - 13:00)</option><option value="Tarde">Tarde (14:00 - 18:00)</option></select>
             <button onclick="enviarWhatsApp()" class="btn-accion ready" style="background: var(--whatsapp);">ENVIAR SOLICITUD</button>
             <button onclick="cerrarPopups()" style="background:none; border:none; color:#999; margin-top:10px;">CANCELAR</button>
         </div>
@@ -199,13 +199,10 @@
     function actualizarVidriera() {
         const carousel = document.getElementById('carousel-items');
         const txtLabel = document.getElementById('clima-txt-dinamico');
-        const temp = 24; // Temperatura dinámica
+        const temp = 24;
         txtLabel.innerText = `CON ${temp}° TE RECOMIENDO ESTAS PRENDAS:`;
 
-        const recomendadas = todasLasPrendas.filter(p => {
-            if(p.name.includes('_COLABORAR_')) return false;
-            return temp < 20 ? p.name.includes('_ABRIGOS_') : p.name.includes('_SUPERIOR_');
-        });
+        const recomendadas = todasLasPrendas.filter(p => !p.name.includes('_COLABORAR_') && (temp < 20 ? p.name.includes('_ABRIGOS_') : p.name.includes('_SUPERIOR_')));
 
         if (recomendadas.length > 0) {
             document.getElementById('vidriera-clima').style.display = 'block';
@@ -231,14 +228,16 @@
             
             let pressTimer;
             const isColab = f.name.includes('_COLABORAR_');
-            card.addEventListener('touchstart', () => {
-                card.style.transform = "scale(0.94)";
+            
+            card.addEventListener('touchstart', (e) => {
                 pressTimer = setTimeout(() => {
                     itemSeleccionado = f;
                     document.getElementById(isColab ? 'popup-confirmar-eliminar' : 'popup-confirmar-colaborar').style.display = 'flex';
-                }, 800);
-            });
-            card.addEventListener('touchend', () => { clearTimeout(pressTimer); card.style.transform = "scale(1)"; });
+                }, 750);
+            }, {passive: true});
+            
+            card.addEventListener('touchend', () => clearTimeout(pressTimer));
+            card.addEventListener('touchmove', () => clearTimeout(pressTimer));
             gal.appendChild(card);
         });
     }
@@ -246,8 +245,7 @@
     async function confirmarEnviarAColaborar() {
         const partes = itemSeleccionado.name.split('_');
         partes[1] = 'COLABORAR';
-        const nuevoNombre = partes.join('_');
-        await fetch(`https://www.googleapis.com/drive/v3/files/${itemSeleccionado.id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: nuevoNombre }) });
+        await fetch(`https://www.googleapis.com/drive/v3/files/${itemSeleccionado.id}`, { method: 'PATCH', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: partes.join('_') }) });
         cerrarPopups(); cargarFotos();
     }
 
@@ -259,8 +257,7 @@
     function validarYAbrirRetiro() { document.getElementById('modal-colaborar').style.display = 'flex'; }
     function enviarWhatsApp() {
         const n = document.getElementById('don-nombre').value;
-        const msg = `SOLICITUD RETIRO KINU - Nombre: ${n}`;
-        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${encodeURIComponent(msg)}`);
+        window.open(`https://api.whatsapp.com/send?phone=59892199199&text=Solicitud Retiro: ${n}`);
     }
 
     function cambiarTab(id, reset=false) {
@@ -272,7 +269,7 @@
     function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet'); }
 
     function abrirEditor(file) { if(!file) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
-    window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if(proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } };
+    window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if(proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); } };
 
     async function subirPrendaFinal() {
         const cat = document.getElementById('main-cat').value;
@@ -282,7 +279,7 @@
         form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
         form.append('file', new Blob([Uint8Array.from(atob(imagenProcesada.split(',')[1]), c => c.charCodeAt(0))], { type: 'image/png' }));
         await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-        botonListo = false; document.getElementById('btn-final').classList.remove('ready'); document.getElementById('btn-text').innerText = "AGREGAR PRENDA"; cargarFotos();
+        botonListo = false; document.getElementById('btn-final').classList.remove('ready'); cargarFotos();
     }
 
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }

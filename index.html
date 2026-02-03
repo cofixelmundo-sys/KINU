@@ -26,7 +26,7 @@
             --rojo: #C0392B;
         }
 
-        /* BLOQUEO TOTAL DE SELECCIÓN Y MENÚS NATIVOS */
+        /* BLOQUEO DE SELECCIÓN Y MENÚS */
         * { 
             box-sizing: border-box; 
             transition: all 0.2s ease; 
@@ -56,18 +56,17 @@
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
 
-        /* GALERIA Y CARDS */
         .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 30px; }
         .prenda-card { 
             background: white; border-radius: 18px; height: 180px; position: relative; 
             display: flex; align-items: center; justify-content: center; overflow: hidden; 
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             transform-origin: center;
+            will-change: transform;
         }
         .prenda-img { width: 100%; height: 100%; object-fit: contain; padding: 15px 15px 35px 15px; pointer-events: none; }
         .tag-sub { position: absolute; bottom: 0; left: 0; right: 0; background: var(--verde); color: white; font-size: 9px; padding: 8px; text-align: center; text-transform: uppercase; font-weight: bold; }
 
-        /* POPUPS */
         .kinu-popup { 
             display: none; position: fixed; inset: 0; 
             background: rgba(0,0,0,0.7); z-index: 9999; 
@@ -85,7 +84,6 @@
         .btn-accion.ready { background: var(--verde); }
         .nav-camera { width: 58px; height: 58px; background: var(--verde); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -38px; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
-        /* Estilo Categorias */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; cursor: pointer; }
         .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: #EBEAE8; border: 1.5px solid #DDD; display: flex; align-items: center; justify-content: center; }
@@ -141,7 +139,7 @@
 
             <div id="pantalla-closet" class="screen" style="display:none;">
                 <div id="area-colaborar-control" style="display: none; margin-bottom: 15px;">
-                    <button id="btn-coordinar" onclick="validarYAbrirRetiro()" class="btn-accion ready">
+                    <button onclick="validarYAbrirRetiro()" class="btn-accion ready">
                         <i class="ph ph-truck"></i> COORDINAR RETIRO
                     </button>
                 </div>
@@ -205,7 +203,7 @@
             <button onclick="enviarColaboracionWhatsApp()" class="btn-accion" style="background: var(--whatsapp);">
                 <i class="ph ph-whatsapp-logo" style="font-size: 20px;"></i> ENVIAR SOLICITUD
             </button>
-            <button onclick="cerrarPopups()" style="background:none; border:none; color:#999; margin-top:15px; font-weight:bold;">CANCELAR</button>
+            <button onclick="cerrarPopups()" style="background:none; border:none; color:#999; margin-top:15px; font-weight:bold; cursor:pointer;">CANCELAR</button>
         </div>
     </div>
 
@@ -229,12 +227,11 @@
     function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'flex'; }
     function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); itemSeleccionado = null; }
 
-    // --- LÓGICA DE RETIRO (MÍNIMO 10) ---
     function validarYAbrirRetiro() {
         const prendasColab = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_')).length;
         if (prendasColab < 10) {
             const faltan = 10 - prendasColab;
-            document.getElementById('txt-minimo').innerText = `Te faltan ${faltan} prendas para poder coordinar un retiro. El servicio se activa con un mínimo de 10 artículos en esta sección.`;
+            document.getElementById('txt-minimo').innerText = `Te faltan ${faltan} prendas para poder coordinar un retiro. El servicio se activa con un mínimo de 10 artículos.`;
             document.getElementById('popup-minimo').style.display = 'flex';
         } else {
             document.getElementById('modal-colaborar').style.display = 'flex';
@@ -246,15 +243,13 @@
         const celular = document.getElementById('don-celular').value;
         const direccion = document.getElementById('don-direccion').value;
         const horario = document.getElementById('don-horario').value;
-        if(!nombre || !celular || !direccion || !horario) return alert("Por favor completa todos los campos");
-        
+        if(!nombre || !celular || !direccion || !horario) return alert("Completa todos los campos");
         const prendasColab = todasLasPrendas.filter(p => p.name.includes('_COLABORAR_'));
-        const mensaje = `*SOLICITUD RETIRO KINU*%0A👤 Nombre: ${nombre}%0A📱 Tel: ${celular}%0A📍 Dir: ${direccion}%0A⏰ Horario: ${horario}%0A📦 Total prendas: ${prendasColab.length}`;
+        const mensaje = `*SOLICITUD RETIRO KINU*%0A👤 ${nombre}%0A📱 ${celular}%0A📍 ${direccion}%0A⏰ ${horario}%0A📦 Prendas: ${prendasColab.length}`;
         window.open(`https://api.whatsapp.com/send?phone=59892199199&text=${mensaje}`, '_blank');
         cerrarPopups();
     }
 
-    // --- GALERIA CON FEEDBACK VISUAL Y VIBRACIÓN ---
     async function cargarFotos() {
         if(!folderId) return;
         const r = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, { headers: { Authorization: `Bearer ${accessToken}` } });
@@ -273,15 +268,12 @@
             
             let pressTimer;
             const isColaborar = f.name.includes('_COLABORAR_');
-            const tiempo = isColaborar ? 1200 : 800; // 0.8s colab / 1.2s delete
+            const tiempo = isColaborar ? 1200 : 800;
 
             const start = () => {
-                // Efecto visual inmediato de presión
                 card.style.transform = "scale(0.94)";
                 card.style.filter = "brightness(0.8)";
-                
                 pressTimer = setTimeout(() => {
-                    if (navigator.vibrate) navigator.vibrate([70, 40, 70]); 
                     card.style.transform = "scale(1)";
                     card.style.filter = "brightness(1)";
                     itemSeleccionado = f;
@@ -303,7 +295,6 @@
         });
     }
 
-    // --- ACCIONES DRIVE ---
     document.getElementById('btn-confirmar-colab').onclick = async () => {
         const partes = itemSeleccionado.name.split('_');
         partes[1] = 'COLABORAR';
@@ -323,7 +314,17 @@
         cerrarPopups(); cargarFotos();
     };
 
-    // --- SUBIDA Y EDITOR ---
+    function cambiarTab(id, el, reset=false) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        if(reset) filtroActual = 'TODO';
+        filtrarGaleria();
+    }
+    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', null); }
+    function manejarBotonAgregar() { if(botonListo) subirPrendaFinal(); else document.getElementById('input-camara').click(); }
+    function abrirEditor(file) { if (!file) return; sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); document.getElementById('iframe-ia').src = 'photo_studio.html'; document.getElementById('modal-ia').style.display = 'flex'; }
+    window.cerrarIA = function() { document.getElementById('modal-ia').style.display = 'none'; const proc = sessionStorage.getItem('imagen_procesada'); if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } };
+
     async function subirPrendaFinal() {
         const cat = document.getElementById('main-cat').value;
         const nom = document.getElementById('sub-cat').value || "Prenda";
@@ -338,30 +339,6 @@
         cargarFotos();
     }
 
-    function abrirEditor(file) { 
-        if (!file) return; 
-        sessionStorage.setItem('temp_img_url', URL.createObjectURL(file)); 
-        document.getElementById('iframe-ia').src = 'photo_studio.html'; 
-        document.getElementById('modal-ia').style.display = 'flex'; 
-    }
-
-    window.cerrarIA = function() { 
-        document.getElementById('modal-ia').style.display = 'none'; 
-        const proc = sessionStorage.getItem('imagen_procesada'); 
-        if (proc) { imagenProcesada = proc; botonListo = true; document.getElementById('btn-final').classList.add('ready'); document.getElementById('btn-text').innerText = "SUBIR AHORA"; } 
-    };
-
-    // --- NAVEGACIÓN ---
-    function cambiarTab(id, el, reset=false) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-        if(reset) filtroActual = 'TODO';
-        filtrarGaleria();
-    }
-    function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet', null); }
-    function manejarBotonAgregar() { if(botonListo) subirPrendaFinal(); else document.getElementById('input-camara').click(); }
-
-    // --- DRIVE INIT ---
     function gapiLoaded() { gapi.load('client', () => gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] }).then(verificarSession)); }
     function gisLoaded() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com', scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => { accessToken = resp.access_token; localStorage.setItem('kinu_token', accessToken); obtenerOCrearCarpeta(); } }); }
     function verificarSession() { const t = localStorage.getItem('kinu_token'); if(t){ accessToken=t; gapi.client.setToken({access_token:t}); obtenerOCrearCarpeta(); } }

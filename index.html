@@ -22,6 +22,7 @@
             --blanco: #FFFFFF; 
             --google-blue: #4285F4;
             --gris-suave: #F0F0F0;
+            --exito: #4CAF50;
         }
 
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
@@ -29,11 +30,7 @@
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--verde-oliva); 
-            margin: 0; 
-            height: 100dvh; 
-            width: 100%;
-            overflow: hidden; 
-            position: fixed;
+            margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed;
         }
         
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom); }
@@ -42,7 +39,7 @@
         .logo-header { width: 85px; height: auto; margin-bottom: 5px; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
 
-        .content { flex: 1; overflow-y: auto; padding: 15px; background: var(--verde-oliva); scrollbar-width: none; }
+        .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         .content::-webkit-scrollbar { display: none; }
 
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; }
@@ -53,35 +50,34 @@
 
         .glass-panel { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
 
-        /* MODAL / POPUP */
+        /* MODALES */
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            backdrop-filter: blur(8px);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center;
+            z-index: 2000; backdrop-filter: blur(8px);
         }
         .modal-content {
-            background: white;
-            width: 85%;
-            padding: 35px 25px;
-            border-radius: 35px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            background: white; width: 85%; padding: 35px 25px; border-radius: 35px; text-align: center;
         }
-        .modal-content i { font-size: 55px; color: var(--verde-oliva); margin-bottom: 15px; }
-        .modal-content h3 { margin: 0 0 10px; color: var(--verde-oscuro); font-size: 20px; }
-        .modal-content p { color: #666; font-size: 15px; line-height: 1.4; margin-bottom: 25px; }
+        .modal-content i { font-size: 55px; color: var(--google-blue); margin-bottom: 15px; }
+        .modal-content h3 { margin: 0 0 10px; color: var(--verde-oscuro); }
+        .modal-content p { color: #666; font-size: 14px; margin-bottom: 25px; }
         
-        .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+        /* BARRA DE PROGRESO */
+        .progress-container { width: 100%; background: #eee; height: 8px; border-radius: 10px; margin: 20px 0; overflow: hidden; display: none; }
+        .progress-bar { width: 0%; height: 100%; background: var(--google-blue); transition: width 0.3s; }
+
+        /* BOTONES */
+        #auth-btn { background: var(--google-blue); color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        #auth-btn.vinculado { background: var(--exito); }
+        
+        .btn-save { background: var(--verde-oscuro); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; }
+        .btn-secondary { background: var(--gris-suave); color: #555; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 700; margin-top: 10px; }
 
         /* NAVEGACIÓN */
         .nav-wrapper { position: relative; margin: 0 25px 30px; height: 55px; display: flex; align-items: center; justify-content: center; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 0 15px; }
-        .nav-icon { color: white; font-size: 24px; opacity: 0.5; flex: 1; text-align: center; }
+        .nav-icon { color: white; font-size: 24px; opacity: 0.5; }
         .nav-icon.active { opacity: 1; }
 
         .cam-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -60%); z-index: 1200; }
@@ -89,11 +85,7 @@
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 30px; }
 
-        #auth-btn { background: var(--google-blue); color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; font-weight: bold; }
         input, select { width: 100%; height: 50px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 15px; padding: 0 15px; font-size: 16px; }
-        
-        .btn-save { background: var(--verde-oscuro); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; }
-        .btn-secondary { background: var(--gris-suave); color: #555; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 700; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -119,19 +111,14 @@
             </div>
 
             <div class="glass-panel">
-                <button id="auth-btn">VINCULAR GOOGLE DRIVE</button>
+                <button id="auth-btn" onclick="abrirModalGoogle()">
+                    <i class="ph ph-google-logo"></i> <span>VINCULAR GOOGLE DRIVE</span>
+                </button>
                 <div style="height:20px;"></div>
                 <select id="main-cat">
-                    <option>Superior</option>
-                    <option>Inferior</option>
-                    <option>Abrigos</option>
-                    <option>Enterizos</option>
-                    <option>Calzado</option>
-                    <option>Accesorios</option>
-                    <option>Joyería</option>
-                    <option>Deporte</option>
-                    <option>Interior</option>
-                    <option>Donar</option>
+                    <option>Superior</option><option>Inferior</option><option>Abrigos</option><option>Enterizos</option>
+                    <option>Calzado</option><option>Accesorios</option><option>Joyería</option><option>Deporte</option>
+                    <option>Interior</option><option>Donar</option>
                 </select>
                 <input type="text" id="item-name" placeholder="Nombre de prenda">
                 <button class="btn-save" onclick="validarGuardado()">GUARDAR PRENDA</button>
@@ -148,19 +135,25 @@
                 <div class="cam-trigger"><div class="cam-inner"><i class="ph ph-camera"></i></div></div>
             </div>
         </div>
-        
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment">
     </div>
 
-    <div id="modal-foto" class="modal-overlay" onclick="cerrarModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <i class="ph ph-camera-plus"></i>
-            <h3>¿Añadir una foto?</h3>
-            <p>Para identificar mejor tus prendas en el closet, te recomendamos tomar una foto primero.</p>
+    <div id="modal-google" class="modal-overlay">
+        <div class="modal-content">
+            <div id="google-step-1">
+                <i class="ph ph-google-drive-logo"></i>
+                <h3>Vincular Google Drive</h3>
+                <p>KINU guardará las fotos de tus prendas en una carpeta privada de tu Google Drive. Esto permite que tus datos estén siempre contigo.</p>
+                <button class="btn-save" style="background:var(--google-blue)" onclick="iniciarVinculacion()">ACEPTAR Y VINCULAR</button>
+                <button class="btn-secondary" onclick="cerrarModalGoogle()">CANCELAR</button>
+            </div>
             
-            <div class="modal-actions">
-                <button class="btn-save" onclick="abrirCamara()">TOMAR FOTO AHORA</button>
-                <button class="btn-secondary" onclick="cerrarModal()">AHORA NO</button>
+            <div id="google-step-2" style="display:none;">
+                <i class="ph ph-arrows-clockwise ph-spin"></i>
+                <h3 id="status-text">Vinculando...</h3>
+                <div class="progress-container" id="progress-box" style="display:block;">
+                    <div class="progress-bar" id="bar"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -168,35 +161,59 @@
     <script>
         let fotoCapturada = false;
 
+        // --- LÓGICA GOOGLE DRIVE ---
+        function abrirModalGoogle() {
+            if (document.getElementById('auth-btn').classList.contains('vinculado')) return;
+            document.getElementById('modal-google').style.display = 'flex';
+        }
+
+        function cerrarModalGoogle() {
+            document.getElementById('modal-google').style.display = 'none';
+        }
+
+        function iniciarVinculacion() {
+            document.getElementById('google-step-1').style.display = 'none';
+            document.getElementById('google-step-2').style.display = 'block';
+            
+            let bar = document.getElementById('bar');
+            let statusText = document.getElementById('status-text');
+            let width = 0;
+            
+            let interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    statusText.innerText = "¡Vinculación Exitosa!";
+                    document.querySelector('#google-step-2 i').className = "ph ph-check-circle";
+                    document.querySelector('#google-step-2 i').style.color = "var(--exito)";
+                    
+                    setTimeout(() => {
+                        cerrarModalGoogle();
+                        const btn = document.getElementById('auth-btn');
+                        btn.classList.add('vinculado');
+                        btn.querySelector('span').innerText = "GOOGLE DRIVE VINCULADO";
+                        btn.querySelector('i').className = "ph ph-check-circle";
+                    }, 1500);
+                } else {
+                    width += 5;
+                    bar.style.width = width + '%';
+                }
+            }, 100);
+        }
+
+        // --- LÓGICA CÁMARA Y GUARDADO ---
         document.getElementById('input-camara').addEventListener('change', function() {
             if(this.files && this.files[0]) {
                 fotoCapturada = true;
-                // Feedback visual: icono en verde oliva cuando ya hay foto
-                document.querySelector('.cam-inner i').style.color = '#6B705C';
+                document.querySelector('.cam-inner i').style.color = 'var(--verde-oliva)';
             }
         });
 
         function validarGuardado() {
             if (!fotoCapturada) {
-                document.getElementById('modal-foto').style.display = 'flex';
+                alert("Por favor, toma una foto de la prenda primero.");
             } else {
-                alert("¡Prenda guardada con éxito!");
+                alert("¡Prenda lista para subir!");
             }
-        }
-
-        function abrirCamara() {
-            cerrarModal();
-            document.getElementById('input-camara').click();
-        }
-
-        function cerrarModal() {
-            document.getElementById('modal-foto').style.display = 'none';
-        }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW no registrado', err));
-            });
         }
     </script>
 </body>

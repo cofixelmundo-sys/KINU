@@ -21,6 +21,7 @@
             --verde-oscuro: #2D4636; 
             --blanco: #FFFFFF; 
             --google-blue: #4285F4;
+            --gris-suave: #F0F0F0;
         }
 
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
@@ -52,28 +53,30 @@
 
         .glass-panel { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
 
-        /* POPUP / MODAL */
+        /* MODAL / POPUP */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 2000;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
         }
         .modal-content {
             background: white;
             width: 85%;
-            padding: 30px;
-            border-radius: 25px;
+            padding: 35px 25px;
+            border-radius: 35px;
             text-align: center;
-            transform: translateY(20px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
-        .modal-content i { font-size: 50px; color: var(--verde-oliva); margin-bottom: 15px; }
-        .modal-content h3 { margin: 0 0 10px; color: var(--verde-oscuro); }
-        .modal-content p { color: #666; font-size: 14px; margin-bottom: 20px; }
+        .modal-content i { font-size: 55px; color: var(--verde-oliva); margin-bottom: 15px; }
+        .modal-content h3 { margin: 0 0 10px; color: var(--verde-oscuro); font-size: 20px; }
+        .modal-content p { color: #666; font-size: 15px; line-height: 1.4; margin-bottom: 25px; }
+        
+        .modal-actions { display: flex; flex-direction: column; gap: 10px; }
 
         /* NAVEGACIÓN */
         .nav-wrapper { position: relative; margin: 0 25px 30px; height: 55px; display: flex; align-items: center; justify-content: center; }
@@ -88,7 +91,9 @@
 
         #auth-btn { background: var(--google-blue); color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; font-weight: bold; }
         input, select { width: 100%; height: 50px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 15px; padding: 0 15px; font-size: 16px; }
-        .btn-save { background: var(--verde-oscuro); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; }
+        
+        .btn-save { background: var(--verde-oscuro); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; }
+        .btn-secondary { background: var(--gris-suave); color: #555; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 700; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -150,9 +155,13 @@
     <div id="modal-foto" class="modal-overlay" onclick="cerrarModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <i class="ph ph-camera-plus"></i>
-            <h3>¡Falta la foto!</h3>
-            <p>Para organizar tu closet, primero debes tomar una foto de la prenda.</p>
-            <button class="btn-save" onclick="abrirCamara()">TOMAR FOTO AHORA</button>
+            <h3>¿Añadir una foto?</h3>
+            <p>Para identificar mejor tus prendas en el closet, te recomendamos tomar una foto primero.</p>
+            
+            <div class="modal-actions">
+                <button class="btn-save" onclick="abrirCamara()">TOMAR FOTO AHORA</button>
+                <button class="btn-secondary" onclick="cerrarModal()">AHORA NO</button>
+            </div>
         </div>
     </div>
 
@@ -162,7 +171,7 @@
         document.getElementById('input-camara').addEventListener('change', function() {
             if(this.files && this.files[0]) {
                 fotoCapturada = true;
-                // Opcional: podrías cambiar el color del icono de cámara para dar feedback
+                // Feedback visual: icono en verde oliva cuando ya hay foto
                 document.querySelector('.cam-inner i').style.color = '#6B705C';
             }
         });
@@ -172,7 +181,6 @@
                 document.getElementById('modal-foto').style.display = 'flex';
             } else {
                 alert("¡Prenda guardada con éxito!");
-                // Aquí iría tu lógica de subida a Google Drive
             }
         }
 

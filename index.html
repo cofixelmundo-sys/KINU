@@ -17,10 +17,8 @@
     
     <style>
         :root { 
-            /* Verde oliva más claro con toque marrón */
-            --verde-kinu: #6B705C; 
+            --verde-oliva: #6B705C; 
             --verde-oscuro: #4B4E40;
-            --fondo: #F5F5F7; 
             --blanco: #FFFFFF; 
             --google-blue: #4285F4;
         }
@@ -29,52 +27,53 @@
 
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: var(--verde-kinu); 
+            background: var(--verde-oliva); 
             height: 100vh; margin: 0; overflow: hidden;
             position: fixed; width: 100%;
         }
         
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
 
-        /* PANTALLA DE ENTRADA */
+        /* PANTALLA ENTRADA */
         #auth-screen {
-            position: fixed; inset: 0; background: var(--verde-kinu); 
+            position: fixed; inset: 0; background: var(--verde-oliva); 
             z-index: 20000; display: flex; flex-direction: column; 
             align-items: center; justify-content: center;
         }
-        .logo-welcome { width: 130px; margin-bottom: 20px; }
 
-        /* HEADER APP */
+        /* HEADER */
         header { 
             padding: env(safe-area-inset-top) 20px 10px; 
-            background: var(--verde-kinu); 
+            background: var(--verde-oliva); 
             display: flex; flex-direction: column; align-items: center; 
             z-index: 1000; 
         }
         .logo-header { width: 85px; height: auto; margin-bottom: 5px; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
 
-        .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; background: var(--verde-kinu); }
+        .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; background: var(--verde-oliva); }
 
-        /* CATEGORIAS MÁS JUNTAS (Entran 4 o más) */
+        /* CATEGORIAS COMPACTAS (Entran 4+) */
         .filter-scroll { 
             display: flex; 
-            gap: 8px; /* Espacio reducido */
+            gap: 10px; 
             overflow-x: auto; 
-            padding: 10px 0 25px; 
+            padding: 10px 5px 25px; 
             scrollbar-width: none; 
         }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+
         .cat-item { 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             gap: 6px; 
-            min-width: 68px; /* Ancho reducido para que entren más */
+            min-width: 72px; 
             cursor: pointer; 
         }
         .cat-circle { 
-            width: 54px; /* Un poco más pequeños */
-            height: 54px; 
+            width: 56px; 
+            height: 56px; 
             border-radius: 50%; 
             background: rgba(255,255,255,0.2); 
             backdrop-filter: blur(10px);
@@ -87,7 +86,7 @@
         /* PANEL BLANCO */
         .glass-panel { 
             background: white; padding: 25px; border-radius: 30px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-top: 5px;
         }
 
         /* NAV Y CÁMARA ELEVADA */
@@ -100,7 +99,7 @@
         .nav-icon.active { opacity: 1; }
 
         .cam-trigger { 
-            width: 70px; height: 70px; background: var(--verde-kinu); border-radius: 50%; 
+            width: 70px; height: 70px; background: var(--verde-oliva); border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
             border: 6px solid white; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             transform: translateY(-25px);
@@ -108,14 +107,15 @@
         }
         .cam-trigger i { color: white; font-size: 30px; }
 
-        .btn-kinu { background: var(--verde-kinu); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; }
+        .btn-kinu { background: var(--verde-oliva); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; }
+        .input-kinu { width: 100%; height: 48px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; padding: 0 15px; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
-        <img src="https://i.imgur.com/yTIrTq2.png" class="logo-welcome" alt="KINU">
-        <button onclick="entrarApp()" style="background:white; color:var(--verde-kinu); padding:16px 65px; border-radius:35px; border:none; font-weight:800; letter-spacing:2px; cursor:pointer;">ENTRAR</button>
+        <img src="https://i.imgur.com/yTIrTq2.png" style="width:135px; margin-bottom:20px;" alt="KINU">
+        <button onclick="entrarApp()" style="background:white; color:var(--verde-oliva); padding:16px 60px; border-radius:35px; border:none; font-weight:800; letter-spacing:2px; cursor:pointer;">ENTRAR</button>
     </div>
 
     <div class="main-container">
@@ -127,26 +127,35 @@
         <div id="main-app" style="display:flex; flex-direction:column; height:100%;">
             <div class="content">
                 <div id="pantalla-home" class="screen">
+                    
                     <div class="filter-scroll">
                         <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                         <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
                         <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
+                        <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
                         <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
                         <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
+                        <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
+                        <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
+                        <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
                         <div class="cat-item" onclick="irACategoria('COLABORAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
                     </div>
 
                     <div class="glass-panel">
-                        <button id="auth-btn" onclick="manejarAccionDrive()" style="background:var(--google-blue); color:white; border:none; padding:15px; border-radius:15px; width:100%; font-weight:bold; margin-bottom:15px; font-size: 12px;">VINCULAR DRIVE</button>
+                        <button id="auth-btn" onclick="manejarAccionDrive()" style="background:var(--google-blue); color:white; border:none; padding:15px; border-radius:15px; width:100%; font-weight:bold; margin-bottom:15px; font-size: 12px;">VINCULAR GOOGLE DRIVE</button>
                         
-                        <select id="main-cat" style="width:100%; height:48px; border-radius:12px; border:1px solid #ddd; margin-bottom:12px; padding:0 15px;">
+                        <select id="main-cat" class="input-kinu">
                             <option value="SUPERIOR">Superior</option>
                             <option value="INFERIOR">Inferior</option>
                             <option value="ABRIGOS">Abrigo</option>
+                            <option value="ENTERIZOS">Enterizo</option>
                             <option value="CALZADO">Calzado</option>
+                            <option value="ACCESORIOS">Accesorios</option>
+                            <option value="DEPORTE">Deporte</option>
+                            <option value="COLABORAR">Donar</option>
                         </select>
                         
-                        <input type="text" id="sub-cat" style="width:100%; height:48px; border-radius:12px; border:1px solid #ddd; margin-bottom:12px; padding:0 15px;" placeholder="Nombre de prenda">
+                        <input type="text" id="sub-cat" class="input-kinu" placeholder="Nombre de prenda">
                         
                         <button id="btn-final" class="btn-kinu" onclick="manejarBotonAgregar()">GUARDAR EN CLOSET</button>
                     </div>
@@ -169,10 +178,7 @@
     </div>
 
     <script>
-        function entrarApp() {
-            document.getElementById('auth-screen').style.display = 'none';
-        }
-
+        function entrarApp() { document.getElementById('auth-screen').style.display = 'none'; }
         function cambiarTab(id, reset=false) { 
             document.querySelectorAll('.screen').forEach(s => s.style.display = 'none'); 
             document.getElementById(id).style.display = 'block';
@@ -180,7 +186,6 @@
             if(id === 'pantalla-home') document.getElementById('nav-home').classList.add('active');
             else document.getElementById('nav-closet').classList.add('active');
         }
-
         function irACategoria(cat) { cambiarTab('pantalla-closet'); }
     </script>
 </body>

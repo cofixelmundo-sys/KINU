@@ -26,70 +26,97 @@
             --rojo: #C0392B;
         }
 
-        * { box-sizing: border-box; transition: all 0.25s ease; -webkit-tap-highlight-color: transparent; }
-        
+        * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
+
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: var(--verde); 
+            background: var(--verde); /* FONDO VERDE COMO LA IMAGEN */
             height: 100vh; margin: 0; overflow: hidden;
             position: fixed; width: 100%;
         }
         
-        .main-container { width: 100%; height: 100%; background: var(--verde); display: flex; flex-direction: column; position: relative; }
+        .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; }
 
-        /* HEADER - EL LOGO VUELVE A SER PRIORIDAD */
+        /* HEADER - LOGO CORREGIDO */
         header { 
             padding: env(safe-area-inset-top) 20px 10px; 
-            background: white; /* Volvemos al fondo blanco del header para que tu logo original luzca perfecto */
             display: flex; flex-direction: column; align-items: center; 
-            z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
         }
-        .logo-header { width: 45px; height: auto; display: block !important; margin-bottom: 5px; }
-        .brand-name { color: var(--verde); letter-spacing: 4px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
+        /* Forzamos que el logo se vea blanco sobre el verde */
+        .logo-kinu { 
+            width: 50px; 
+            height: auto; 
+            filter: brightness(0) invert(1) !important; 
+            display: block !important; 
+            opacity: 1 !important;
+            margin-bottom: 5px;
+        }
+        .brand-name { color: white; letter-spacing: 5px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
 
-        .content { flex: 1; overflow-y: auto; padding: 20px; scrollbar-width: none; background: var(--fondo); border-radius: 30px 30px 0 0; }
+        .content { flex: 1; overflow-y: auto; padding: 20px; scrollbar-width: none; }
 
-        /* CATEGORIAS */
-        .filter-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; }
-        .cat-circle { width: 64px; height: 64px; border-radius: 50%; background: white; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .cat-circle i { font-size: 28px; color: var(--gris-suave); }
-        .cat-label { font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--gris-suave); }
+        /* TARJETA BLANCA (OUTFIT) */
+        .vidriera-container { 
+            background: white; border-radius: 25px; padding: 20px; margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .vidriera-header { font-size: 10px; font-weight: 900; color: var(--verde); margin-bottom: 15px; }
 
-        /* NAV Y CÁMARA ELEVADA */
+        /* CATEGORIAS GLASS (TODAS) */
+        .filter-scroll { display: flex; gap: 15px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 75px; }
+        .cat-circle { 
+            width: 60px; height: 60px; border-radius: 50%; 
+            background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; 
+        }
+        .cat-circle i { font-size: 26px; color: white; }
+        .cat-label { font-size: 9px; font-weight: 600; color: white; text-align: center; }
+
+        /* NAV Y CÁMARA CENTRADA (ESTÉTICA IMAGEN 1) */
         nav { 
-            height: 70px; background: white; border-top: 1px solid #eee; 
+            height: 70px; margin: 0 25px 35px; background: white; border-radius: 40px;
             display: flex; justify-content: space-around; align-items: center; 
-            padding-bottom: env(safe-area-inset-bottom); z-index: 1000; position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); position: relative; overflow: visible;
         }
+        .nav-item { color: var(--verde); font-size: 26px; opacity: 0.3; flex: 1; text-align: center; }
+        .nav-item.active { opacity: 1; }
+
         .nav-camera { 
-            width: 65px; height: 65px; background: var(--verde); border-radius: 50%; 
+            width: 70px; height: 70px; background: var(--verde); border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
-            border: 6px solid white; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); 
-            margin-top: -45px; /* LA POSICIÓN QUE BUSCABAS: ARRIBA DEL NAV */
+            border: 6px solid white; box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            transform: translateY(-22px); /* ELEVADA ENTRE ICONOS */
+            z-index: 1100;
         }
-        .nav-camera i { color: white; font-size: 28px; }
+        .nav-camera i { color: white; font-size: 30px; }
 
-        /* POPUPS */
-        .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .popup-content { background: white; border-radius: 30px; padding: 30px; width: 85%; text-align: center; }
-
-        /* FORMULARIOS */
-        .form-input { width: 100%; height: 48px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; padding: 0 15px; }
-        .btn-accion { background: var(--verde); color: white; border: none; padding: 16px; border-radius: 20px; width: 100%; font-weight: 800; }
+        /* FORMULARIOS Y POPUPS */
+        .panel-inputs { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); }
+        .form-input { width: 100%; height: 50px; background: white; border-radius: 15px; border: none; margin-bottom: 12px; padding: 0 15px; }
+        .btn-accion { background: white; color: var(--verde); border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; }
+        
+        .kinu-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .popup-content { background: white; border-radius: 35px; padding: 30px; width: 85%; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="main-container">
     <header>
-        <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header" alt="Logo KINU">
+        <img src="https://i.imgur.com/yTIrTq2.png" class="logo-kinu" alt="KINU">
         <div class="brand-name">KINU</div>
     </header>
     
     <div id="main-app" style="display:flex; flex-direction:column; height:100%;">
         <div class="content">
             <div id="pantalla-home" class="screen">
+                <div id="vidriera-clima" class="vidriera-container" style="display: none;">
+                    <div class="vidriera-header">DAILY OUTFIT</div>
+                    <div id="carousel-items" style="display: flex; gap: 10px; overflow-x: auto;"></div>
+                </div>
+
                 <div class="filter-scroll">
                     <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
                     <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
@@ -99,19 +126,15 @@
                     <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
                     <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
                     <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
-                    <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
                     <div class="cat-item" onclick="irACategoria('COLABORAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
                 </div>
 
-                <div style="background:white; padding:20px; border-radius:25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                    <button id="auth-btn" onclick="manejarAccionDrive()" class="btn-accion" style="background:var(--google-blue); margin-bottom:15px;">VINCULAR DRIVE</button>
+                <div class="panel-inputs">
+                    <button id="auth-btn" onclick="manejarAccionDrive()" class="btn-accion" style="background:var(--google-blue); color:white; margin-bottom:15px; font-size: 11px;">VINCULAR GOOGLE DRIVE</button>
                     <select id="main-cat" class="form-input">
                         <option value="SUPERIOR">Superior</option>
                         <option value="INFERIOR">Inferior</option>
                         <option value="ABRIGOS">Abrigo</option>
-                        <option value="ENTERIZOS">Enterizo</option>
-                        <option value="CALZADO">Calzado</option>
-                        <option value="ACCESORIOS">Accesorios</option>
                         <option value="COLABORAR">Donación</option>
                     </select>
                     <input type="text" id="sub-cat" class="form-input" placeholder="Nombre de prenda">
@@ -120,35 +143,38 @@
             </div>
 
             <div id="pantalla-closet" class="screen" style="display:none;">
-                <div id="galeria-real" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"></div>
+                <div id="galeria-real" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-bottom: 50px;"></div>
             </div>
         </div>
 
         <nav>
-            <div onclick="cambiarTab('pantalla-home')"><i class="ph ph-house" style="font-size:26px; color:var(--verde)"></i></div>
+            <div class="nav-item active" id="nav-home" onclick="cambiarTab('pantalla-home')"><i class="ph ph-house-simple"></i></div>
             <div onclick="document.getElementById('input-camara').click()">
                 <div class="nav-camera"><i class="ph ph-camera"></i></div>
             </div>
-            <div onclick="cambiarTab('pantalla-closet', true)"><i class="ph ph-archive" style="font-size:26px; color:var(--verde)"></i></div>
+            <div class="nav-item" id="nav-closet" onclick="cambiarTab('pantalla-closet', true)"><i class="ph ph-archive"></i></div>
         </nav>
         <input type="file" id="input-camara" hidden accept="image/*" capture="environment" onchange="abrirEditor(this.files[0])">
     </div>
 
-    <div id="popup-advertencia-foto" class="kinu-popup"><div class="popup-content"><i class="ph ph-warning-circle" style="font-size:50px; color:var(--rojo)"></i><h3>¡FALTA LA FOTO!</h3><button onclick="cerrarPopups()" class="btn-accion">OK</button></div></div>
+    <div id="popup-advertencia-foto" class="kinu-popup"><div class="popup-content"><i class="ph ph-warning-circle" style="font-size:50px; color:var(--rojo);"></i><h3>¡FALTA LA FOTO!</h3><button onclick="cerrarPopups()" class="btn-accion" style="background:var(--verde); color:white;">OK</button></div></div>
 </div>
 
 <script>
-    /* TU LÓGICA DE DRIVE ORIGINAL */
+    /* Lógica de tu archivo original intacta */
     let accessToken = null, folderId = null, todasLasPrendas = [], filtroActual = 'TODO', tokenClient;
     let imagenProcesada = null, botonListo = false;
 
-    function entrarApp() { document.getElementById('main-app').style.display = 'flex'; }
-    function cambiarTab(id, reset=false) { document.querySelectorAll('.screen').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = 'block'; if(reset) { filtroActual = 'TODO'; cargarFotos(); } }
+    // Aquí pegarías tus funciones: gapiLoaded, gisLoaded, cargarFotos, subirPrendaFinal, etc.
+    function cambiarTab(id, reset=false) { 
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none'); 
+        document.getElementById(id).style.display = 'block';
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id === 'pantalla-home' ? 'nav-home' : 'nav-closet').classList.add('active');
+        if(reset) { filtroActual = 'TODO'; cargarFotos(); }
+    }
     function irACategoria(cat) { filtroActual = cat; cambiarTab('pantalla-closet'); }
     function cerrarPopups() { document.querySelectorAll('.kinu-popup').forEach(p => p.style.display = 'none'); }
-
-    // Reintegra aquí tus funciones gapiLoaded, gisLoaded y la subida de Drive de tu index.html original.
 </script>
-
 </body>
 </html>

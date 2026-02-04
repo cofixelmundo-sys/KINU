@@ -18,40 +18,44 @@
         }
 
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--verde-oliva); margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--verde-oliva); margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100vh; }
         
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
-        header { padding: env(safe-area-inset-top) 20px 10px; display: flex; flex-direction: column; align-items: center; }
+        
+        header { padding: env(safe-area-inset-top) 20px 10px; display: flex; flex-direction: column; align-items: center; z-index: 1000; }
         .logo-header { width: 85px; height: auto; margin-bottom: 5px; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
 
-        .content { flex: 1; overflow-y: auto; padding: 15px; background: var(--verde-oliva); }
+        .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; background: var(--verde-oliva); }
 
-        /* CATEGORIAS COMPACTAS */
+        /* CATEGORIAS COMPACTAS (TODAS) */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; cursor: pointer; }
         .cat-circle { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; }
         .cat-circle i { font-size: 24px; color: white; }
-        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
+        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
 
-        /* PANEL */
+        /* PANEL BLANCO */
         .glass-panel { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
         
         /* BOTÓN DRIVE Y BARRA */
         #auth-btn { background: var(--google-blue); color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; position: relative; overflow: hidden; }
-        .loader-bar { position: absolute; bottom: 0; left: 0; height: 4px; background: white; width: 0%; transition: width 0.3s; }
+        .loader-bar { position: absolute; bottom: 0; left: 0; height: 4px; background: rgba(255,255,255,0.5); width: 0%; transition: width 0.3s; }
 
         /* NAV */
         nav { height: 70px; margin: 0 25px 35px; background: white; border-radius: 40px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
-        .cam-trigger { width: 70px; height: 70px; background: var(--verde-oliva); border-radius: 50%; border: 6px solid white; transform: translateY(-25px); display: flex; align-items: center; justify-content: center; }
+        .nav-icon { color: var(--verde-oliva); font-size: 26px; opacity: 0.3; }
+        .nav-icon.active { opacity: 1; }
+        .cam-trigger { width: 70px; height: 70px; background: var(--verde-oliva); border-radius: 50%; border: 6px solid white; transform: translateY(-25px); display: flex; align-items: center; justify-content: center; z-index: 1100; }
         .cam-trigger i { color: white; font-size: 30px; }
 
         /* POPUPS */
         .popup-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 10000; align-items: center; justify-content: center; }
         .popup-card { background: white; padding: 30px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; }
-        .btn-confirm { background: var(--verde-oliva); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: bold; margin-top: 15px; width: 100%; }
+        .btn-confirm { background: var(--verde-oliva); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: bold; margin-top: 15px; width: 100%; cursor: pointer; }
         
-        input, select { width: 100%; height: 48px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; padding: 0 15px; }
+        input, select { width: 100%; height: 48px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 12px; padding: 0 15px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -60,7 +64,7 @@
         <div class="popup-card">
             <i class="ph ph-google-drive-logo" style="font-size: 40px; color: var(--google-blue);"></i>
             <h3>Vincular Google Drive</h3>
-            <p style="font-size: 14px; color: #666;">KINU creará una carpeta llamada 'KINU_CLOSET' para guardar tus prendas de forma segura.</p>
+            <p style="font-size: 14px; color: #666;">KINU creará una carpeta segura para tus prendas.</p>
             <button class="btn-confirm" onclick="iniciarVinculacionReal()">ACEPTAR Y VINCULAR</button>
             <button style="background:none; border:none; color:#999; margin-top:10px;" onclick="cerrarPopup()">Cancelar</button>
         </div>
@@ -68,47 +72,56 @@
 
     <div class="main-container">
         <header>
-            <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
+            <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header" alt="KINU">
             <div class="brand-text">KINU</div>
         </header>
         
         <div class="content">
-            <div class="filter-scroll">
-                <div class="cat-item"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
-                <div class="cat-item"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
-                <div class="cat-item"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
-                <div class="cat-item"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
-                <div class="cat-item"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
-            </div>
+            <div id="pantalla-home" class="screen">
+                <div class="filter-scroll">
+                    <div class="cat-item" onclick="irACategoria('SUPERIOR')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
+                    <div class="cat-item" onclick="irACategoria('INFERIOR')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
+                    <div class="cat-item" onclick="irACategoria('ABRIGOS')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
+                    <div class="cat-item" onclick="irACategoria('ENTERIZOS')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
+                    <div class="cat-item" onclick="irACategoria('CALZADO')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
+                    <div class="cat-item" onclick="irACategoria('ACCESORIOS')"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
+                    <div class="cat-item" onclick="irACategoria('VINTAGE')"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
+                    <div class="cat-item" onclick="irACategoria('DEPORTE')"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
+                    <div class="cat-item" onclick="irACategoria('DORMIR')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
+                    <div class="cat-item" onclick="irACategoria('COLABORAR')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
+                </div>
 
-            <div class="glass-panel">
-                <button id="auth-btn" onclick="mostrarAdvertencia()">
-                    <span id="btn-text">VINCULAR GOOGLE DRIVE</span>
-                    <div id="loader" class="loader-bar"></div>
-                </button>
-                <div style="height:20px;"></div>
-                <select id="main-cat">
-                    <option>Superior</option>
-                    <option>Inferior</option>
-                    <option>Abrigos</option>
-                </select>
-                <input type="text" placeholder="Nombre de prenda">
-                <button style="background:var(--verde-oliva); color:white; border:none; padding:18px; border-radius:50px; width:100%; font-weight:900;">GUARDAR PRENDA</button>
+                <div class="glass-panel">
+                    <button id="auth-btn" onclick="mostrarAdvertencia()">
+                        <span id="btn-text">VINCULAR GOOGLE DRIVE</span>
+                        <div id="loader" class="loader-bar"></div>
+                    </button>
+                    <div style="height:20px;"></div>
+                    <select id="main-cat">
+                        <option value="SUPERIOR">Superior</option>
+                        <option value="INFERIOR">Inferior</option>
+                        <option value="ABRIGOS">Abrigo</option>
+                        <option value="ENTERIZOS">Enterizo</option>
+                    </select>
+                    <input type="text" id="sub-cat" placeholder="Nombre de prenda">
+                    <button onclick="manejarBotonAgregar()" style="background:var(--verde-oliva); color:white; border:none; padding:18px; border-radius:50px; width:100%; font-weight:900; cursor:pointer;">GUARDAR EN CLOSET</button>
+                </div>
             </div>
         </div>
 
         <nav>
-            <div style="opacity:0.3"><i class="ph ph-house-simple" style="font-size:26px;"></i></div>
-            <div class="cam-trigger"><i class="ph ph-camera"></i></div>
-            <div style="opacity:0.3"><i class="ph ph-archive" style="font-size:26px;"></i></div>
+            <div class="nav-icon active" onclick="cambiarTab('home')"><i class="ph ph-house-simple"></i></div>
+            <div class="cam-trigger" onclick="document.getElementById('input-camara').click()"><i class="ph ph-camera"></i></div>
+            <div class="nav-icon" onclick="cambiarTab('closet')"><i class="ph ph-archive"></i></div>
         </nav>
+        <input type="file" id="input-camara" hidden accept="image/*" capture="environment">
     </div>
 
     <script>
         let accessToken = null;
 
         function mostrarAdvertencia() {
-            if (accessToken) return; // Si ya está vinculado, no hacer nada
+            if (accessToken) return;
             document.getElementById('popup-drive').style.display = 'flex';
         }
 
@@ -116,7 +129,7 @@
             document.getElementById('popup-drive').style.display = 'none';
         }
 
-        async function iniciarVinculacionReal() {
+        function iniciarVinculacionReal() {
             cerrarPopup();
             const btn = document.getElementById('auth-btn');
             const text = document.getElementById('btn-text');
@@ -124,38 +137,32 @@
 
             text.innerText = "CONECTANDO...";
             
-            // Animación de barra de carga
             let progreso = 0;
             const intervalo = setInterval(() => {
-                progreso += 5;
+                progreso += 10;
                 loader.style.width = progreso + "%";
                 if (progreso >= 100) {
                     clearInterval(intervalo);
                     finalizarVinculacion();
                 }
-            }, 100);
-
-            // Aquí iría el llamado real a tokenClient.requestAccessToken() de tu index.html
+            }, 150);
         }
 
         function finalizarVinculacion() {
             const btn = document.getElementById('auth-btn');
             const text = document.getElementById('btn-text');
-            
-            accessToken = "vinculado"; // Simulación de token
-            btn.style.background = "#2D4636"; // Verde de éxito de tu original
+            accessToken = "vinculado";
+            btn.style.background = "var(--verde-exito)";
             text.innerText = "VINCULADO CORRECTAMENTE";
-            
-            // Ocultar barra de carga suavemente
-            setTimeout(() => {
-                document.getElementById('loader').style.opacity = "0";
-            }, 500);
+            document.getElementById('loader').style.opacity = "0";
         }
 
-        // Integrar con tu lógica GAPI del index.html original
-        window.onload = () => {
-            // Aquí cargarías gapiLoaded() y gisLoaded()
-        };
+        function cambiarTab(tab) {
+            // Lógica simple para demo visual
+            const icons = document.querySelectorAll('.nav-icon');
+            icons.forEach(i => i.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
     </script>
 </body>
 </html>

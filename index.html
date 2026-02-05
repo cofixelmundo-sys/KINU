@@ -14,6 +14,7 @@
             --blanco: #FFFFFF; 
             --google-blue: #4285F4;
             --icon-inactivo: rgba(255,255,255,0.4);
+            --exito: #4BB543;
         }
 
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
@@ -76,13 +77,12 @@
         .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
         #cam-input { display: none; }
 
-        /* MODALES UNIFICADOS Y ACHICADOS */
+        /* MODALES UNIFICADOS */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 85%; max-width: 320px; padding: 25px; border-radius: 30px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         
         .input-kinu { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #eee; margin: 10px 0; font-size: 14px; background: #f9f9f9; outline: none; }
         
-        /* Grid de categorías más pequeño y scrolleable */
         .grid-cats-modal { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0 20px; max-height: 140px; overflow-y: auto; padding: 5px; scrollbar-width: none; }
         .grid-cats-modal::-webkit-scrollbar { display: none; }
         
@@ -97,6 +97,9 @@
         .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
         .btn-ghost { background: none; border: none; color: #999; margin-top: 12px; font-weight: 700; font-size: 11px; cursor: pointer; text-transform: uppercase; }
         
+        /* ICONO DE ÉXITO ANIMADO */
+        .success-icon { font-size: 60px; color: var(--exito); margin-bottom: 10px; }
+
         .ph-spin { animation: spin 2s infinite linear; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
@@ -167,13 +170,18 @@
         <div class="modal-content">
             <h3 style="margin-bottom:15px; font-size:18px;">Nueva Prenda</h3>
             <img id="preview-prenda" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; background: #f9f9f9; border-radius: 15px; border: 1px solid #eee;">
-            
             <input type="text" id="nombre-prenda" class="input-kinu" placeholder="Nombre (ej: Saco Gris)">
-            
             <div class="grid-cats-modal" id="modal-grid-cats"></div>
-
             <button class="btn-action" onclick="finalizarGuardado()">GUARDAR</button>
             <button class="btn-ghost" onclick="document.getElementById('modal-guardar').style.display='none'">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="modal-exito" class="modal-overlay">
+        <div class="modal-content" style="max-width: 250px;">
+            <i class="ph ph-check-circle success-icon"></i>
+            <h3 style="margin: 0; font-size: 18px; color: var(--verde-oscuro);">¡Guardado!</h3>
+            <p style="color: #666; font-size: 13px; margin-top: 5px;">Prenda añadida al closet.</p>
         </div>
     </div>
 
@@ -215,9 +223,7 @@
                         iconEl.className = iconClass;
                     }
                 } catch (e) { cityEl.innerText = "Error"; }
-            }, () => { 
-                cityEl.innerText = "OFFLINE"; tempEl.innerText = "22°"; iconEl.className = "ph ph-sun weather-icon"; 
-            });
+            }, () => { cityEl.innerText = "OFFLINE"; tempEl.innerText = "22°"; iconEl.className = "ph ph-sun weather-icon"; });
         }
 
         async function procesarFoto(event) {
@@ -254,8 +260,16 @@
             if(!document.getElementById('nombre-prenda').value || !categoriaSeleccionada) {
                 alert("Completa los datos"); return;
             }
-            alert("¡Guardado!");
+            // Acting de éxito
             document.getElementById('modal-guardar').style.display = 'none';
+            document.getElementById('modal-exito').style.display = 'flex';
+            
+            setTimeout(() => {
+                document.getElementById('modal-exito').style.display = 'none';
+                // Reset del form para la próxima vez
+                document.getElementById('nombre-prenda').value = '';
+                document.querySelectorAll('.cat-modal-item').forEach(i => i.classList.remove('selected'));
+            }, 1500);
         }
 
         function manejarDrive() {

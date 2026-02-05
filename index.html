@@ -52,13 +52,14 @@
         .cat-circle i { font-size: 24px; color: white; }
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
 
-        .glass-panel { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 20px; }
-
-        /* GRID DEL CLOSET */
-        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 100px; }
+        /* GRID DEL CLOSET (AHORA ARRIBA) */
+        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 30px; }
         .prenda-card { background: rgba(255,255,255,0.15); border-radius: 20px; overflow: hidden; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); animation: fadeIn 0.4s ease forwards; }
-        .prenda-img { width: 100%; height: 140px; object-fit: cover; background: rgba(255,255,255,0.1); }
-        .prenda-info { padding: 8px; color: white; font-size: 10px; font-weight: 700; text-align: center; text-transform: uppercase; }
+        .prenda-img { width: 100%; height: 140px; border-radius: 20px 20px 0 0; object-fit: cover; background: rgba(255,255,255,0.1); }
+        .prenda-info { padding: 10px; color: white; font-size: 10px; font-weight: 700; text-align: center; text-transform: uppercase; }
+
+        /* PANEL DE GUARDADO (AHORA ABAJO) */
+        .glass-panel { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 100px; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -109,6 +110,8 @@
                 <div class="cat-item" onclick="selectCat(this, 'Donar')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
             </div>
 
+            <div id="closet-display" class="closet-grid"></div>
+
             <div class="glass-panel">
                 <button id="auth-btn" onclick="abrirModalGoogle()">
                     <i class="ph ph-google-logo"></i> <span>VINCULAR GOOGLE DRIVE</span>
@@ -122,8 +125,6 @@
                 <input type="text" id="item-name" placeholder="Nombre de prenda">
                 <button class="btn-save" onclick="validarGuardado()">GUARDAR PRENDA</button>
             </div>
-
-            <div id="closet-display" class="closet-grid"></div>
         </div>
 
         <div class="nav-wrapper">
@@ -143,7 +144,7 @@
         <div class="modal-content">
             <i class="ph ph-camera-plus" style="font-size:50px; color:var(--verde-oliva);"></i>
             <h3>¿Añadir una foto?</h3>
-            <p>Te recomendamos tomar una foto para identificar mejor tu prenda en el closet.</p>
+            <p>Te recomendamos tomar una foto para identificar mejor tu prenda.</p>
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <button class="btn-save" onclick="abrirCamara()">TOMAR FOTO AHORA</button>
                 <button class="btn-secondary" onclick="cerrarModalFoto()">AHORA NO</button>
@@ -171,9 +172,12 @@
     <script>
         let fotoCapturada = false;
         
-        // Simulación de datos para la galería
+        // Simulación de datos
         const closetData = {
-            'Superior': [{n:'Camisa Blanca', img:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300'}],
+            'Superior': [
+                {n:'Camisa Blanca', img:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300'},
+                {n:'T-Shirt Negra', img:'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300'}
+            ],
             'Calzado': [{n:'Nike Air', img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300'}]
         };
 
@@ -225,7 +229,6 @@
             }, 80);
         }
 
-        // Carga inicial
         window.onload = () => renderCloset('Superior');
     </script>
 </body>

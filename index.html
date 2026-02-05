@@ -15,6 +15,7 @@
             --google-blue: #4285F4;
             --icon-inactivo: rgba(255,255,255,0.4);
             --exito: #4BB543;
+            --error: #E63946;
         }
 
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
@@ -97,8 +98,9 @@
         .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
         .btn-ghost { background: none; border: none; color: #999; margin-top: 12px; font-weight: 700; font-size: 11px; cursor: pointer; text-transform: uppercase; }
         
-        /* ICONO DE ÉXITO ANIMADO */
-        .success-icon { font-size: 60px; color: var(--exito); margin-bottom: 10px; }
+        .status-icon { font-size: 55px; margin-bottom: 10px; }
+        .color-success { color: var(--exito); }
+        .color-error { color: var(--error); }
 
         .ph-spin { animation: spin 2s infinite linear; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -177,11 +179,11 @@
         </div>
     </div>
 
-    <div id="modal-exito" class="modal-overlay">
+    <div id="modal-feedback" class="modal-overlay">
         <div class="modal-content" style="max-width: 250px;">
-            <i class="ph ph-check-circle success-icon"></i>
-            <h3 style="margin: 0; font-size: 18px; color: var(--verde-oscuro);">¡Guardado!</h3>
-            <p style="color: #666; font-size: 13px; margin-top: 5px;">Prenda añadida al closet.</p>
+            <i id="feedback-icon" class="ph status-icon"></i>
+            <h3 id="feedback-title" style="margin: 0; font-size: 18px; color: var(--verde-oscuro);"></h3>
+            <p id="feedback-msg" style="color: #666; font-size: 13px; margin-top: 5px;"></p>
         </div>
     </div>
 
@@ -256,20 +258,31 @@
             categoriaSeleccionada = nombre;
         }
 
-        function finalizarGuardado() {
-            if(!document.getElementById('nombre-prenda').value || !categoriaSeleccionada) {
-                alert("Completa los datos"); return;
-            }
-            // Acting de éxito
-            document.getElementById('modal-guardar').style.display = 'none';
-            document.getElementById('modal-exito').style.display = 'flex';
+        function mostrarFeedback(tipo, titulo, msg) {
+            const icon = document.getElementById('feedback-icon');
+            icon.className = tipo === 'success' ? 'ph ph-check-circle status-icon color-success' : 'ph ph-warning-circle status-icon color-error';
+            document.getElementById('feedback-title').innerText = titulo;
+            document.getElementById('feedback-msg').innerText = msg;
+            document.getElementById('modal-feedback').style.display = 'flex';
             
             setTimeout(() => {
-                document.getElementById('modal-exito').style.display = 'none';
-                // Reset del form para la próxima vez
-                document.getElementById('nombre-prenda').value = '';
-                document.querySelectorAll('.cat-modal-item').forEach(i => i.classList.remove('selected'));
+                document.getElementById('modal-feedback').style.display = 'none';
             }, 1500);
+        }
+
+        function finalizarGuardado() {
+            if(!document.getElementById('nombre-prenda').value || !categoriaSeleccionada) {
+                mostrarFeedback('error', 'Incompleto', 'Por favor rellena todos los datos');
+                return;
+            }
+            
+            document.getElementById('modal-guardar').style.display = 'none';
+            mostrarFeedback('success', '¡Guardado!', 'Prenda añadida al closet');
+            
+            // Reset
+            document.getElementById('nombre-prenda').value = '';
+            document.querySelectorAll('.cat-modal-item').forEach(i => i.classList.remove('selected'));
+            categoriaSeleccionada = '';
         }
 
         function manejarDrive() {

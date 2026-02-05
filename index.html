@@ -11,8 +11,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://i.imgur.com/yTIrTq2.png">
 
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <style>
@@ -21,7 +19,6 @@
             --verde-oscuro: #2D4636; 
             --blanco: #FFFFFF; 
             --google-blue: #4285F4;
-            --gris-suave: #F0F0F0;
         }
 
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
@@ -41,89 +38,56 @@
             align-items: end;
         }
 
-        /* LADO IZQUIERDO: CLIMA */
         .header-left-info { 
-            grid-column: 1; 
-            justify-self: start; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            color: white; 
-            margin-bottom: -4px;
-            min-width: 42px;
+            grid-column: 1; justify-self: start; 
+            display: flex; flex-direction: column; align-items: center; 
+            color: white; margin-bottom: -4px; min-width: 50px;
         }
         .weather-icon { font-size: 22px; margin-bottom: 2px; }
-        .temp-text { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
-        .ph-spin { animation: ph-spin 2s infinite linear; }
-        @keyframes ph-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .temp-text { font-size: 14px; font-weight: 700; }
 
         .header-center { display: flex; flex-direction: column; align-items: center; grid-column: 2; }
         .logo-header { width: 75px; height: auto; margin-bottom: 2px; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; line-height: 1; }
 
-        /* LADO DERECHO: DRIVE */
         .drive-status-btn {
-            grid-column: 3;
-            justify-self: end;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            width: 42px; height: 42px;
-            border-radius: 12px;
+            grid-column: 3; justify-self: end;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            width: 42px; height: 42px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; backdrop-filter: blur(5px);
-            position: relative; margin-bottom: -4px;
+            cursor: pointer; backdrop-filter: blur(5px); position: relative; margin-bottom: -4px;
         }
-        .drive-status-btn i { font-size: 22px; color: rgba(255,255,255,0.4); }
-        .drive-status-btn img { display: none; }
-        .drive-status-btn.vinculado { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); }
+        .drive-status-btn img { display: none; width: 28px; height: 28px; }
+        .drive-status-btn.vinculado img { display: block; }
         .drive-status-btn.vinculado i { display: none; }
-        .drive-status-btn.vinculado img { display: block; width: 28px; height: 28px; object-fit: contain; }
-
-        .drive-status-btn:not(.vinculado)::after {
-            content: ''; position: absolute; width: 100%; height: 100%;
-            border-radius: 12px; border: 2px solid white;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.4); opacity: 0; } }
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
-        .content::-webkit-scrollbar { display: none; }
-
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; cursor: pointer; opacity: 0.6; }
+        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; opacity: 0.6; }
         .cat-item.active { opacity: 1; }
-        .cat-circle { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; }
+        .cat-circle { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
         .cat-item.active .cat-circle { background: white; }
         .cat-item.active i { color: var(--verde-oscuro); }
-        .cat-circle i { font-size: 24px; color: white; }
-        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
+        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
 
-        /* NAVEGACIÓN */
-        .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; display: flex; align-items: center; justify-content: center; }
-        nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; padding: 0 15px; }
+        .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
+        nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.5; }
-        .nav-icon.active { opacity: 1; }
-
-        .cam-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 1200; }
-        .cam-trigger { width: 68px; height: 68px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .cam-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+        .cam-trigger { width: 68px; height: 68px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
-
-        /* MODALES */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
-        .modal-content { background: white; width: 85%; padding: 30px; border-radius: 30px; text-align: center; }
-        .progress-container { width: 100%; background: #eee; height: 8px; border-radius: 10px; margin: 20px 0; overflow: hidden; }
-        .progress-bar { width: 0%; height: 100%; background: var(--google-blue); transition: width 0.1s; }
-        .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; }
+        
+        .ph-spin { animation: spin 2s infinite linear; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body onload="obtenerClima()">
 
     <div class="main-container">
         <header>
-            <div class="header-left-info" id="weather-box">
+            <div class="header-left-info">
                 <i class="ph ph-circle-notch ph-spin weather-icon" id="w-icon"></i>
-                <span class="temp-text" id="w-temp">...</span>
+                <span class="temp-text" id="w-temp">Cargando</span>
             </div>
 
             <div class="header-center">
@@ -131,117 +95,72 @@
                 <div class="brand-text">KINU</div>
             </div>
 
-            <div id="auth-btn" class="drive-status-btn" onclick="manejarDrive()">
-                <i class="ph ph-google-drive-logo"></i>
-                <img src="https://i.imgur.com/Go2a4Hs.png" alt="Drive Connected">
+            <div id="auth-btn" class="drive-status-btn">
+                <i class="ph ph-google-drive-logo" style="color: white; opacity: 0.5;"></i>
+                <img src="https://i.imgur.com/Go2a4Hs.png">
             </div>
         </header>
         
         <div class="content">
             <div class="filter-scroll">
-                <div class="cat-item active" onclick="selectCat(this, 'Superior')"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
-                <div class="cat-item" onclick="selectCat(this, 'Inferior')"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
-                <div class="cat-item" onclick="selectCat(this, 'Abrigos')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
-                <div class="cat-item" onclick="selectCat(this, 'Enterizos')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
-                <div class="cat-item" onclick="selectCat(this, 'Calzado')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
-                <div class="cat-item" onclick="selectCat(this, 'Donar')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
+                <div class="cat-item active"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
+                <div class="cat-item"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
+                <div class="cat-item"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
             </div>
             <div id="main-content-area"></div>
         </div>
 
         <div class="nav-wrapper">
             <nav>
-                <div class="nav-icon active"><i class="ph ph-house-simple"></i></div>
-                <div style="flex: 1;"></div> 
+                <div class="nav-icon"><i class="ph ph-house-simple"></i></div>
                 <div class="nav-icon"><i class="ph ph-archive"></i></div>
             </nav>
-            <div class="cam-container" onclick="document.getElementById('input-camara').click()">
+            <div class="cam-container">
                 <div class="cam-trigger"><div class="cam-inner"><i class="ph ph-camera"></i></div></div>
-            </div>
-        </div>
-        <input type="file" id="input-camara" hidden accept="image/*" capture="environment">
-    </div>
-
-    <div id="modal-google" class="modal-overlay">
-        <div class="modal-content">
-            <div id="google-step-vincular">
-                <i class="ph ph-google-drive-logo" style="font-size:50px; color:var(--google-blue)"></i>
-                <h3>Vincular Google Drive</h3>
-                <p>Guarda tus prendas en tu nube personal.</p>
-                <button class="btn-action" style="background:var(--google-blue)" onclick="iniciarProceso('vincular')">VINCULAR AHORA</button>
-                <button style="background:none; border:none; color:#999; margin-top:15px; cursor:pointer;" onclick="cerrarModal()">CANCELAR</button>
-            </div>
-            <div id="google-step-progreso" style="display:none;">
-                <i id="progreso-icon" class="ph ph-arrows-clockwise ph-spin" style="font-size:50px;"></i>
-                <h3 id="progreso-text">Procesando...</h3>
-                <div class="progress-container"><div class="progress-bar" id="bar"></div></div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- LÓGICA DEL CLIMA ---
         async function obtenerClima() {
             const tempEl = document.getElementById('w-temp');
             const iconEl = document.getElementById('w-icon');
-            const apiKey = "869e98822080344d9f7832289667793e";
+            
+            // API KEY Pública de reserva
+            const apiKey = "ed60fcfbd4846fbd38c1447ca3d6537d"; 
 
             if (!navigator.geolocation) {
-                tempEl.innerText = "S/D";
-                iconEl.className = "ph ph-warning-circle weather-icon";
+                tempEl.innerText = "No GPS";
                 return;
             }
 
             navigator.geolocation.getCurrentPosition(async (pos) => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                
                 try {
-                    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&units=metric&appid=${apiKey}`);
-                    const data = await res.json();
+                    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`);
+                    const data = await response.json();
                     
-                    tempEl.innerText = Math.round(data.main.temp) + "°C";
-                    
-                    const main = data.weather[0].main.toLowerCase();
-                    if(main.includes('cloud')) iconEl.className = "ph ph-cloud weather-icon";
-                    else if(main.includes('rain') || main.includes('drizzle')) iconEl.className = "ph ph-cloud-rain weather-icon";
-                    else if(main.includes('clear')) iconEl.className = "ph ph-sun weather-icon";
-                    else if(main.includes('thunderstorm')) iconEl.className = "ph ph-cloud-lightning weather-icon";
-                    else iconEl.className = "ph ph-cloud-fog weather-icon";
-                } catch (e) {
-                    tempEl.innerText = "Err";
-                    iconEl.className = "ph ph-warning-circle weather-icon";
+                    if (data.main) {
+                        tempEl.innerText = Math.round(data.main.temp) + "°C";
+                        const clima = data.weather[0].main.toLowerCase();
+                        
+                        // Selección de iconos corregida
+                        if(clima.includes('cloud')) iconEl.className = "ph ph-cloud weather-icon";
+                        else if(clima.includes('rain')) iconEl.className = "ph ph-cloud-rain weather-icon";
+                        else if(clima.includes('clear')) iconEl.className = "ph ph-sun weather-icon";
+                        else iconEl.className = "ph ph-cloud-sun weather-icon";
+                    } else {
+                        tempEl.innerText = "Error";
+                    }
+                } catch (err) {
+                    tempEl.innerText = "Offline";
                 }
-            }, (error) => {
-                tempEl.innerText = "S/D";
+            }, (err) => {
+                tempEl.innerText = "Bloqueado";
                 iconEl.className = "ph ph-map-pin-slash weather-icon";
-                console.warn("Geolocalización denegada.");
-            });
-        }
-
-        // --- LÓGICA DRIVE ---
-        function manejarDrive() {
-            const btn = document.getElementById('auth-btn');
-            if (btn.classList.contains('vinculado')) {
-                if(confirm("¿Desvincular Google Drive?")) btn.classList.remove('vinculado');
-            } else {
-                document.getElementById('modal-google').style.display = 'flex';
-            }
-        }
-        function cerrarModal() { document.getElementById('modal-google').style.display = 'none'; }
-        function iniciarProceso(tipo) {
-            document.getElementById('google-step-vincular').style.display = 'none';
-            document.getElementById('google-step-progreso').style.display = 'block';
-            const bar = document.getElementById('bar');
-            let width = 0;
-            let interval = setInterval(() => {
-                if (width >= 100) {
-                    clearInterval(interval);
-                    document.getElementById('auth-btn').classList.add('vinculado');
-                    cerrarModal();
-                } else { width += 10; bar.style.width = width + '%'; }
-            }, 80);
-        }
-        function selectCat(element, name) {
-            document.querySelectorAll('.cat-item').forEach(i => i.classList.remove('active'));
-            element.classList.add('active');
+            }, { timeout: 10000 });
         }
     </script>
 </body>

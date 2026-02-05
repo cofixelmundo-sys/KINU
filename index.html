@@ -33,12 +33,7 @@
             align-items: center;
         }
 
-        /* CLIMA CON TRANSPARENCIA SIN RECUADRO */
-        .header-left-info { 
-            grid-column: 1; justify-self: start; 
-            display: flex; flex-direction: column; align-items: center; 
-            min-width: 55px;
-        }
+        .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 55px; }
         .weather-icon { font-size: 24px; margin-bottom: 2px; color: rgba(255, 255, 255, 0.7); }
         .temp-text { font-size: 16px; font-weight: 700; color: rgba(255, 255, 255, 0.7); }
         .city-label { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); letter-spacing: 0.5px; }
@@ -47,13 +42,11 @@
         .logo-header { width: 75px; height: auto; margin-bottom: 2px; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; line-height: 1; }
 
-        /* GOOGLE DRIVE ESTILO ORIGINAL */
         .drive-status-btn {
             grid-column: 3; justify-self: end;
             background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
             width: 42px; height: 42px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; backdrop-filter: blur(5px); position: relative;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(5px);
         }
         .drive-status-btn i { font-size: 22px; color: var(--icon-inactivo); }
         .drive-status-btn img { display: none; width: 28px; height: 28px; }
@@ -86,10 +79,19 @@
 
         /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
-        .modal-content { background: white; width: 85%; padding: 30px; border-radius: 30px; text-align: center; }
+        .modal-content { background: white; width: 90%; max-height: 80vh; padding: 25px; border-radius: 30px; text-align: center; overflow-y: auto; }
+        
+        /* ESTILO NUEVO POPUP GUARDAR */
+        .input-kinu { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #ddd; margin: 15px 0; font-size: 16px; outline: none; }
+        .grid-cats-modal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .cat-modal-item { padding: 10px; border-radius: 12px; border: 1px solid #eee; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .cat-modal-item.selected { border-color: var(--verde-oscuro); background: #f0f4f1; }
+        .cat-modal-item i { font-size: 20px; margin-bottom: 5px; color: var(--verde-oscuro); }
+        .cat-modal-item span { font-size: 9px; font-weight: 700; text-transform: uppercase; }
+
         .progress-container { width: 100%; background: #eee; height: 8px; border-radius: 10px; margin: 20px 0; overflow: hidden; }
         .progress-bar { width: 0%; height: 100%; background: var(--google-blue); transition: width 0.1s; }
-        .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; }
+        .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; margin-top: 10px; }
         
         .ph-spin { animation: spin 2s infinite linear; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -104,12 +106,10 @@
                 <span class="temp-text" id="w-temp">--°</span>
                 <span class="city-label" id="w-city">Cargando...</span>
             </div>
-
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
                 <div class="brand-text">KINU</div>
             </div>
-
             <div id="auth-btn" class="drive-status-btn" onclick="manejarDrive()">
                 <i class="ph ph-google-drive-logo"></i>
                 <img src="https://i.imgur.com/Go2a4Hs.png">
@@ -117,18 +117,8 @@
         </header>
         
         <div class="content">
-            <div class="filter-scroll">
-                <div class="cat-item active" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
-                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
-                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
-                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
-                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
-                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
-                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
-                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
-                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
-                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
-            </div>
+            <div class="filter-scroll" id="main-cats">
+                </div>
             <div id="main-content-area"></div>
         </div>
 
@@ -151,14 +141,12 @@
             <div id="step-vincular">
                 <i class="ph ph-google-drive-logo" style="font-size:50px; color:var(--google-blue)"></i>
                 <h3>Vincular Google Drive</h3>
-                <p>Guarda tus prendas en tu nube personal.</p>
                 <button class="btn-action" style="background:var(--google-blue)" onclick="iniciarProceso('vincular')">VINCULAR AHORA</button>
                 <button style="background:none; border:none; color:#999; margin-top:15px;" onclick="cerrarModal()">CANCELAR</button>
             </div>
             <div id="step-desvincular" style="display:none;">
                 <i class="ph ph-warning-circle" style="font-size:50px; color:#ff4d4d"></i>
                 <h3>¿Desvincular cuenta?</h3>
-                <p>Ya no se guardarán nuevas prendas en Drive.</p>
                 <button class="btn-action" style="background:#ff4d4d" onclick="iniciarProceso('desvincular')">SÍ, DESVINCULAR</button>
                 <button style="background:none; border:none; color:#999; margin-top:15px;" onclick="cerrarModal()">CANCELAR</button>
             </div>
@@ -170,64 +158,116 @@
         </div>
     </div>
 
+    <div id="modal-guardar" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Nueva Prenda</h3>
+            <img id="preview-prenda" style="width: 120px; height: 120px; object-fit: contain; margin-bottom: 10px; background: #f9f9f9; border-radius: 15px;">
+            
+            <input type="text" id="nombre-prenda" class="input-kinu" placeholder="Nombre (ej: Camisa Lino)">
+            
+            <p style="font-size: 11px; font-weight: 800; text-align: left; margin-bottom: 10px; color: #666;">SELECCIONA CATEGORÍA:</p>
+            <div class="grid-cats-modal" id="modal-grid-cats">
+                </div>
+
+            <button class="btn-action" onclick="finalizarGuardado()">GUARDAR EN CLOSET</button>
+            <button style="background:none; border:none; color:#999; margin-top:15px;" onclick="document.getElementById('modal-guardar').style.display='none'">DESCARTAR</button>
+        </div>
+    </div>
+
     <script>
         const API_KEY_WEATHER = 'd567259d44af4945dcfc74513d09e079';
-        const REMOVE_BG_API = 'TU_API_KEY_AQUI'; 
+        const categorias = [
+            {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
+            {n: 'Enterizos', i: 'ph-dress'}, {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Accesorios', i: 'ph-sunglasses'},
+            {n: 'Vintage', i: 'ph-hourglass'}, {n: 'Deporte', i: 'ph-person-simple-run'}, {n: 'Dormir', i: 'ph-moon'}, {n: 'Donar', i: 'ph-hand-heart'}
+        ];
 
-        // --- CLIMA RECUPERADO ---
+        let categoriaSeleccionada = '';
+
+        // Cargar categorías
+        function renderCats() {
+            const container = document.getElementById('main-cats');
+            const modalGrid = document.getElementById('modal-grid-cats');
+            
+            categorias.forEach((cat, idx) => {
+                // Header cats
+                container.innerHTML += `
+                    <div class="cat-item ${idx===0?'active':''}" onclick="selectCat(this)">
+                        <div class="cat-circle"><i class="ph ${cat.i}"></i></div>
+                        <span class="cat-label">${cat.n}</span>
+                    </div>`;
+                // Modal cats
+                modalGrid.innerHTML += `
+                    <div class="cat-modal-item" onclick="selectCatModal(this, '${cat.n}')">
+                        <i class="ph ${cat.i}"></i>
+                        <span>${cat.n}</span>
+                    </div>`;
+            });
+        }
+
+        // --- LÓGICA CÁMARA + POPUP ---
+        async function procesarFoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // 1. Mostrar progreso de "Quitando fondo"
+            const modalG = document.getElementById('modal-google');
+            document.getElementById('step-vincular').style.display = 'none';
+            document.getElementById('step-progreso').style.display = 'block';
+            document.getElementById('progreso-txt').innerText = "Quitando fondo...";
+            modalG.style.display = 'flex';
+
+            // Simulación de procesamiento (Aquí iría tu fetch a Remove.bg)
+            let b = document.getElementById('bar');
+            b.style.width = '0%';
+            let itv = setInterval(() => {
+                let w = parseInt(b.style.width);
+                if(w >= 100) {
+                    clearInterval(itv);
+                    modalG.style.display = 'none';
+                    abrirModalGuardar(URL.createObjectURL(file));
+                } else { b.style.width = (w + 10) + '%'; }
+            }, 150);
+        }
+
+        function abrirModalGuardar(imgUrl) {
+            document.getElementById('preview-prenda').src = imgUrl;
+            document.getElementById('modal-guardar').style.display = 'flex';
+        }
+
+        function selectCatModal(el, nombre) {
+            document.querySelectorAll('.cat-modal-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+            categoriaSeleccionada = nombre;
+        }
+
+        function finalizarGuardado() {
+            const nombre = document.getElementById('nombre-prenda').value;
+            if(!nombre || !categoriaSeleccionada) {
+                alert("Por favor ponle un nombre y elige categoría");
+                return;
+            }
+            alert(`Guardado: ${nombre} en ${categoriaSeleccionada}`);
+            document.getElementById('modal-guardar').style.display = 'none';
+        }
+
+        // --- RESTO DE FUNCIONES (CLIMA/DRIVE) ---
         async function obtenerClima() {
-            const tempEl = document.getElementById('w-temp');
-            const iconEl = document.getElementById('w-icon');
-            const cityEl = document.getElementById('w-city');
-
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const { latitude: lat, longitude: lon } = pos.coords;
                 try {
                     const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=es&appid=${API_KEY_WEATHER}`);
                     const data = await res.json();
-                    
-                    if (data.main) {
-                        tempEl.innerText = Math.round(data.main.temp) + "°";
-                        cityEl.innerText = data.name.split(',')[0];
-                        
-                        const clima = data.weather[0].main.toLowerCase();
-                        if(clima.includes('cloud')) iconEl.className = "ph ph-cloud weather-icon";
-                        else if(clima.includes('rain')) iconEl.className = "ph ph-cloud-rain weather-icon";
-                        else if(clima.includes('clear')) iconEl.className = "ph ph-sun weather-icon";
-                        else iconEl.className = "ph ph-cloud-sun weather-icon";
-                    }
-                } catch (e) {
-                    tempEl.innerText = "--°";
-                    cityEl.innerText = "Error";
-                }
-            }, (error) => {
-                cityEl.innerText = "OFFLINE";
-                tempEl.innerText = "22°"; 
-                iconEl.className = "ph ph-sun weather-icon";
+                    document.getElementById('w-temp').innerText = Math.round(data.main.temp) + "°";
+                    document.getElementById('w-city').innerText = data.name.split(',')[0];
+                } catch (e) { console.error(e); }
             });
         }
 
-        // --- CÁMARA + REMOVE BG ---
-        async function procesarFoto(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            document.getElementById('modal-google').style.display = 'flex';
-            document.getElementById('step-vincular').style.display = 'none';
-            document.getElementById('step-progreso').style.display = 'block';
-            document.getElementById('progreso-txt').innerText = "Quitando fondo...";
-            
-            // Lógica de Remove.bg (igual que el anterior)
-            // ...
-            setTimeout(() => cerrarModal(), 2000); // Simulación para el ejemplo
-        }
-
-        // --- GOOGLE DRIVE RECUPERADO ---
         function manejarDrive() {
             const btn = document.getElementById('auth-btn');
             document.getElementById('modal-google').style.display = 'flex';
             document.getElementById('step-progreso').style.display = 'none';
-            document.getElementById('progreso-txt').innerText = "Procesando...";
-            
             if (btn.classList.contains('vinculado')) {
                 document.getElementById('step-vincular').style.display = 'none';
                 document.getElementById('step-desvincular').style.display = 'block';
@@ -241,17 +281,17 @@
             document.getElementById('step-vincular').style.display = 'none';
             document.getElementById('step-desvincular').style.display = 'none';
             document.getElementById('step-progreso').style.display = 'block';
-            let bar = document.getElementById('bar');
-            let width = 0;
-            let interval = setInterval(() => {
-                if (width >= 100) {
-                    clearInterval(interval);
+            let b = document.getElementById('bar');
+            let w = 0;
+            let itv = setInterval(() => {
+                if (w >= 100) {
+                    clearInterval(itv);
                     const btn = document.getElementById('auth-btn');
                     if (tipo === 'vincular') btn.classList.add('vinculado');
                     else btn.classList.remove('vinculado');
                     cerrarModal();
-                } else { width += 5; bar.style.width = width + '%'; }
-            }, 60);
+                } else { w += 5; b.style.width = w + '%'; }
+            }, 50);
         }
 
         function cerrarModal() { document.getElementById('modal-google').style.display = 'none'; }
@@ -260,7 +300,7 @@
             el.classList.add('active');
         }
 
-        window.onload = obtenerClima;
+        window.onload = () => { renderCats(); obtenerClima(); };
     </script>
 </body>
 </html>

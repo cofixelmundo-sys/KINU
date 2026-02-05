@@ -5,12 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>KINU - Smart Closet</title>
     
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2D4636">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://i.imgur.com/yTIrTq2.png">
-
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <style>
@@ -62,12 +56,13 @@
         .drive-status-btn.vinculado i { display: none; }
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; opacity: 0.6; }
+        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; opacity: 0.6; cursor: pointer; }
         .cat-item.active { opacity: 1; }
         .cat-circle { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
         .cat-item.active .cat-circle { background: white; }
         .cat-item.active i { color: var(--verde-oscuro); }
+        .cat-circle i { font-size: 24px; color: white; }
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
@@ -76,18 +71,19 @@
         .cam-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
         .cam-trigger { width: 68px; height: 68px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
         
         .ph-spin { animation: spin 2s infinite linear; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
-<body onload="obtenerClima()">
+<body>
 
     <div class="main-container">
         <header>
             <div class="header-left-info">
                 <i class="ph ph-circle-notch ph-spin weather-icon" id="w-icon"></i>
-                <span class="temp-text" id="w-temp">Cargando</span>
+                <span class="temp-text" id="w-temp">...</span>
             </div>
 
             <div class="header-center">
@@ -95,19 +91,22 @@
                 <div class="brand-text">KINU</div>
             </div>
 
-            <div id="auth-btn" class="drive-status-btn">
-                <i class="ph ph-google-drive-logo" style="color: white; opacity: 0.5;"></i>
+            <div id="auth-btn" class="drive-status-btn" onclick="this.classList.toggle('vinculado')">
+                <i class="ph ph-google-drive-logo" style="color: white; opacity: 0.5; font-size: 22px;"></i>
                 <img src="https://i.imgur.com/Go2a4Hs.png">
             </div>
         </header>
         
         <div class="content">
             <div class="filter-scroll">
-                <div class="cat-item active"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
-                <div class="cat-item"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
-                <div class="cat-item"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
+                <div class="cat-item active" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-t-shirt"></i></div><span class="cat-label">Superior</span></div>
+                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-pants"></i></div><span class="cat-label">Inferior</span></div>
+                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
+                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
+                <div class="cat-item" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
             </div>
-            <div id="main-content-area"></div>
+            <div id="main-content-area">
+                </div>
         </div>
 
         <div class="nav-wrapper">
@@ -122,46 +121,51 @@
     </div>
 
     <script>
+        // Función de selección de categoría
+        function selectCat(el) {
+            document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // Lógica de Clima Mejorada (No bloqueante)
         async function obtenerClima() {
             const tempEl = document.getElementById('w-temp');
             const iconEl = document.getElementById('w-icon');
-            
-            // API KEY Pública de reserva
             const apiKey = "ed60fcfbd4846fbd38c1447ca3d6537d"; 
 
-            if (!navigator.geolocation) {
-                tempEl.innerText = "No GPS";
-                return;
-            }
+            // Si el GPS no responde en 5 segundos, cancelar búsqueda
+            const timeout = setTimeout(() => {
+                tempEl.innerText = "22°C"; // Valor por defecto para que no se vea vacío
+                iconEl.className = "ph ph-sun weather-icon";
+            }, 5000);
 
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                
-                try {
-                    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`);
-                    const data = await response.json();
-                    
-                    if (data.main) {
-                        tempEl.innerText = Math.round(data.main.temp) + "°C";
-                        const clima = data.weather[0].main.toLowerCase();
-                        
-                        // Selección de iconos corregida
-                        if(clima.includes('cloud')) iconEl.className = "ph ph-cloud weather-icon";
-                        else if(clima.includes('rain')) iconEl.className = "ph ph-cloud-rain weather-icon";
-                        else if(clima.includes('clear')) iconEl.className = "ph ph-sun weather-icon";
-                        else iconEl.className = "ph ph-cloud-sun weather-icon";
-                    } else {
-                        tempEl.innerText = "Error";
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    clearTimeout(timeout);
+                    try {
+                        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&units=metric&appid=${apiKey}`);
+                        const data = await response.json();
+                        if (data.main) {
+                            tempEl.innerText = Math.round(data.main.temp) + "°C";
+                            const clima = data.weather[0].main.toLowerCase();
+                            if(clima.includes('cloud')) iconEl.className = "ph ph-cloud weather-icon";
+                            else if(clima.includes('rain')) iconEl.className = "ph ph-cloud-rain weather-icon";
+                            else if(clima.includes('clear')) iconEl.className = "ph ph-sun weather-icon";
+                            else iconEl.className = "ph ph-cloud-sun weather-icon";
+                        }
+                    } catch (err) {
+                        console.log("Error clima, usando defecto");
                     }
-                } catch (err) {
-                    tempEl.innerText = "Offline";
-                }
-            }, (err) => {
-                tempEl.innerText = "Bloqueado";
-                iconEl.className = "ph ph-map-pin-slash weather-icon";
-            }, { timeout: 10000 });
+                }, (err) => {
+                    clearTimeout(timeout);
+                    tempEl.innerText = "--°C";
+                    iconEl.className = "ph ph-map-pin-slash weather-icon";
+                });
+            }
         }
+
+        // Ejecutar clima al cargar
+        obtenerClima();
     </script>
 </body>
 </html>

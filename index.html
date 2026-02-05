@@ -39,7 +39,7 @@
         .logo-header { width: 85px; height: auto; margin-bottom: 5px; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
 
-        .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
+        .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .content::-webkit-scrollbar { display: none; }
 
         /* CATEGORIAS */
@@ -47,44 +47,42 @@
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; cursor: pointer; opacity: 0.6; }
         .cat-item.active { opacity: 1; }
         .cat-circle { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; }
-        .cat-item.active .cat-circle { background: white; }
+        .cat-item.active .cat-circle { background: white; border: none; }
         .cat-item.active i { color: var(--verde-oscuro); }
         .cat-circle i { font-size: 24px; color: white; }
-        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
+        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
 
-        .glass-panel { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .glass-panel { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 20px; }
+
+        /* GRID DEL CLOSET */
+        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 100px; }
+        .prenda-card { background: rgba(255,255,255,0.15); border-radius: 20px; overflow: hidden; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); animation: fadeIn 0.4s ease forwards; }
+        .prenda-img { width: 100%; height: 140px; object-fit: cover; background: rgba(255,255,255,0.1); }
+        .prenda-info { padding: 8px; color: white; font-size: 10px; font-weight: 700; text-align: center; text-transform: uppercase; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* MODALES */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center;
-            z-index: 2000; backdrop-filter: blur(8px);
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 85%; padding: 35px 25px; border-radius: 35px; text-align: center; }
-        .modal-content i { font-size: 55px; color: var(--verde-oliva); margin-bottom: 15px; }
-        .modal-content h3 { margin: 0 0 10px; color: var(--verde-oscuro); }
-        .modal-content p { color: #666; font-size: 14px; margin-bottom: 25px; }
         
         /* BOTONES */
         #auth-btn { background: var(--google-blue); color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
         #auth-btn.vinculado { background: var(--exito); }
-        
         .btn-save { background: var(--verde-oscuro); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; }
         .btn-secondary { background: var(--gris-suave); color: #555; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 700; cursor: pointer; }
 
-        /* NAVEGACIÓN */
+        /* NAV */
         .nav-wrapper { position: relative; margin: 0 25px 30px; height: 55px; display: flex; align-items: center; justify-content: center; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 0 15px; }
         .nav-icon { color: white; font-size: 24px; opacity: 0.5; }
         .nav-icon.active { opacity: 1; }
-
         .cam-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -60%); z-index: 1200; }
         .cam-trigger { width: 70px; height: 70px; background: var(--verde-oliva); border-radius: 50%; border: 6px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 30px; }
 
         input, select { width: 100%; height: 50px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 15px; padding: 0 15px; font-size: 16px; background: white; }
-
         .progress-container { width: 100%; background: #eee; height: 8px; border-radius: 10px; margin: 20px 0; overflow: hidden; display: none; }
         .progress-bar { width: 0%; height: 100%; background: var(--google-blue); }
     </style>
@@ -124,6 +122,8 @@
                 <input type="text" id="item-name" placeholder="Nombre de prenda">
                 <button class="btn-save" onclick="validarGuardado()">GUARDAR PRENDA</button>
             </div>
+
+            <div id="closet-display" class="closet-grid"></div>
         </div>
 
         <div class="nav-wrapper">
@@ -141,9 +141,9 @@
 
     <div id="modal-foto" class="modal-overlay">
         <div class="modal-content">
-            <i class="ph ph-camera-plus"></i>
+            <i class="ph ph-camera-plus" style="font-size:50px; color:var(--verde-oliva);"></i>
             <h3>¿Añadir una foto?</h3>
-            <p>Para identificar mejor tus prendas en el closet, te recomendamos tomar una foto primero.</p>
+            <p>Te recomendamos tomar una foto para identificar mejor tu prenda en el closet.</p>
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <button class="btn-save" onclick="abrirCamara()">TOMAR FOTO AHORA</button>
                 <button class="btn-secondary" onclick="cerrarModalFoto()">AHORA NO</button>
@@ -154,14 +154,14 @@
     <div id="modal-google" class="modal-overlay">
         <div class="modal-content">
             <div id="google-step-1">
-                <i class="ph ph-google-drive-logo" style="color:var(--google-blue)"></i>
+                <i class="ph ph-google-drive-logo" style="font-size:50px; color:var(--google-blue)"></i>
                 <h3>Vincular Google Drive</h3>
-                <p>KINU guardará las fotos de tus prendas en una carpeta privada de tu Google Drive.</p>
+                <p>KINU guardará tus prendas en una carpeta privada de tu Drive.</p>
                 <button class="btn-save" style="background:var(--google-blue)" onclick="iniciarVinculacion()">ACEPTAR Y VINCULAR</button>
                 <button class="btn-secondary" onclick="cerrarModalGoogle()">CANCELAR</button>
             </div>
             <div id="google-step-2" style="display:none;">
-                <i class="ph ph-arrows-clockwise ph-spin"></i>
+                <i class="ph ph-arrows-clockwise ph-spin" style="font-size:50px;"></i>
                 <h3 id="status-text">Vinculando...</h3>
                 <div class="progress-container" id="progress-box" style="display:block;"><div class="progress-bar" id="bar"></div></div>
             </div>
@@ -170,61 +170,63 @@
 
     <script>
         let fotoCapturada = false;
+        
+        // Simulación de datos para la galería
+        const closetData = {
+            'Superior': [{n:'Camisa Blanca', img:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300'}],
+            'Calzado': [{n:'Nike Air', img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300'}]
+        };
 
-        // --- CATEGORÍAS ---
         function selectCat(element, name) {
             document.querySelectorAll('.cat-item').forEach(i => i.classList.remove('active'));
             element.classList.add('active');
             document.getElementById('main-cat').value = name;
+            renderCloset(name);
         }
 
-        // --- CÁMARA ---
-        function abrirCamara() {
-            cerrarModalFoto();
-            document.getElementById('input-camara').click();
-        }
-
-        document.getElementById('input-camara').addEventListener('change', function() {
-            if(this.files && this.files[0]) {
-                fotoCapturada = true;
-                document.querySelector('.cam-inner i').style.color = 'var(--verde-oliva)';
+        function renderCloset(cat) {
+            const display = document.getElementById('closet-display');
+            display.innerHTML = '';
+            const items = closetData[cat] || [];
+            if(items.length === 0) {
+                display.innerHTML = `<p style="grid-column:1/3; color:white; text-align:center; opacity:0.5; padding:20px;">No hay prendas en ${cat}</p>`;
+                return;
             }
+            items.forEach(item => {
+                display.innerHTML += `<div class="prenda-card"><img src="${item.img}" class="prenda-img"><div class="prenda-info">${item.n}</div></div>`;
+            });
+        }
+
+        function abrirCamara() { cerrarModalFoto(); document.getElementById('input-camara').click(); }
+        document.getElementById('input-camara').addEventListener('change', function() {
+            if(this.files && this.files[0]) { fotoCapturada = true; document.querySelector('.cam-inner i').style.color = 'var(--exito)'; }
         });
 
-        // --- GUARDADO ---
-        function validarGuardado() {
-            if (!fotoCapturada) {
-                document.getElementById('modal-foto').style.display = 'flex';
-            } else {
-                alert("¡Prenda guardada con éxito!");
-            }
-        }
+        function validarGuardado() { if (!fotoCapturada) document.getElementById('modal-foto').style.display = 'flex'; else alert("¡Guardado!"); }
         function cerrarModalFoto() { document.getElementById('modal-foto').style.display = 'none'; }
-
-        // --- GOOGLE DRIVE ---
         function abrirModalGoogle() { if (!document.getElementById('auth-btn').classList.contains('vinculado')) document.getElementById('modal-google').style.display = 'flex'; }
         function cerrarModalGoogle() { document.getElementById('modal-google').style.display = 'none'; }
+
         function iniciarVinculacion() {
             document.getElementById('google-step-1').style.display = 'none';
             document.getElementById('google-step-2').style.display = 'block';
-            let bar = document.getElementById('bar');
-            let width = 0;
+            let bar = document.getElementById('bar'); let width = 0;
             let interval = setInterval(() => {
                 if (width >= 100) {
                     clearInterval(interval);
-                    document.getElementById('status-text').innerText = "¡Vinculación Exitosa!";
-                    document.querySelector('#google-step-2 i').className = "ph ph-check-circle";
-                    document.querySelector('#google-step-2 i').style.color = "var(--exito)";
+                    document.getElementById('status-text').innerText = "¡Éxito!";
                     setTimeout(() => {
                         cerrarModalGoogle();
                         const btn = document.getElementById('auth-btn');
                         btn.classList.add('vinculado');
-                        btn.querySelector('span').innerText = "GOOGLE DRIVE VINCULADO";
-                        btn.querySelector('i').className = "ph ph-check-circle";
-                    }, 1500);
+                        btn.innerHTML = '<i class="ph ph-check-circle"></i> GOOGLE DRIVE VINCULADO';
+                    }, 1000);
                 } else { width += 5; bar.style.width = width + '%'; }
-            }, 100);
+            }, 80);
         }
+
+        // Carga inicial
+        window.onload = () => renderCloset('Superior');
     </script>
 </body>
 </html>

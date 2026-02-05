@@ -33,7 +33,6 @@
             align-items: center;
         }
 
-        /* CLIMA CON TRANSPARENCIA */
         .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 55px; }
         .weather-icon { font-size: 24px; margin-bottom: 2px; color: rgba(255, 255, 255, 0.7); }
         .temp-text { font-size: 16px; font-weight: 700; color: rgba(255, 255, 255, 0.7); }
@@ -78,19 +77,24 @@
         .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
         #cam-input { display: none; }
 
+        /* ESTILO UNIFICADO DE MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
-        .modal-content { background: white; width: 90%; max-height: 80vh; padding: 25px; border-radius: 30px; text-align: center; overflow-y: auto; }
+        .modal-content { background: white; width: 85%; padding: 30px; border-radius: 30px; text-align: center; }
         
-        .input-kinu { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #ddd; margin: 15px 0; font-size: 16px; outline: none; }
-        .grid-cats-modal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .cat-modal-item { padding: 10px; border-radius: 12px; border: 1px solid #eee; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .cat-modal-item.selected { border-color: var(--verde-oscuro); background: #f0f4f1; }
+        /* ESTILO INPUTS Y GRID DE CATEGORÍAS */
+        .input-kinu { width: 100%; padding: 18px; border-radius: 15px; border: 1px solid #eee; margin: 15px 0; font-size: 14px; background: #f9f9f9; outline: none; font-weight: 500; }
+        .grid-cats-modal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0 25px; max-height: 200px; overflow-y: auto; padding: 5px; }
+        .cat-modal-item { padding: 12px 5px; border-radius: 15px; border: 1px solid #f0f0f0; display: flex; flex-direction: column; align-items: center; cursor: pointer; background: #fff; }
+        .cat-modal-item.selected { border-color: var(--verde-oscuro); background: #f0f4f1; border-width: 2px; }
         .cat-modal-item i { font-size: 20px; margin-bottom: 5px; color: var(--verde-oscuro); }
-        .cat-modal-item span { font-size: 9px; font-weight: 700; text-transform: uppercase; }
+        .cat-modal-item span { font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--verde-oscuro); }
 
         .progress-container { width: 100%; background: #eee; height: 8px; border-radius: 10px; margin: 20px 0; overflow: hidden; }
         .progress-bar { width: 0%; height: 100%; background: var(--google-blue); transition: width 0.1s; }
-        .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; margin-top: 10px; }
+        
+        /* BOTÓN IDÉNTICO AL DE GOOGLE DRIVE */
+        .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; font-size: 14px; text-transform: uppercase; }
+        .btn-ghost { background: none; border: none; color: #999; margin-top: 15px; font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; }
         
         .ph-spin { animation: spin 2s infinite linear; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -138,19 +142,21 @@
         <div class="modal-content">
             <div id="step-vincular">
                 <i class="ph ph-google-drive-logo" style="font-size:50px; color:var(--google-blue)"></i>
-                <h3>Vincular Google Drive</h3>
+                <h3 style="margin-top:15px;">Vincular Google Drive</h3>
+                <p style="color:#666; font-size:14px; margin-bottom:25px;">Guarda tus prendas en tu nube personal.</p>
                 <button class="btn-action" style="background:var(--google-blue)" onclick="iniciarProceso('vincular')">VINCULAR AHORA</button>
-                <button style="background:none; border:none; color:#999; margin-top:15px;" onclick="cerrarModal()">CANCELAR</button>
+                <button class="btn-ghost" onclick="cerrarModal()">CANCELAR</button>
             </div>
             <div id="step-desvincular" style="display:none;">
                 <i class="ph ph-warning-circle" style="font-size:50px; color:#ff4d4d"></i>
-                <h3>¿Desvincular cuenta?</h3>
+                <h3 style="margin-top:15px;">¿Desvincular cuenta?</h3>
+                <p style="color:#666; font-size:14px; margin-bottom:25px;">Ya no se guardarán nuevas prendas en Drive.</p>
                 <button class="btn-action" style="background:#ff4d4d" onclick="iniciarProceso('desvincular')">SÍ, DESVINCULAR</button>
-                <button style="background:none; border:none; color:#999; margin-top:15px;" onclick="cerrarModal()">CANCELAR</button>
+                <button class="btn-ghost" onclick="cerrarModal()">CANCELAR</button>
             </div>
             <div id="step-progreso" style="display:none;">
                 <i class="ph ph-arrows-clockwise ph-spin" style="font-size:50px; color:var(--google-blue)"></i>
-                <h3 id="progreso-txt">Procesando...</h3>
+                <h3 id="progreso-txt" style="margin-top:15px;">Procesando...</h3>
                 <div class="progress-container"><div class="progress-bar" id="bar"></div></div>
             </div>
         </div>
@@ -158,13 +164,16 @@
 
     <div id="modal-guardar" class="modal-overlay">
         <div class="modal-content">
-            <h3>Nueva Prenda</h3>
-            <img id="preview-prenda" style="width: 120px; height: 120px; object-fit: contain; margin-bottom: 10px; background: #f9f9f9; border-radius: 15px;">
-            <input type="text" id="nombre-prenda" class="input-kinu" placeholder="Nombre (ej: Camisa Lino)">
-            <p style="font-size: 11px; font-weight: 800; text-align: left; margin-bottom: 10px; color: #666;">SELECCIONA CATEGORÍA:</p>
+            <h3 style="margin-bottom:20px;">Nueva Prenda</h3>
+            <img id="preview-prenda" style="width: 140px; height: 140px; object-fit: contain; margin-bottom: 5px; background: #f9f9f9; border-radius: 20px; border: 1px solid #eee;">
+            
+            <input type="text" id="nombre-prenda" class="input-kinu" placeholder="Nombre de la prenda">
+            
+            <p style="font-size: 10px; font-weight: 800; text-align: left; margin-bottom: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Categoría</p>
             <div class="grid-cats-modal" id="modal-grid-cats"></div>
+
             <button class="btn-action" onclick="finalizarGuardado()">GUARDAR EN CLOSET</button>
-            <button style="background:none; border:none; color:#999; margin-top:15px;" onclick="document.getElementById('modal-guardar').style.display='none'">DESCARTAR</button>
+            <button class="btn-ghost" onclick="document.getElementById('modal-guardar').style.display='none'">DESCARTAR</button>
         </div>
     </div>
 
@@ -180,8 +189,7 @@
         function renderCats() {
             const container = document.getElementById('main-cats');
             const modalGrid = document.getElementById('modal-grid-cats');
-            container.innerHTML = '';
-            modalGrid.innerHTML = '';
+            container.innerHTML = ''; modalGrid.innerHTML = '';
             categorias.forEach((cat, idx) => {
                 container.innerHTML += `<div class="cat-item ${idx===0?'active':''}" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;
                 modalGrid.innerHTML += `<div class="cat-modal-item" onclick="selectCatModal(this, '${cat.n}')"><i class="ph ${cat.i}"></i><span>${cat.n}</span></div>`;
@@ -192,34 +200,23 @@
             const tempEl = document.getElementById('w-temp');
             const iconEl = document.getElementById('w-icon');
             const cityEl = document.getElementById('w-city');
-
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 try {
                     const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&units=metric&lang=es&appid=${API_KEY_WEATHER}`);
                     const data = await res.json();
-                    
                     if (data.main) {
                         tempEl.innerText = Math.round(data.main.temp) + "°";
                         cityEl.innerText = data.name.split(',')[0];
-                        
-                        // CORRECCIÓN ICONO: Quitamos el spin y ponemos el real
                         const clima = data.weather[0].main.toLowerCase();
-                        let iconClass = "ph ph-cloud-sun weather-icon"; // Default
-                        
+                        let iconClass = "ph ph-cloud-sun weather-icon";
                         if(clima.includes('cloud')) iconClass = "ph ph-cloud weather-icon";
                         else if(clima.includes('rain')) iconClass = "ph ph-cloud-rain weather-icon";
                         else if(clima.includes('clear')) iconClass = "ph ph-sun weather-icon";
-                        
-                        iconEl.className = iconClass; // Esto pisa el circle-notch
+                        iconEl.className = iconClass;
                     }
-                } catch (e) { 
-                    cityEl.innerText = "Error"; 
-                    iconEl.className = "ph ph-warning weather-icon";
-                }
+                } catch (e) { cityEl.innerText = "Error"; }
             }, () => { 
-                cityEl.innerText = "OFFLINE"; 
-                tempEl.innerText = "22°"; 
-                iconEl.className = "ph ph-sun weather-icon"; 
+                cityEl.innerText = "OFFLINE"; tempEl.innerText = "22°"; iconEl.className = "ph ph-sun weather-icon"; 
             });
         }
 
@@ -235,9 +232,11 @@
             b.style.width = '0%';
             let itv = setInterval(() => {
                 let w = parseInt(b.style.width);
-                if(w >= 100) { clearInterval(itv); modalG.style.display = 'none'; abrirModalGuardar(URL.createObjectURL(file)); }
-                else { b.style.width = (w + 10) + '%'; }
-            }, 150);
+                if(w >= 100) { 
+                    clearInterval(itv); modalG.style.display = 'none'; 
+                    abrirModalGuardar(URL.createObjectURL(file)); 
+                } else { b.style.width = (w + 10) + '%'; }
+            }, 120);
         }
 
         function abrirModalGuardar(imgUrl) {
@@ -253,9 +252,9 @@
 
         function finalizarGuardado() {
             if(!document.getElementById('nombre-prenda').value || !categoriaSeleccionada) {
-                alert("Por favor completa los campos"); return;
+                alert("Completa el nombre y elige una categoría"); return;
             }
-            alert("Guardado con éxito");
+            alert("Prenda guardada en el closet");
             document.getElementById('modal-guardar').style.display = 'none';
         }
 
@@ -276,6 +275,7 @@
             document.getElementById('step-vincular').style.display = 'none';
             document.getElementById('step-desvincular').style.display = 'none';
             document.getElementById('step-progreso').style.display = 'block';
+            document.getElementById('progreso-txt').innerText = "Procesando...";
             let b = document.getElementById('bar');
             let w = 0;
             let itv = setInterval(() => {

@@ -35,9 +35,35 @@
         
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom); }
         
-        header { padding: calc(env(safe-area-inset-top) + 10px) 20px 10px; display: flex; flex-direction: column; align-items: center; }
-        .logo-header { width: 85px; height: auto; margin-bottom: 5px; }
+        /* HEADER REORGANIZADO */
+        header { 
+            padding: calc(env(safe-area-inset-top) + 15px) 25px 10px; 
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+        }
+        .header-left { display: flex; flex-direction: column; align-items: center; grid-column: 2; }
+        .logo-header { width: 80px; height: auto; margin-bottom: 2px; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
+
+        /* BOTÓN DRIVE ARRIBA A LA DERECHA */
+        .drive-status-btn {
+            grid-column: 3;
+            justify-self: end;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+        .drive-status-btn i { font-size: 24px; color: rgba(255,255,255,0.4); } /* Gris por defecto */
+        .drive-status-btn.vinculado { background: white; border: none; }
+        .drive-status-btn.vinculado i { color: #34A853; } /* Color Drive (Verde Google) */
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .content::-webkit-scrollbar { display: none; }
@@ -52,13 +78,13 @@
         .cat-circle i { font-size: 24px; color: white; }
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
 
-        /* GRID DEL CLOSET (AHORA ARRIBA) */
+        /* GRID DEL CLOSET */
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 30px; }
         .prenda-card { background: rgba(255,255,255,0.15); border-radius: 20px; overflow: hidden; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); animation: fadeIn 0.4s ease forwards; }
-        .prenda-img { width: 100%; height: 140px; border-radius: 20px 20px 0 0; object-fit: cover; background: rgba(255,255,255,0.1); }
+        .prenda-img { width: 100%; height: 140px; object-fit: cover; background: rgba(255,255,255,0.1); }
         .prenda-info { padding: 10px; color: white; font-size: 10px; font-weight: 700; text-align: center; text-transform: uppercase; }
 
-        /* PANEL DE GUARDADO (AHORA ABAJO) */
+        /* PANEL DE GUARDADO */
         .glass-panel { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 100px; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -67,9 +93,6 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 85%; padding: 35px 25px; border-radius: 35px; text-align: center; }
         
-        /* BOTONES */
-        #auth-btn { background: var(--google-blue); color: white; border: none; padding: 15px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        #auth-btn.vinculado { background: var(--exito); }
         .btn-save { background: var(--verde-oscuro); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; }
         .btn-secondary { background: var(--gris-suave); color: #555; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 700; cursor: pointer; }
 
@@ -92,8 +115,13 @@
 
     <div class="main-container">
         <header>
-            <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
-            <div class="brand-text">KINU</div>
+            <div class="header-left">
+                <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
+                <div class="brand-text">KINU</div>
+            </div>
+            <div id="auth-btn" class="drive-status-btn" onclick="abrirModalGoogle()">
+                <i class="ph-fill ph-google-drive-logo"></i>
+            </div>
         </header>
         
         <div class="content">
@@ -113,10 +141,6 @@
             <div id="closet-display" class="closet-grid"></div>
 
             <div class="glass-panel">
-                <button id="auth-btn" onclick="abrirModalGoogle()">
-                    <i class="ph ph-google-logo"></i> <span>VINCULAR GOOGLE DRIVE</span>
-                </button>
-                <div style="height:20px;"></div>
                 <select id="main-cat">
                     <option>Superior</option><option>Inferior</option><option>Abrigos</option><option>Enterizos</option>
                     <option>Calzado</option><option>Accesorios</option><option>Joyería</option><option>Deporte</option>
@@ -172,13 +196,11 @@
     <script>
         let fotoCapturada = false;
         
-        // Simulación de datos
         const closetData = {
             'Superior': [
                 {n:'Camisa Blanca', img:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300'},
                 {n:'T-Shirt Negra', img:'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300'}
-            ],
-            'Calzado': [{n:'Nike Air', img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300'}]
+            ]
         };
 
         function selectCat(element, name) {
@@ -208,7 +230,14 @@
 
         function validarGuardado() { if (!fotoCapturada) document.getElementById('modal-foto').style.display = 'flex'; else alert("¡Guardado!"); }
         function cerrarModalFoto() { document.getElementById('modal-foto').style.display = 'none'; }
-        function abrirModalGoogle() { if (!document.getElementById('auth-btn').classList.contains('vinculado')) document.getElementById('modal-google').style.display = 'flex'; }
+        
+        function abrirModalGoogle() { 
+            if (document.getElementById('auth-btn').classList.contains('vinculado')) {
+                alert("Ya estás vinculado a Google Drive");
+                return;
+            }
+            document.getElementById('modal-google').style.display = 'flex'; 
+        }
         function cerrarModalGoogle() { document.getElementById('modal-google').style.display = 'none'; }
 
         function iniciarVinculacion() {
@@ -221,9 +250,7 @@
                     document.getElementById('status-text').innerText = "¡Éxito!";
                     setTimeout(() => {
                         cerrarModalGoogle();
-                        const btn = document.getElementById('auth-btn');
-                        btn.classList.add('vinculado');
-                        btn.innerHTML = '<i class="ph ph-check-circle"></i> GOOGLE DRIVE VINCULADO';
+                        document.getElementById('auth-btn').classList.add('vinculado');
                     }, 1000);
                 } else { width += 5; bar.style.width = width + '%'; }
             }, 80);

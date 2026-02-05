@@ -40,11 +40,14 @@
             grid-template-columns: 1fr auto 1fr;
             align-items: end;
         }
-        .header-left { display: flex; flex-direction: column; align-items: center; grid-column: 2; }
+        .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; color: white; margin-bottom: -4px; }
+        .weather-icon { font-size: 22px; margin-bottom: 2px; }
+        .temp-text { font-size: 14px; font-weight: 700; }
+
+        .header-center { display: flex; flex-direction: column; align-items: center; grid-column: 2; }
         .logo-header { width: 75px; height: auto; margin-bottom: 2px; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; line-height: 1; }
 
-        /* BOTÓN DRIVE REVERSIBLE */
         .drive-status-btn {
             grid-column: 3;
             justify-self: end;
@@ -59,18 +62,9 @@
 
         .drive-status-btn i { font-size: 22px; color: rgba(255,255,255,0.4); }
         .drive-status-btn img { display: none; }
-
-        .drive-status-btn.vinculado { 
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-        }
+        .drive-status-btn.vinculado { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); }
         .drive-status-btn.vinculado i { display: none; }
-        .drive-status-btn.vinculado img { 
-            display: block; 
-            width: 28px; height: 28px; 
-            object-fit: contain; 
-        }
+        .drive-status-btn.vinculado img { display: block; width: 28px; height: 28px; object-fit: contain; }
 
         .drive-status-btn:not(.vinculado)::after {
             content: ''; position: absolute; width: 100%; height: 100%;
@@ -83,7 +77,6 @@
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         .content::-webkit-scrollbar { display: none; }
 
-        /* CATEGORIAS SUPERIORES */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; cursor: pointer; opacity: 0.6; }
         .cat-item.active { opacity: 1; }
@@ -93,35 +86,37 @@
         .cat-circle i { font-size: 24px; color: white; }
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
 
-        /* NAV BAR INFERIOR */
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; display: flex; align-items: center; justify-content: center; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; padding: 0 15px; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.5; }
         .nav-icon.active { opacity: 1; }
 
-        /* CÁMARA CENTRADA */
         .cam-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 1200; }
         .cam-trigger { width: 68px; height: 68px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
 
-        /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 85%; padding: 30px; border-radius: 30px; text-align: center; }
         .progress-container { width: 100%; background: #eee; height: 8px; border-radius: 10px; margin: 20px 0; overflow: hidden; }
         .progress-bar { width: 0%; height: 100%; background: var(--google-blue); transition: width 0.1s; }
-        .progress-bar.red { background: #ff4d4d; }
         .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 18px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; }
     </style>
 </head>
-<body>
+<body onload="obtenerClima()">
 
     <div class="main-container">
         <header>
-            <div class="header-left">
+            <div class="header-left-info" id="weather-box">
+                <i class="ph ph-sun weather-icon" id="w-icon"></i>
+                <span class="temp-text" id="w-temp">--°C</span>
+            </div>
+
+            <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
                 <div class="brand-text">KINU</div>
             </div>
+
             <div id="auth-btn" class="drive-status-btn" onclick="manejarDrive()">
                 <i class="ph ph-google-drive-logo"></i>
                 <img src="https://i.imgur.com/Go2a4Hs.png" alt="Drive Connected">
@@ -135,16 +130,10 @@
                 <div class="cat-item" onclick="selectCat(this, 'Abrigos')"><div class="cat-circle"><i class="ph ph-hoodie"></i></div><span class="cat-label">Abrigos</span></div>
                 <div class="cat-item" onclick="selectCat(this, 'Enterizos')"><div class="cat-circle"><i class="ph ph-dress"></i></div><span class="cat-label">Enterizos</span></div>
                 <div class="cat-item" onclick="selectCat(this, 'Calzado')"><div class="cat-circle"><i class="ph ph-sneaker"></i></div><span class="cat-label">Calzado</span></div>
-                <div class="cat-item" onclick="selectCat(this, 'Accesorios')"><div class="cat-circle"><i class="ph ph-sunglasses"></i></div><span class="cat-label">Accesorios</span></div>
-                <div class="cat-item" onclick="selectCat(this, 'Vintage')"><div class="cat-circle"><i class="ph ph-hourglass"></i></div><span class="cat-label">Vintage</span></div>
-                <div class="cat-item" onclick="selectCat(this, 'Deporte')"><div class="cat-circle"><i class="ph ph-person-simple-run"></i></div><span class="cat-label">Deporte</span></div>
-                <div class="cat-item" onclick="selectCat(this, 'Dormir')"><div class="cat-circle"><i class="ph ph-moon"></i></div><span class="cat-label">Dormir</span></div>
                 <div class="cat-item" onclick="selectCat(this, 'Donar')"><div class="cat-circle"><i class="ph ph-hand-heart"></i></div><span class="cat-label">Donar</span></div>
             </div>
 
-            <div id="main-content-area">
-                </div>
-
+            <div id="main-content-area"></div>
         </div>
 
         <div class="nav-wrapper">
@@ -162,18 +151,11 @@
 
     <div id="modal-google" class="modal-overlay">
         <div class="modal-content">
-            <div id="google-step-vincular" style="display:block;">
+            <div id="google-step-vincular">
                 <i class="ph ph-google-drive-logo" style="font-size:50px; color:var(--google-blue)"></i>
                 <h3>Vincular Google Drive</h3>
                 <p>Guarda tus prendas en tu nube personal.</p>
                 <button class="btn-action" style="background:var(--google-blue)" onclick="iniciarProceso('vincular')">VINCULAR AHORA</button>
-                <button style="background:none; border:none; color:#999; margin-top:15px; cursor:pointer;" onclick="cerrarModal()">CANCELAR</button>
-            </div>
-            <div id="google-step-desvincular" style="display:none;">
-                <i class="ph ph-warning-circle" style="font-size:50px; color:#ff4d4d"></i>
-                <h3>¿Desvincular cuenta?</h3>
-                <p>Ya no se guardarán nuevas prendas en tu Google Drive.</p>
-                <button class="btn-action" style="background:#ff4d4d" onclick="iniciarProceso('desvincular')">SÍ, DESVINCULAR</button>
                 <button style="background:none; border:none; color:#999; margin-top:15px; cursor:pointer;" onclick="cerrarModal()">CANCELAR</button>
             </div>
             <div id="google-step-progreso" style="display:none;">
@@ -185,24 +167,38 @@
     </div>
 
     <script>
-        function selectCat(element, name) {
-            document.querySelectorAll('.cat-item').forEach(i => i.classList.remove('active'));
-            element.classList.add('active');
-            // Aquí puedes añadir lógica para filtrar contenido según la categoría
+        // --- LÓGICA DEL CLIMA ---
+        async function obtenerClima() {
+            const apiKey = "869e98822080344d9f7832289667793e"; // API Key de ejemplo
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                try {
+                    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`);
+                    const data = await res.json();
+                    
+                    // Actualizar Temperatura
+                    document.getElementById('w-temp').innerText = Math.round(data.main.temp) + "°C";
+                    
+                    // Actualizar Icono según clima
+                    const main = data.weather[0].main.toLowerCase();
+                    const icon = document.getElementById('w-icon');
+                    if(main.includes('cloud')) icon.className = "ph ph-cloud weather-icon";
+                    else if(main.includes('rain')) icon.className = "ph ph-cloud-rain weather-icon";
+                    else if(main.includes('clear')) icon.className = "ph ph-sun weather-icon";
+                    else icon.className = "ph ph-cloud-fog weather-icon";
+                    
+                } catch (e) { console.error("Error clima", e); }
+            });
         }
 
+        // --- LÓGICA DRIVE ---
         function manejarDrive() {
             const btn = document.getElementById('auth-btn');
-            const modal = document.getElementById('modal-google');
-            modal.style.display = 'flex';
             if (btn.classList.contains('vinculado')) {
-                document.getElementById('google-step-vincular').style.display = 'none';
-                document.getElementById('google-step-desvincular').style.display = 'block';
-                document.getElementById('google-step-progreso').style.display = 'none';
+                if(confirm("¿Desvincular Google Drive?")) btn.classList.remove('vinculado');
             } else {
-                document.getElementById('google-step-vincular').style.display = 'block';
-                document.getElementById('google-step-desvincular').style.display = 'none';
-                document.getElementById('google-step-progreso').style.display = 'none';
+                document.getElementById('modal-google').style.display = 'flex';
             }
         }
 
@@ -210,27 +206,21 @@
 
         function iniciarProceso(tipo) {
             document.getElementById('google-step-vincular').style.display = 'none';
-            document.getElementById('google-step-desvincular').style.display = 'none';
             document.getElementById('google-step-progreso').style.display = 'block';
             const bar = document.getElementById('bar');
-            const text = document.getElementById('progreso-text');
-            const icon = document.getElementById('progreso-icon');
-            bar.style.width = '0%';
-            bar.className = 'progress-bar';
-            if (tipo === 'vincular') { text.innerText = "Vinculando..."; icon.style.color = "var(--google-blue)"; }
-            else { text.innerText = "Desvinculando..."; icon.style.color = "#ff4d4d"; bar.classList.add('red'); }
             let width = 0;
             let interval = setInterval(() => {
                 if (width >= 100) {
                     clearInterval(interval);
-                    setTimeout(() => {
-                        const btn = document.getElementById('auth-btn');
-                        if (tipo === 'vincular') btn.classList.add('vinculado');
-                        else btn.classList.remove('vinculado');
-                        cerrarModal();
-                    }, 500);
-                } else { width += 5; bar.style.width = width + '%'; }
-            }, 80);
+                    document.getElementById('auth-btn').classList.add('vinculado');
+                    cerrarModal();
+                } else { width += 10; bar.style.width = width + '%'; }
+            }, 100);
+        }
+
+        function selectCat(element, name) {
+            document.querySelectorAll('.cat-item').forEach(i => i.classList.remove('active'));
+            element.classList.add('active');
         }
     </script>
 </body>

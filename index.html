@@ -44,7 +44,7 @@
         .logo-header { width: 75px; height: auto; margin-bottom: 2px; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; line-height: 1; }
 
-        /* BOTÓN DRIVE CORREGIDO */
+        /* BOTÓN DRIVE CORREGIDO (FONDO TRANSPARENTE) */
         .drive-status-btn {
             grid-column: 3;
             justify-self: end;
@@ -60,12 +60,16 @@
         .drive-status-btn i { font-size: 22px; color: rgba(255,255,255,0.4); }
         .drive-status-btn img { display: none; }
 
-        /* Estado vinculado con tu imagen de Imgur */
-        .drive-status-btn.vinculado { background: white; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        /* Estado vinculado: Mantiene transparencia y muestra logo a color */
+        .drive-status-btn.vinculado { 
+            background: rgba(255,255,255,0.15); /* Fondo sutil transparente */
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        }
         .drive-status-btn.vinculado i { display: none; }
         .drive-status-btn.vinculado img { 
             display: block; 
-            width: 26px; height: 26px; 
+            width: 28px; height: 28px; 
             object-fit: contain; 
         }
 

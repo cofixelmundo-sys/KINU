@@ -33,7 +33,7 @@
             align-items: end;
         }
 
-        /* CLIMA COLOR DRIVE INACTIVO */
+        /* CLIMA DISCRETO (MISMO COLOR QUE DRIVE INACTIVO) */
         .header-left-info { 
             grid-column: 1; justify-self: start; 
             display: flex; flex-direction: column; align-items: center; 
@@ -46,7 +46,6 @@
         .logo-header { width: 75px; height: auto; margin-bottom: 2px; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; line-height: 1; }
 
-        /* BOTÓN DRIVE FUNCIONAL */
         .drive-status-btn {
             grid-column: 3; justify-self: end;
             background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
@@ -63,7 +62,6 @@
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         
-        /* CATEGORIAS COMPLETAS */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; opacity: 0.6; cursor: pointer; }
         .cat-item.active { opacity: 1; }
@@ -93,9 +91,9 @@
 
     <div class="main-container">
         <header>
-            <div class="header-left-info">
-                <i class="ph ph-sun weather-icon" id="w-icon"></i>
-                <span class="temp-text" id="w-temp">--°</span>
+            <div class="header-left-info" id="clima-container">
+                <i class="ph ph-circle-notch ph-spin weather-icon" id="w-icon"></i>
+                <span class="temp-text" id="w-temp">...</span>
             </div>
 
             <div class="header-center">
@@ -166,7 +164,7 @@
             el.classList.add('active');
         }
 
-        // LÓGICA DRIVE REVERSIBLE
+        // LÓGICA DRIVE
         function manejarDrive() {
             const btn = document.getElementById('auth-btn');
             document.getElementById('modal-google').style.display = 'flex';
@@ -186,7 +184,6 @@
             document.getElementById('step-vincular').style.display = 'none';
             document.getElementById('step-desvincular').style.display = 'none';
             document.getElementById('step-progreso').style.display = 'block';
-            
             let bar = document.getElementById('bar');
             let width = 0;
             let interval = setInterval(() => {
@@ -200,34 +197,37 @@
             }, 60);
         }
 
-        // CLIMA POR IP (Rápido y discreto)
-        async function cargarClimaRapido() {
+        // CLIMA DE ALTA PRECISIÓN (GPS REAL)
+        async function obtenerClimaPreciso() {
             const tempEl = document.getElementById('w-temp');
             const iconEl = document.getElementById('w-icon');
             const apiKey = "ed60fcfbd4846fbd38c1447ca3d6537d"; 
 
-            try {
-                const ipRes = await fetch('https://ipapi.co/json/');
-                const ipData = await ipRes.json();
-                const ciudad = ipData.city || "Madrid";
-
-                const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${ciudad}&units=metric&appid=${apiKey}`);
-                const data = await weatherRes.json();
-
-                if (data.main) {
-                    tempEl.innerText = Math.round(data.main.temp) + "°C";
-                    const clima = data.weather[0].main.toLowerCase();
-                    if(clima.includes('cloud')) iconEl.className = "ph ph-cloud weather-icon";
-                    else if(clima.includes('rain')) iconEl.className = "ph ph-cloud-rain weather-icon";
-                    else if(clima.includes('clear')) iconEl.className = "ph ph-sun weather-icon";
-                    else iconEl.className = "ph ph-cloud-sun weather-icon";
-                }
-            } catch (err) {
-                tempEl.innerText = "22°C";
+            if (!navigator.geolocation) {
+                tempEl.innerText = "S/D";
+                return;
             }
+
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                try {
+                    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&units=metric&appid=${apiKey}`);
+                    const data = await res.json();
+                    if (data.main) {
+                        tempEl.innerText = Math.round(data.main.temp) + "°C";
+                        const clima = data.weather[0].main.toLowerCase();
+                        if(clima.includes('cloud')) iconEl.className = "ph ph-cloud weather-icon";
+                        else if(clima.includes('rain')) iconEl.className = "ph ph-cloud-rain weather-icon";
+                        else if(clima.includes('clear')) iconEl.className = "ph ph-sun weather-icon";
+                        else iconEl.className = "ph ph-cloud-sun weather-icon";
+                    }
+                } catch (e) { tempEl.innerText = "--°C"; }
+            }, (error) => {
+                tempEl.innerText = "22°C"; // Fallback si el usuario deniega GPS
+                iconEl.className = "ph ph-sun weather-icon";
+            }, { enableHighAccuracy: true, timeout: 5000 });
         }
 
-        cargarClimaRapido();
+        obtenerClimaPreciso();
     </script>
 </body>
 </html>

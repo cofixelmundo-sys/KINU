@@ -33,6 +33,7 @@
             align-items: center;
         }
 
+        /* CLIMA CON TRANSPARENCIA */
         .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 55px; }
         .weather-icon { font-size: 24px; margin-bottom: 2px; color: rgba(255, 255, 255, 0.7); }
         .temp-text { font-size: 16px; font-weight: 700; color: rgba(255, 255, 255, 0.7); }
@@ -77,11 +78,9 @@
         .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
         #cam-input { display: none; }
 
-        /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 90%; max-height: 80vh; padding: 25px; border-radius: 30px; text-align: center; overflow-y: auto; }
         
-        /* ESTILO NUEVO POPUP GUARDAR */
         .input-kinu { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #ddd; margin: 15px 0; font-size: 16px; outline: none; }
         .grid-cats-modal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
         .cat-modal-item { padding: 10px; border-radius: 12px; border: 1px solid #eee; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
@@ -117,8 +116,7 @@
         </header>
         
         <div class="content">
-            <div class="filter-scroll" id="main-cats">
-                </div>
+            <div class="filter-scroll" id="main-cats"></div>
             <div id="main-content-area"></div>
         </div>
 
@@ -162,13 +160,9 @@
         <div class="modal-content">
             <h3>Nueva Prenda</h3>
             <img id="preview-prenda" style="width: 120px; height: 120px; object-fit: contain; margin-bottom: 10px; background: #f9f9f9; border-radius: 15px;">
-            
             <input type="text" id="nombre-prenda" class="input-kinu" placeholder="Nombre (ej: Camisa Lino)">
-            
             <p style="font-size: 11px; font-weight: 800; text-align: left; margin-bottom: 10px; color: #666;">SELECCIONA CATEGORÍA:</p>
-            <div class="grid-cats-modal" id="modal-grid-cats">
-                </div>
-
+            <div class="grid-cats-modal" id="modal-grid-cats"></div>
             <button class="btn-action" onclick="finalizarGuardado()">GUARDAR EN CLOSET</button>
             <button style="background:none; border:none; color:#999; margin-top:15px;" onclick="document.getElementById('modal-guardar').style.display='none'">DESCARTAR</button>
         </div>
@@ -181,52 +175,68 @@
             {n: 'Enterizos', i: 'ph-dress'}, {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Accesorios', i: 'ph-sunglasses'},
             {n: 'Vintage', i: 'ph-hourglass'}, {n: 'Deporte', i: 'ph-person-simple-run'}, {n: 'Dormir', i: 'ph-moon'}, {n: 'Donar', i: 'ph-hand-heart'}
         ];
-
         let categoriaSeleccionada = '';
 
-        // Cargar categorías
         function renderCats() {
             const container = document.getElementById('main-cats');
             const modalGrid = document.getElementById('modal-grid-cats');
-            
+            container.innerHTML = '';
+            modalGrid.innerHTML = '';
             categorias.forEach((cat, idx) => {
-                // Header cats
-                container.innerHTML += `
-                    <div class="cat-item ${idx===0?'active':''}" onclick="selectCat(this)">
-                        <div class="cat-circle"><i class="ph ${cat.i}"></i></div>
-                        <span class="cat-label">${cat.n}</span>
-                    </div>`;
-                // Modal cats
-                modalGrid.innerHTML += `
-                    <div class="cat-modal-item" onclick="selectCatModal(this, '${cat.n}')">
-                        <i class="ph ${cat.i}"></i>
-                        <span>${cat.n}</span>
-                    </div>`;
+                container.innerHTML += `<div class="cat-item ${idx===0?'active':''}" onclick="selectCat(this)"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;
+                modalGrid.innerHTML += `<div class="cat-modal-item" onclick="selectCatModal(this, '${cat.n}')"><i class="ph ${cat.i}"></i><span>${cat.n}</span></div>`;
             });
         }
 
-        // --- LÓGICA CÁMARA + POPUP ---
+        async function obtenerClima() {
+            const tempEl = document.getElementById('w-temp');
+            const iconEl = document.getElementById('w-icon');
+            const cityEl = document.getElementById('w-city');
+
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                try {
+                    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&units=metric&lang=es&appid=${API_KEY_WEATHER}`);
+                    const data = await res.json();
+                    
+                    if (data.main) {
+                        tempEl.innerText = Math.round(data.main.temp) + "°";
+                        cityEl.innerText = data.name.split(',')[0];
+                        
+                        // CORRECCIÓN ICONO: Quitamos el spin y ponemos el real
+                        const clima = data.weather[0].main.toLowerCase();
+                        let iconClass = "ph ph-cloud-sun weather-icon"; // Default
+                        
+                        if(clima.includes('cloud')) iconClass = "ph ph-cloud weather-icon";
+                        else if(clima.includes('rain')) iconClass = "ph ph-cloud-rain weather-icon";
+                        else if(clima.includes('clear')) iconClass = "ph ph-sun weather-icon";
+                        
+                        iconEl.className = iconClass; // Esto pisa el circle-notch
+                    }
+                } catch (e) { 
+                    cityEl.innerText = "Error"; 
+                    iconEl.className = "ph ph-warning weather-icon";
+                }
+            }, () => { 
+                cityEl.innerText = "OFFLINE"; 
+                tempEl.innerText = "22°"; 
+                iconEl.className = "ph ph-sun weather-icon"; 
+            });
+        }
+
         async function procesarFoto(event) {
             const file = event.target.files[0];
             if (!file) return;
-
-            // 1. Mostrar progreso de "Quitando fondo"
             const modalG = document.getElementById('modal-google');
             document.getElementById('step-vincular').style.display = 'none';
             document.getElementById('step-progreso').style.display = 'block';
             document.getElementById('progreso-txt').innerText = "Quitando fondo...";
             modalG.style.display = 'flex';
-
-            // Simulación de procesamiento (Aquí iría tu fetch a Remove.bg)
             let b = document.getElementById('bar');
             b.style.width = '0%';
             let itv = setInterval(() => {
                 let w = parseInt(b.style.width);
-                if(w >= 100) {
-                    clearInterval(itv);
-                    modalG.style.display = 'none';
-                    abrirModalGuardar(URL.createObjectURL(file));
-                } else { b.style.width = (w + 10) + '%'; }
+                if(w >= 100) { clearInterval(itv); modalG.style.display = 'none'; abrirModalGuardar(URL.createObjectURL(file)); }
+                else { b.style.width = (w + 10) + '%'; }
             }, 150);
         }
 
@@ -242,26 +252,11 @@
         }
 
         function finalizarGuardado() {
-            const nombre = document.getElementById('nombre-prenda').value;
-            if(!nombre || !categoriaSeleccionada) {
-                alert("Por favor ponle un nombre y elige categoría");
-                return;
+            if(!document.getElementById('nombre-prenda').value || !categoriaSeleccionada) {
+                alert("Por favor completa los campos"); return;
             }
-            alert(`Guardado: ${nombre} en ${categoriaSeleccionada}`);
+            alert("Guardado con éxito");
             document.getElementById('modal-guardar').style.display = 'none';
-        }
-
-        // --- RESTO DE FUNCIONES (CLIMA/DRIVE) ---
-        async function obtenerClima() {
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const { latitude: lat, longitude: lon } = pos.coords;
-                try {
-                    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=es&appid=${API_KEY_WEATHER}`);
-                    const data = await res.json();
-                    document.getElementById('w-temp').innerText = Math.round(data.main.temp) + "°";
-                    document.getElementById('w-city').innerText = data.name.split(',')[0];
-                } catch (e) { console.error(e); }
-            });
         }
 
         function manejarDrive() {
@@ -295,10 +290,7 @@
         }
 
         function cerrarModal() { document.getElementById('modal-google').style.display = 'none'; }
-        function selectCat(el) {
-            document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-        }
+        function selectCat(el) { document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active')); el.classList.add('active'); }
 
         window.onload = () => { renderCats(); obtenerClima(); };
     </script>

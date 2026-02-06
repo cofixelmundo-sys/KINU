@@ -17,7 +17,7 @@
     <style>
         :root { 
             --verde-oliva: #6B705C; --verde-oscuro: #2D4636; --blanco: #FFFFFF; 
-            --google-blue: #4285F4; --icon-inactivo: rgba(255,255,255,0.4);
+            --google-blue: #4285F4; --rojo-borrar: #E63946;
         }
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
@@ -39,14 +39,7 @@
 
         .drive-status-btn { grid-column: 3; justify-self: end; background: none; border: none; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .drive-status-btn img { width: 32px; height: auto; filter: grayscale(1) opacity(0.8) brightness(1.2); transition: 0.3s; }
-        
-        @keyframes pulse-logo {
-            0% { transform: scale(1); opacity: 0.7; }
-            50% { transform: scale(1.15); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.7; }
-        }
-        .drive-status-btn:not(.vinculado) img { animation: pulse-logo 2s infinite ease-in-out; }
-        .drive-status-btn.vinculado img { filter: grayscale(0) opacity(1) drop-shadow(0 0 8px rgba(255,255,255,0.4)); animation: none; transform: scale(1.05); }
+        .drive-status-btn.vinculado img { filter: grayscale(0) opacity(1) drop-shadow(0 0 8px rgba(255,255,255,0.4)); transform: scale(1.05); }
         
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; }
@@ -59,9 +52,10 @@
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1); animation: fadeIn 0.4s ease forwards; }
+        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1); animation: fadeIn 0.4s ease forwards; user-select: none; }
+        .prenda-card:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; }
+        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
         .prenda-card span { color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
@@ -74,8 +68,9 @@
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 85%; max-width: 320px; padding: 25px; border-radius: 30px; text-align: center; }
-        .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; font-size: 13px; text-transform: uppercase; }
-        .btn-ghost { background: none; border: none; color: #999; margin-top: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; }
+        .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; font-size: 13px; text-transform: uppercase; margin-bottom: 8px; }
+        .btn-delete { background: var(--rojo-borrar); color: white; }
+        .btn-ghost { background: none; border: none; color: #999; margin-top: 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; width: 100%; }
     </style>
 </head>
 <body>
@@ -118,18 +113,27 @@
         </div>
     </div>
 
+    <div id="modal-borrar" class="modal-overlay">
+        <div class="modal-content">
+            <i class="ph ph-trash" style="font-size: 40px; color: var(--rojo-borrar); margin-bottom: 15px; display: block;"></i>
+            <h3 style="margin:0 0 10px;">¿Borrar prenda?</h3>
+            <p style="font-size:13px; color:#666; margin-bottom: 20px;">Esta foto se eliminará permanentemente de tu Drive.</p>
+            <button class="btn-action btn-delete" id="confirmar-borrado">SÍ, ELIMINAR</button>
+            <button class="btn-ghost" onclick="cerrarModales()">CANCELAR</button>
+        </div>
+    </div>
+
     <div id="modal-google" class="modal-overlay">
         <div class="modal-content">
             <div id="step-vincular">
                 <h3 style="margin:0 0 10px;">Google Drive</h3>
-                <p style="font-size:13px; color:#666;">Conecta para guardar tus prendas.</p>
                 <button class="btn-action" style="background:var(--google-blue)" onclick="loginGoogle()">CONECTAR</button>
-                <button class="btn-ghost" onclick="cerrarModal()">CERRAR</button>
+                <button class="btn-ghost" onclick="cerrarModales()">CERRAR</button>
             </div>
             <div id="step-desvincular" style="display:none;">
                 <h3 style="margin:0 0 10px;">Desconectar</h3>
                 <button class="btn-action" style="background:#ff4d4d" onclick="logoutGoogle()">DESVINCULAR</button>
-                <button class="btn-ghost" onclick="cerrarModal()">CERRAR</button>
+                <button class="btn-ghost" onclick="cerrarModales()">CERRAR</button>
             </div>
         </div>
     </div>
@@ -140,8 +144,8 @@
         let accessToken = localStorage.getItem('drive_token');
         let tokenClient;
         let categoriaActual = 'SUPERIOR';
+        let idPrendaABorrar = null;
 
-        // LISTA DE CATEGORÍAS CORREGIDA
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
             {n: 'Enterizos', i: 'ph-dress'}, {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Accesorios', i: 'ph-sunglasses'},
@@ -167,7 +171,7 @@
                     const resC = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
                     const dataC = await resC.json();
                     document.getElementById('w-city').innerText = dataC.address.city || dataC.address.town || "Hoy";
-                } catch (e) { document.getElementById('w-city').innerText = "Hoy"; }
+                } catch (e) {}
             }, () => {}, { timeout: 10000 });
         }
 
@@ -180,7 +184,7 @@
                     localStorage.setItem('drive_token', accessToken);
                     document.getElementById('auth-btn').classList.add('vinculado');
                     setProgress(100);
-                    cerrarModal();
+                    cerrarModales();
                     cargarPrendas();
                 }
             });
@@ -188,21 +192,6 @@
                 document.getElementById('auth-btn').classList.add('vinculado');
                 setTimeout(cargarPrendas, 500);
             }
-        }
-
-        async function obtenerOCrearCarpeta(name) {
-            const q = `name = '${name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, {
-                headers: { 'Authorization': 'Bearer ' + accessToken }
-            });
-            const data = await res.json();
-            if (data.files?.length > 0) return data.files[0].id;
-            const create = await fetch('https://www.googleapis.com/drive/v3/files', {
-                method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder' })
-            });
-            const folder = await create.json();
-            return folder.id;
         }
 
         async function cargarPrendas() {
@@ -224,11 +213,56 @@
                 } else {
                     data.files.forEach(file => {
                         const nombreVisible = file.name.split('_')[2] || 'Prenda';
-                        grid.innerHTML += `<div class="prenda-card"><img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda"><span>${nombreVisible}</span></div>`;
+                        const card = document.createElement('div');
+                        card.className = 'prenda-card';
+                        card.innerHTML = `<img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda"><span>${nombreVisible}</span>`;
+                        
+                        // LÓGICA DE PULSACIÓN LARGA
+                        let timer;
+                        card.addEventListener('touchstart', () => {
+                            timer = setTimeout(() => {
+                                idPrendaABorrar = file.id;
+                                document.getElementById('modal-borrar').style.display = 'flex';
+                                if (window.navigator.vibrate) window.navigator.vibrate(50); // Vibración táctil
+                            }, 1000);
+                        });
+                        card.addEventListener('touchend', () => clearTimeout(timer));
+                        card.addEventListener('touchmove', () => clearTimeout(timer));
+                        
+                        grid.appendChild(card);
                     });
                 }
                 setProgress(100);
             } catch (e) { setProgress(100); }
+        }
+
+        document.getElementById('confirmar-borrado').onclick = async () => {
+            if (!idPrendaABorrar) return;
+            setProgress(20);
+            cerrarModales();
+            try {
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaABorrar}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                setProgress(100);
+                cargarPrendas();
+            } catch (e) { setProgress(100); alert("Error al borrar"); }
+        };
+
+        async function obtenerOCrearCarpeta(name) {
+            const q = `name = '${name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, {
+                headers: { 'Authorization': 'Bearer ' + accessToken }
+            });
+            const data = await res.json();
+            if (data.files?.length > 0) return data.files[0].id;
+            const create = await fetch('https://www.googleapis.com/drive/v3/files', {
+                method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder' })
+            });
+            const folder = await create.json();
+            return folder.id;
         }
 
         function renderCats() {
@@ -236,11 +270,7 @@
             container.innerHTML = '';
             categorias.forEach((cat) => {
                 const isActive = cat.n.toUpperCase() === categoriaActual;
-                container.innerHTML += `
-                    <div class="cat-item ${isActive?'active':''}" onclick="cambiarCat(this, '${cat.n}')">
-                        <div class="cat-circle"><i class="ph ${cat.i}"></i></div>
-                        <span class="cat-label">${cat.n}</span>
-                    </div>`;
+                container.innerHTML += `<div class="cat-item ${isActive?'active':''}" onclick="cambiarCat(this, '${cat.n}')"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;
             });
         }
 
@@ -259,14 +289,15 @@
 
         function loginGoogle() { setProgress(10); tokenClient.requestAccessToken({prompt: 'consent'}); }
         function logoutGoogle() { 
-            setProgress(50);
             accessToken = null; localStorage.removeItem('drive_token'); 
             document.getElementById('auth-btn').classList.remove('vinculado'); 
             document.getElementById('closet-grid').innerHTML = '';
-            setProgress(100);
-            cerrarModal(); 
+            cerrarModales(); 
         }
-        function cerrarModal() { document.getElementById('modal-google').style.display = 'none'; }
+        function cerrarModales() { 
+            document.getElementById('modal-google').style.display = 'none'; 
+            document.getElementById('modal-borrar').style.display = 'none'; 
+        }
 
         window.onload = () => { renderCats(); startGoogle(); updateWeather(); };
     </script>

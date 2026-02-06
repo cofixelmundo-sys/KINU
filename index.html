@@ -17,7 +17,8 @@
     <style>
         :root { 
             --verde-oliva: #6B705C; --verde-oscuro: #2D4636; --blanco: #FFFFFF; 
-            --google-blue: #4285F4; --resaltado: #A5A58D;
+            --google-blue: #4285F4; --icon-inactivo: rgba(255,255,255,0.4);
+            --exito: #4BB543; --error: #E63946;
         }
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
@@ -25,36 +26,23 @@
         
         header { padding: calc(env(safe-area-inset-top) + 15px) 25px 10px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; }
 
-        /* BARRA DE PROGRESO ESTILO KINU */
-        .progress-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: rgba(255,255,255,0.1);
-            display: none; /* Oculta por defecto */
-            overflow: hidden;
-        }
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: white;
-            box-shadow: 0 0 10px rgba(255,255,255,0.5);
-            transition: width 0.4s ease;
-        }
+        /* BARRA DE PROGRESO */
+        .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.1); display: none; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: white; box-shadow: 0 0 10px rgba(255,255,255,0.5); transition: width 0.3s ease; }
 
-        /* LOGO DRIVE Y CLIMA (Tus estilos anteriores) */
-        .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 60px; }
+        .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 55px; }
         .weather-icon { font-size: 24px; color: rgba(255, 255, 255, 0.7); }
         .temp-text { font-size: 16px; font-weight: 700; color: rgba(255, 255, 255, 0.7); }
-        .city-label { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); letter-spacing: 0.5px; text-align: center; }
+        .city-label { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); letter-spacing: 0.5px; }
+        
         .header-center { display: flex; flex-direction: column; align-items: center; grid-column: 2; }
         .logo-header { width: 75px; height: auto; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
 
+        /* DRIVE LOGO A COLOR Y CON PULSO */
         .drive-status-btn { grid-column: 3; justify-self: end; background: none; border: none; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .drive-status-btn img { width: 32px; height: auto; filter: grayscale(1) opacity(0.8) brightness(1.2); transition: 0.3s; }
+        
         @keyframes pulse-logo {
             0% { transform: scale(1); opacity: 0.7; }
             50% { transform: scale(1.15); opacity: 1; }
@@ -62,8 +50,7 @@
         }
         .drive-status-btn:not(.vinculado) img { animation: pulse-logo 2s infinite ease-in-out; }
         .drive-status-btn.vinculado img { filter: grayscale(0) opacity(1) drop-shadow(0 0 8px rgba(255,255,255,0.4)); animation: none; transform: scale(1.05); }
-
-        /* CONTENIDO Y GRID */
+        
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; opacity: 0.6; cursor: pointer; }
@@ -80,7 +67,6 @@
         .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; }
         .prenda-card span { color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; }
 
-        /* NAVEGACIÓN */
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.5; }
@@ -88,12 +74,20 @@
         .cam-trigger { width: 68px; height: 68px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
+        #cam-input { display: none; }
 
         /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 85%; max-width: 320px; padding: 25px; border-radius: 30px; text-align: center; }
-        .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; font-size: 13px; text-transform: uppercase; margin-top: 10px; }
+        .input-kinu { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #eee; margin: 10px 0; font-size: 14px; background: #f9f9f9; outline: none; }
+        .grid-cats-modal { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0 20px; max-height: 140px; overflow-y: auto; scrollbar-width: none; }
+        .cat-modal-item { padding: 8px 0; border-radius: 12px; border: 1px solid #f0f0f0; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .cat-modal-item.selected { border-color: var(--verde-oscuro); background: #f0f4f1; border-width: 2px; }
+        .cat-modal-item i { font-size: 18px; margin-bottom: 4px; color: var(--verde-oscuro); }
+        .cat-modal-item span { font-size: 7px; font-weight: 800; text-transform: uppercase; }
+        .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; font-size: 13px; text-transform: uppercase; }
         .btn-ghost { background: none; border: none; color: #999; margin-top: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; }
+        .status-icon { font-size: 55px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -110,9 +104,8 @@
                 <div class="brand-text">KINU</div>
             </div>
             <div id="auth-btn" class="drive-status-btn" onclick="manejarDrive()">
-                <img src="https://i.imgur.com/Go2a4Hs.png" alt="Google Drive">
+                <img src="https://i.imgur.com/Go2a4Hs.png" alt="Drive">
             </div>
-
             <div class="progress-container" id="global-progress">
                 <div class="progress-bar" id="inner-bar"></div>
             </div>
@@ -132,7 +125,7 @@
                 <label for="cam-input" class="cam-trigger">
                     <div class="cam-inner"><i class="ph ph-camera"></i></div>
                 </label>
-                <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none">
+                <input type="file" id="cam-input" accept="image/*" capture="environment" onchange="procesarFoto(event)">
             </div>
         </div>
     </div>
@@ -141,15 +134,34 @@
         <div class="modal-content">
             <div id="step-vincular">
                 <h3 style="margin:0 0 10px;">Google Drive</h3>
-                <p style="font-size:13px; color:#666;">Conecta tu armario en la nube.</p>
+                <p style="font-size:13px; color:#666;">Conecta para guardar tus prendas.</p>
                 <button class="btn-action" style="background:var(--google-blue)" onclick="loginGoogle()">CONECTAR</button>
                 <button class="btn-ghost" onclick="cerrarModal()">CERRAR</button>
             </div>
             <div id="step-desvincular" style="display:none;">
-                <h3 style="margin:0 0 10px;">Cuenta Conectada</h3>
+                <h3 style="margin:0 0 10px;">Desconectar</h3>
                 <button class="btn-action" style="background:#ff4d4d" onclick="logoutGoogle()">DESVINCULAR</button>
-                <button class="btn-ghost" onclick="cerrarModal()">VOLVER</button>
+                <button class="btn-ghost" onclick="cerrarModal()">CERRAR</button>
             </div>
+        </div>
+    </div>
+
+    <div id="modal-guardar" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Nueva Prenda</h3>
+            <img id="preview-prenda" style="width:120px; height:120px; object-fit:contain; border-radius:15px; background:#f5f5f5; margin-bottom:10px;">
+            <input type="text" id="nombre-prenda" class="input-kinu" placeholder="Nombre (ej: Short Baño)">
+            <div class="grid-cats-modal" id="modal-grid-cats"></div>
+            <button class="btn-action" id="btn-finalizar" onclick="finalizarGuardado()">GUARDAR EN DRIVE</button>
+            <button class="btn-ghost" onclick="document.getElementById('modal-guardar').style.display='none'">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="modal-feedback" class="modal-overlay">
+        <div class="modal-content">
+            <i id="feedback-icon" class="ph status-icon"></i>
+            <h3 id="feedback-title"></h3>
+            <p id="feedback-msg" style="font-size:13px; color:#666;"></p>
         </div>
     </div>
 
@@ -159,6 +171,7 @@
         let accessToken = localStorage.getItem('drive_token');
         let tokenClient;
         let categoriaActual = 'SUPERIOR';
+        let categoriaSeleccionada = '';
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
@@ -166,34 +179,12 @@
             {n: 'Vintage', i: 'ph-hourglass'}, {n: 'Deporte', i: 'ph-person-simple-run'}, {n: 'Dormir', i: 'ph-moon'}, {n: 'Donar', i: 'ph-hand-heart'}
         ];
 
-        // --- FUNCIÓN PARA LA BARRA DE PROGRESO ---
         function setProgress(percent) {
             const container = document.getElementById('global-progress');
             const bar = document.getElementById('inner-bar');
             container.style.display = 'block';
             bar.style.width = percent + '%';
-            
-            if (percent >= 100) {
-                setTimeout(() => {
-                    container.style.display = 'none';
-                    bar.style.width = '0%';
-                }, 800);
-            }
-        }
-
-        async function updateWeather() {
-            if (!navigator.geolocation) return;
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const lat = pos.coords.latitude; const lon = pos.coords.longitude;
-                try {
-                    const resW = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-                    const dataW = await resW.json();
-                    document.getElementById('w-temp').innerText = Math.round(dataW.current_weather.temperature) + '°';
-                    const resC = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
-                    const dataC = await resC.json();
-                    document.getElementById('w-city').innerText = dataC.address.city || dataC.address.town || "Hoy";
-                } catch (e) { }
-            });
+            if (percent >= 100) setTimeout(() => { container.style.display = 'none'; bar.style.width = '0%'; }, 800);
         }
 
         function startGoogle() {
@@ -201,7 +192,6 @@
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID, scope: SCOPES,
                 callback: (resp) => {
-                    setProgress(50);
                     accessToken = resp.access_token;
                     localStorage.setItem('drive_token', accessToken);
                     document.getElementById('auth-btn').classList.add('vinculado');
@@ -212,7 +202,8 @@
             });
             if (accessToken) {
                 document.getElementById('auth-btn').classList.add('vinculado');
-                cargarPrendas();
+                // Retraso mínimo para asegurar que gapi está listo
+                setTimeout(cargarPrendas, 500);
             }
         }
 
@@ -222,12 +213,103 @@
             const grid = document.getElementById('closet-grid');
             grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center; padding-top:40px;">Buscando...</p>';
             try {
-                // Simulación de pasos de carga para ver la barra
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
                 setProgress(60);
-                // Aquí iría tu fetch real a Drive...
+                const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                const data = await res.json();
+                grid.innerHTML = '';
+                if (!data.files || data.files.length === 0) {
+                    grid.innerHTML = `<p style="color:rgba(255,255,255,0.5); grid-column:1/-1; text-align:center; margin-top:40px;">No hay nada en ${categoriaActual}.</p>`;
+                } else {
+                    data.files.forEach(file => {
+                        const nombreVisible = file.name.split('_')[2] || 'Prenda';
+                        grid.innerHTML += `<div class="prenda-card"><img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda"><span>${nombreVisible}</span></div>`;
+                    });
+                }
                 setProgress(100);
-                grid.innerHTML = `<p style="color:rgba(255,255,255,0.5); grid-column:1/-1; text-align:center; margin-top:40px;">No hay prendas aquí</p>`;
-            } catch (e) { setProgress(100); }
+            } catch (e) { 
+                grid.innerHTML = 'Error al conectar'; 
+                setProgress(100);
+            }
+        }
+
+        async function finalizarGuardado() {
+            const nombreRaw = document.getElementById('nombre-prenda').value;
+            if(!nombreRaw || !categoriaSeleccionada) return mostrarFeedback('error', 'Error', 'Faltan datos');
+            setProgress(10);
+            const btn = document.getElementById('btn-finalizar');
+            btn.disabled = true; btn.innerText = "SUBIENDO...";
+            try {
+                const imgBlob = await fetch(document.getElementById('preview-prenda').src).then(r => r.blob());
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                setProgress(40);
+                const catSafe = categoriaSeleccionada.toUpperCase();
+                const nomSafe = nombreRaw.toUpperCase().replace(/[^A-Z0-9]/g, ' ');
+                const fileName = `KINU_${catSafe}_${nomSafe}_${Date.now()}.jpg`;
+                const metadata = { name: fileName, parents: [folderId], mimeType: 'image/jpeg' };
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+                form.append('file', imgBlob);
+                const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: form
+                });
+                if(res.ok) {
+                    setProgress(100);
+                    mostrarFeedback('success', '¡Listo!', 'Guardado en Drive');
+                    document.getElementById('modal-guardar').style.display = 'none';
+                    cargarPrendas();
+                }
+            } catch (e) { mostrarFeedback('error', 'Error', 'No se pudo subir'); setProgress(100); }
+            finally { btn.disabled = false; btn.innerText = "GUARDAR EN DRIVE"; }
+        }
+
+        async function obtenerOCrearCarpeta(name) {
+            const q = `name = '${name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, {
+                headers: { 'Authorization': 'Bearer ' + accessToken }
+            });
+            const data = await res.json();
+            if (data.files?.length > 0) return data.files[0].id;
+            const create = await fetch('https://www.googleapis.com/drive/v3/files', {
+                method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder' })
+            });
+            const folder = await create.json();
+            return folder.id;
+        }
+
+        function renderCats() {
+            const container = document.getElementById('main-cats');
+            const modalGrid = document.getElementById('modal-grid-cats');
+            container.innerHTML = ''; modalGrid.innerHTML = '';
+            categorias.forEach((cat) => {
+                const isActive = cat.n.toUpperCase() === categoriaActual;
+                container.innerHTML += `<div class="cat-item ${isActive?'active':''}" onclick="cambiarCat(this, '${cat.n}')"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;
+                modalGrid.innerHTML += `<div class="cat-modal-item" onclick="selectCatModal(this, '${cat.n}')"><i class="ph ${cat.i}"></i><span>${cat.n}</span></div>`;
+            });
+        }
+
+        function cambiarCat(el, nombre) {
+            document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            categoriaActual = nombre.toUpperCase();
+            cargarPrendas();
+        }
+
+        function selectCatModal(el, nombre) {
+            document.querySelectorAll('.cat-modal-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+            categoriaSeleccionada = nombre;
+        }
+
+        function procesarFoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            document.getElementById('preview-prenda').src = URL.createObjectURL(file);
+            document.getElementById('modal-guardar').style.display = 'flex';
         }
 
         function manejarDrive() {
@@ -236,45 +318,26 @@
             document.getElementById('step-desvincular').style.display = accessToken ? 'block' : 'none';
         }
 
-        function loginGoogle() { 
-            cerrarModal();
-            setProgress(10);
-            tokenClient.requestAccessToken({prompt: 'consent'}); 
-        }
-        
+        function loginGoogle() { setProgress(10); tokenClient.requestAccessToken({prompt: 'consent'}); }
         function logoutGoogle() { 
-            setProgress(20);
-            accessToken = null; 
-            localStorage.removeItem('drive_token'); 
+            setProgress(50);
+            accessToken = null; localStorage.removeItem('drive_token'); 
             document.getElementById('auth-btn').classList.remove('vinculado'); 
             document.getElementById('closet-grid').innerHTML = '';
             setProgress(100);
             cerrarModal(); 
         }
-
-        function renderCats() {
-            const container = document.getElementById('main-cats');
-            container.innerHTML = '';
-            categorias.forEach((cat) => {
-                const isActive = cat.n.toUpperCase() === categoriaActual;
-                container.innerHTML += `
-                    <div class="cat-item ${isActive?'active':''}" onclick="cambiarCat(this, '${cat.n}')">
-                        <div class="cat-circle"><i class="ph ${cat.i}"></i></div>
-                        <span class="cat-label">${cat.n}</span>
-                    </div>`;
-            });
-        }
-
-        function cambiarCat(el, nombre) {
-            document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-            categoriaActual = nombre.toUpperCase();
-            if (accessToken) cargarPrendas();
-        }
-
         function cerrarModal() { document.getElementById('modal-google').style.display = 'none'; }
 
-        window.onload = () => { renderCats(); startGoogle(); updateWeather(); };
+        function mostrarFeedback(tipo, tit, msg) {
+            document.getElementById('feedback-icon').className = `ph ph-${tipo==='success'?'check':'warning'}-circle status-icon color-${tipo}`;
+            document.getElementById('feedback-title').innerText = tit;
+            document.getElementById('feedback-msg').innerText = msg;
+            document.getElementById('modal-feedback').style.display = 'flex';
+            setTimeout(() => document.getElementById('modal-feedback').style.display = 'none', 2000);
+        }
+
+        window.onload = () => { renderCats(); startGoogle(); };
     </script>
 </body>
 </html>

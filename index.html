@@ -34,7 +34,6 @@
         .logo-header { width: 75px; height: auto; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
 
-        /* HEADER DERECHO (DRIVE) */
         .header-right-info { grid-column: 3; justify-self: end; display: flex; flex-direction: column; align-items: center; min-width: 55px; }
         .drive-status-btn { 
             background: none; border: none; width: 42px; height: 42px; 
@@ -43,7 +42,6 @@
         }
         .drive-status-btn img { width: 32px; height: auto; filter: grayscale(1) opacity(0.8) brightness(1.2); transition: 0.3s; z-index: 2; }
         
-        /* Pulso inactivo */
         .drive-status-btn:not(.vinculado)::after {
             content: ''; position: absolute; width: 32px; height: 32px;
             background: rgba(255, 255, 255, 0.4); border-radius: 50%;
@@ -54,7 +52,6 @@
         .drive-status-btn.vinculado img { filter: grayscale(0) opacity(1) drop-shadow(0 0 8px rgba(255,255,255,0.4)); transform: scale(1.05); }
         .drive-label { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); letter-spacing: 0.5px; }
 
-        /* GRID Y CONTENIDO */
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; opacity: 0.6; cursor: pointer; }
@@ -91,7 +88,7 @@
             <div class="header-left-info">
                 <i class="ph ph-sun weather-icon" id="w-icon"></i>
                 <span class="temp-text" id="w-temp">--°</span>
-                <span class="city-label" id="w-city">Hoy</span>
+                <span class="city-label" id="w-city">Buscando...</span>
             </div>
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
@@ -128,7 +125,6 @@
         <div class="modal-content">
             <div id="step-vincular">
                 <h3 style="margin:0 0 10px;">Google Drive</h3>
-                <p style="font-size:12px; color:#666; margin-bottom:20px;">Sincroniza con KINU_CLOSET para ver tus prendas.</p>
                 <button class="btn-action" style="background:var(--google-blue)" onclick="loginGoogle()">CONECTAR</button>
                 <button class="btn-ghost" onclick="cerrarModales()">CERRAR</button>
             </div>
@@ -148,7 +144,35 @@
         let tokenClient;
         let categoriaActual = 'SUPERIOR';
 
-        // 1. INICIALIZACIÓN
+        // --- CLIMA CON CIUDAD REAL ---
+        async function updateWeather() {
+            if (!navigator.geolocation) {
+                document.getElementById('w-city').innerText = "Madrid"; // Fallback
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                try {
+                    // 1. Temperatura
+                    const resW = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                    const dataW = await resW.json();
+                    document.getElementById('w-temp').innerText = Math.round(dataW.current_weather.temperature) + '°';
+                    
+                    // 2. Nombre de la Ciudad (Reverse Geocoding)
+                    const resC = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+                    const dataC = await resC.json();
+                    const city = dataC.address.city || dataC.address.town || dataC.address.village || "Tu Ciudad";
+                    document.getElementById('w-city').innerText = city;
+                } catch (e) {
+                    document.getElementById('w-city').innerText = "Error";
+                }
+            }, () => {
+                document.getElementById('w-city').innerText = "Activa GPS";
+            });
+        }
+
+        // --- DRIVE Y CARPETA ---
         function startGoogle() {
             gapi.load('client', async () => {
                 await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
@@ -170,7 +194,6 @@
             });
         }
 
-        // 2. LÓGICA DE CARPETA Y PRENDAS
         async function obtenerOCrearCarpeta() {
             try {
                 const q = "name = 'KINU_CLOSET' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
@@ -178,7 +201,6 @@
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 const data = await res.json();
-                
                 if (data.files && data.files.length > 0) {
                     folderId = data.files[0].id;
                 } else {
@@ -191,14 +213,13 @@
                     folderId = folder.id;
                 }
                 cargarPrendas();
-            } catch (e) { console.error("Error carpeta:", e); }
+            } catch (e) {}
         }
 
         async function cargarPrendas() {
             if (!accessToken || !folderId) return;
             const grid = document.getElementById('closet-grid');
             grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center; padding-top:40px;">Cargando...</p>';
-            
             try {
                 const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
                 const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, {
@@ -206,49 +227,28 @@
                 });
                 const data = await res.json();
                 grid.innerHTML = '';
-                
                 if (!data.files || data.files.length === 0) {
-                    grid.innerHTML = `<p style="color:rgba(255,255,255,0.4); grid-column:1/-1; text-align:center; padding-top:40px;">No hay prendas en ${categoriaActual}</p>`;
+                    grid.innerHTML = `<p style="color:rgba(255,255,255,0.4); grid-column:1/-1; text-align:center; padding-top:40px;">Sin prendas en ${categoriaActual.toLowerCase()}</p>`;
                 } else {
                     data.files.forEach(file => {
                         const name = file.name.split('_')[2] || 'Prenda';
-                        grid.innerHTML += `
-                            <div class="prenda-card">
-                                <img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="ropa">
-                                <span>${name}</span>
-                            </div>`;
+                        grid.innerHTML += `<div class="prenda-card"><img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="ropa"><span>${name}</span></div>`;
                     });
                 }
-            } catch (e) { grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center;">Error al conectar.</p>'; }
+            } catch (e) {}
         }
 
-        // 3. UI Y NAVEGACIÓN
+        // --- UI Y CATEGORÍAS ---
         function actualizarDriveUI(vinculado) {
             document.getElementById('auth-btn').classList.toggle('vinculado', vinculado);
             document.getElementById('drive-text').innerText = vinculado ? "Vinculado" : "Sin Vincular";
-        }
-
-        function manejarDrive() {
-            document.getElementById('modal-google').style.display = 'flex';
-            document.getElementById('step-vincular').style.display = accessToken ? 'none' : 'block';
-            document.getElementById('step-desvincular').style.display = accessToken ? 'block' : 'none';
-        }
-
-        function loginGoogle() { tokenClient.requestAccessToken({prompt: 'consent'}); }
-        
-        function logoutGoogle() { 
-            accessToken = null; folderId = null;
-            localStorage.removeItem('drive_token'); 
-            actualizarDriveUI(false);
-            document.getElementById('closet-grid').innerHTML = '';
-            cerrarModales(); 
         }
 
         function cambiarCat(el, nombre) {
             document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
             categoriaActual = nombre.toUpperCase();
-            cargarPrendas();
+            if (accessToken) cargarPrendas();
         }
 
         function renderCats() {
@@ -262,18 +262,18 @@
             });
         }
 
-        function cerrarModales() { document.getElementById('modal-google').style.display = 'none'; }
-
-        // CLIMA SIMPLE
-        async function updateWeather() {
-            if (!navigator.geolocation) return;
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&current_weather=true`);
-                const data = await res.json();
-                document.getElementById('w-temp').innerText = Math.round(data.current_weather.temperature) + '°';
-                document.getElementById('w-city').innerText = "Tu Ciudad";
-            });
+        function manejarDrive() {
+            document.getElementById('modal-google').style.display = 'flex';
+            document.getElementById('step-vincular').style.display = accessToken ? 'none' : 'block';
+            document.getElementById('step-desvincular').style.display = accessToken ? 'block' : 'none';
         }
+
+        function loginGoogle() { tokenClient.requestAccessToken({prompt: 'consent'}); }
+        function logoutGoogle() { 
+            accessToken = null; folderId = null; localStorage.removeItem('drive_token'); 
+            actualizarDriveUI(false); document.getElementById('closet-grid').innerHTML = ''; cerrarModales(); 
+        }
+        function cerrarModales() { document.getElementById('modal-google').style.display = 'none'; }
 
         window.onload = () => { renderCats(); startGoogle(); updateWeather(); };
     </script>

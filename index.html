@@ -11,7 +11,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js"></script>
     
@@ -24,6 +23,7 @@
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        
         header { padding: calc(env(safe-area-inset-top) + 15px) 25px 10px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
         .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 55px; }
         .weather-icon { font-size: 24px; color: rgba(255, 255, 255, 0.7); }
@@ -46,14 +46,51 @@
         .cat-circle i { font-size: 24px; color: white; }
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
 
+        .category-title { color: white; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin: 25px 0 10px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; width: 100%; }
+        
+        /* GRID DE PRENDAS CORREGIDO */
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; }
-        .prenda-card span { color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; }
+        
+        .prenda-card { 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 20px; 
+            padding: 12px; 
+            text-align: center; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* ESTE CONTENEDOR ES LA CLAVE PARA QUE NO SE CORTE NADA */
+        .img-wrapper {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: rgba(255,255,255,0.08);
+            border-radius: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 8px; /* Margen interno de seguridad */
+        }
+
+        .img-wrapper img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            width: auto;
+            height: auto;
+            object-fit: contain; /* Obliga a la imagen a caber entera */
+            border-radius: 8px;
+        }
+        
+        .prenda-card span { color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
-        .nav-icon { color: white; font-size: 22px; opacity: 0.5; }
+        .nav-icon { color: white; font-size: 22px; opacity: 0.5; cursor: pointer; }
+        .nav-icon.active { opacity: 1; }
         .cam-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
         .cam-trigger { width: 68px; height: 68px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -93,15 +130,15 @@
             </div>
         </header>
         
-        <div class="content">
+        <div class="content" id="scroll-area">
             <div class="filter-scroll" id="main-cats"></div>
             <div class="closet-grid" id="closet-grid"></div>
         </div>
 
         <div class="nav-wrapper">
             <nav>
-                <div class="nav-icon"><i class="ph ph-house-simple"></i></div>
-                <div class="nav-icon"><i class="ph ph-archive"></i></div>
+                <div class="nav-icon active" onclick="mostrarModo('categorias')" id="nav-home"><i class="ph ph-house-simple"></i></div>
+                <div class="nav-icon" onclick="mostrarModo('todo')" id="nav-closet"><i class="ph ph-archive"></i></div>
             </nav>
             <div class="cam-container">
                 <label for="cam-input" class="cam-trigger">
@@ -116,7 +153,6 @@
         <div class="modal-content">
             <div id="step-vincular">
                 <h3 style="margin:0 0 10px;">Google Drive</h3>
-                <p style="font-size:13px; color:#666;">Conecta para guardar tus prendas.</p>
                 <button class="btn-action" style="background:var(--google-blue)" onclick="loginGoogle()">CONECTAR</button>
                 <button class="btn-ghost" onclick="cerrarModal()">CERRAR</button>
             </div>
@@ -131,7 +167,9 @@
     <div id="modal-guardar" class="modal-overlay">
         <div class="modal-content">
             <h3>Nueva Prenda</h3>
-            <img id="preview-prenda" style="width:120px; height:120px; object-fit:contain; border-radius:15px; background:#f5f5f5; margin-bottom:10px;">
+            <div class="img-wrapper" style="width:140px; margin: 0 auto 10px;">
+                <img id="preview-prenda">
+            </div>
             <input type="text" id="nombre-prenda" class="input-kinu" placeholder="Nombre (ej: Short Baño)">
             <div class="grid-cats-modal" id="modal-grid-cats"></div>
             <button class="btn-action" id="btn-finalizar" onclick="finalizarGuardado()">GUARDAR EN DRIVE</button>
@@ -153,14 +191,13 @@
         let accessToken = localStorage.getItem('drive_token');
         let tokenClient;
         let categoriaActual = 'SUPERIOR';
+        let modoVista = 'categorias';
 
-        // --- TODAS LAS CATEGORÍAS RECUPERADAS ---
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
             {n: 'Enterizos', i: 'ph-dress'}, {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Accesorios', i: 'ph-sunglasses'},
             {n: 'Vintage', i: 'ph-hourglass'}, {n: 'Deporte', i: 'ph-person-simple-run'}, {n: 'Dormir', i: 'ph-moon'}, {n: 'Donar', i: 'ph-hand-heart'}
         ];
-        let categoriaSeleccionada = '';
 
         function startGoogle() {
             gapi.load('client', () => gapi.client.init({}));
@@ -178,6 +215,81 @@
                 document.getElementById('auth-btn').classList.add('vinculado');
                 cargarPrendas();
             }
+        }
+
+        async function cargarPrendas() {
+            if (!accessToken) return;
+            const grid = document.getElementById('closet-grid');
+            const filter = document.getElementById('main-cats');
+            grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center; padding-top:40px;">Cargando...</p>';
+
+            try {
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                
+                if (modoVista === 'todo') {
+                    filter.style.display = 'none';
+                    grid.innerHTML = '';
+                    const q = `'${folderId}' in parents and name contains 'KINU_' and trashed = false`;
+                    const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)&pageSize=100`, {
+                        headers: { 'Authorization': 'Bearer ' + accessToken }
+                    });
+                    const data = await res.json();
+                    
+                    if (!data.files || data.files.length === 0) {
+                        grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center;">Vacío.</p>';
+                        return;
+                    }
+
+                    categorias.forEach(cat => {
+                        const catKey = cat.n.toUpperCase();
+                        const prendasCat = data.files.filter(f => f.name.includes(`KINU_${catKey}_`));
+                        
+                        if (prendasCat.length > 0) {
+                            grid.innerHTML += `<div class="category-title">${cat.n}</div>`;
+                            prendasCat.forEach(file => {
+                                const nombre = file.name.split('_')[2] || 'Sin nombre';
+                                grid.innerHTML += `
+                                    <div class="prenda-card">
+                                        <div class="img-wrapper">
+                                            <img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda">
+                                        </div>
+                                        <span>${nombre}</span>
+                                    </div>`;
+                            });
+                        }
+                    });
+                } else {
+                    filter.style.display = 'flex';
+                    const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
+                    const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, {
+                        headers: { 'Authorization': 'Bearer ' + accessToken }
+                    });
+                    const data = await res.json();
+                    grid.innerHTML = '';
+                    if (!data.files || data.files.length === 0) {
+                        grid.innerHTML = '<p style="color:rgba(255,255,255,0.5); grid-column:1/-1; text-align:center; margin-top:40px;">Sin prendas.</p>';
+                        return;
+                    }
+                    data.files.forEach(file => {
+                        const nombre = file.name.split('_')[2] || 'Sin nombre';
+                        grid.innerHTML += `
+                            <div class="prenda-card">
+                                <div class="img-wrapper">
+                                    <img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda">
+                                </div>
+                                <span>${nombre}</span>
+                            </div>`;
+                    });
+                }
+            } catch (e) { grid.innerHTML = 'Error de conexión'; }
+        }
+
+        function mostrarModo(modo) {
+            modoVista = modo;
+            document.getElementById('nav-home').classList.toggle('active', modo === 'categorias');
+            document.getElementById('nav-closet').classList.toggle('active', modo === 'todo');
+            document.getElementById('scroll-area').scrollTop = 0;
+            cargarPrendas();
         }
 
         async function finalizarGuardado() {
@@ -199,36 +311,12 @@
                     method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: form
                 });
                 if(res.ok) {
-                    mostrarFeedback('success', '¡Listo!', 'Guardado en Drive');
+                    mostrarFeedback('success', '¡Listo!', 'Guardado');
                     document.getElementById('modal-guardar').style.display = 'none';
                     cargarPrendas();
                 }
-            } catch (e) { mostrarFeedback('error', 'Error', 'No se pudo subir'); }
+            } catch (e) { mostrarFeedback('error', 'Error', 'Fallo de red'); }
             finally { btn.disabled = false; btn.innerText = "GUARDAR EN DRIVE"; }
-        }
-
-        async function cargarPrendas() {
-            if (!accessToken) return;
-            const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center; padding-top:40px;">Buscando...</p>';
-            try {
-                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
-                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, {
-                    headers: { 'Authorization': 'Bearer ' + accessToken }
-                });
-                const data = await res.json();
-                grid.innerHTML = '';
-                if (!data.files || data.files.length === 0) {
-                    grid.innerHTML = '<p style="color:rgba(255,255,255,0.5); grid-column:1/-1; text-align:center; margin-top:40px;">No hay nada aquí.</p>';
-                    return;
-                }
-                data.files.forEach(file => {
-                    const partes = file.name.split('_');
-                    const nombreVisible = partes[2] || 'Sin nombre';
-                    grid.innerHTML += `<div class="prenda-card"><img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda"><span>${nombreVisible}</span></div>`;
-                });
-            } catch (e) { grid.innerHTML = 'Error al cargar'; }
         }
 
         async function obtenerOCrearCarpeta(name) {
@@ -258,6 +346,9 @@
         }
 
         function cambiarCat(el, nombre) {
+            modoVista = 'categorias';
+            document.getElementById('nav-home').classList.add('active');
+            document.getElementById('nav-closet').classList.remove('active');
             document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
             categoriaActual = nombre.toUpperCase();
@@ -290,6 +381,7 @@
             cerrarModal(); 
         }
         function cerrarModal() { document.getElementById('modal-google').style.display = 'none'; }
+        
         function mostrarFeedback(tipo, tit, msg) {
             document.getElementById('feedback-icon').className = `ph ph-${tipo==='success'?'check':'warning'}-circle status-icon color-${tipo}`;
             document.getElementById('feedback-title').innerText = tit;

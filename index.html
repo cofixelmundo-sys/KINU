@@ -39,7 +39,7 @@
         .logo-header { width: 75px; height: auto; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
 
-        /* DRIVE LOGO A COLOR Y CON PULSO */
+        /* DRIVE LOGO CON PULSO */
         .drive-status-btn { grid-column: 3; justify-self: end; background: none; border: none; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .drive-status-btn img { width: 32px; height: auto; filter: grayscale(1) opacity(0.8) brightness(1.2); transition: 0.3s; }
         
@@ -79,15 +79,8 @@
         /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 85%; max-width: 320px; padding: 25px; border-radius: 30px; text-align: center; }
-        .input-kinu { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #eee; margin: 10px 0; font-size: 14px; background: #f9f9f9; outline: none; }
-        .grid-cats-modal { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0 20px; max-height: 140px; overflow-y: auto; scrollbar-width: none; }
-        .cat-modal-item { padding: 8px 0; border-radius: 12px; border: 1px solid #f0f0f0; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .cat-modal-item.selected { border-color: var(--verde-oscuro); background: #f0f4f1; border-width: 2px; }
-        .cat-modal-item i { font-size: 18px; margin-bottom: 4px; color: var(--verde-oscuro); }
-        .cat-modal-item span { font-size: 7px; font-weight: 800; text-transform: uppercase; }
         .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; font-size: 13px; text-transform: uppercase; }
         .btn-ghost { background: none; border: none; color: #999; margin-top: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; }
-        .status-icon { font-size: 55px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -97,7 +90,7 @@
             <div class="header-left-info">
                 <i class="ph ph-sun weather-icon" id="w-icon"></i>
                 <span class="temp-text" id="w-temp">--°</span>
-                <span class="city-label" id="w-city">...</span>
+                <span class="city-label" id="w-city">Hoy</span>
             </div>
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
@@ -125,7 +118,7 @@
                 <label for="cam-input" class="cam-trigger">
                     <div class="cam-inner"><i class="ph ph-camera"></i></div>
                 </label>
-                <input type="file" id="cam-input" accept="image/*" capture="environment" onchange="procesarFoto(event)">
+                <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none">
             </div>
         </div>
     </div>
@@ -146,32 +139,12 @@
         </div>
     </div>
 
-    <div id="modal-guardar" class="modal-overlay">
-        <div class="modal-content">
-            <h3>Nueva Prenda</h3>
-            <img id="preview-prenda" style="width:120px; height:120px; object-fit:contain; border-radius:15px; background:#f5f5f5; margin-bottom:10px;">
-            <input type="text" id="nombre-prenda" class="input-kinu" placeholder="Nombre (ej: Short Baño)">
-            <div class="grid-cats-modal" id="modal-grid-cats"></div>
-            <button class="btn-action" id="btn-finalizar" onclick="finalizarGuardado()">GUARDAR EN DRIVE</button>
-            <button class="btn-ghost" onclick="document.getElementById('modal-guardar').style.display='none'">CANCELAR</button>
-        </div>
-    </div>
-
-    <div id="modal-feedback" class="modal-overlay">
-        <div class="modal-content">
-            <i id="feedback-icon" class="ph status-icon"></i>
-            <h3 id="feedback-title"></h3>
-            <p id="feedback-msg" style="font-size:13px; color:#666;"></p>
-        </div>
-    </div>
-
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token');
         let tokenClient;
         let categoriaActual = 'SUPERIOR';
-        let categoriaSeleccionada = '';
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
@@ -185,6 +158,28 @@
             container.style.display = 'block';
             bar.style.width = percent + '%';
             if (percent >= 100) setTimeout(() => { container.style.display = 'none'; bar.style.width = '0%'; }, 800);
+        }
+
+        async function updateWeather() {
+            if (!navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const { latitude, longitude } = pos.coords;
+                try {
+                    const resW = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+                    const dataW = await resW.json();
+                    document.getElementById('w-temp').innerText = Math.round(dataW.current_weather.temperature) + '°';
+                    
+                    const code = dataW.current_weather.weathercode;
+                    const icon = document.getElementById('w-icon');
+                    if (code === 0) icon.className = "ph ph-sun weather-icon";
+                    else if (code <= 3) icon.className = "ph ph-cloud-sun weather-icon";
+                    else icon.className = "ph ph-cloud-rain weather-icon";
+
+                    const resC = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
+                    const dataC = await resC.json();
+                    document.getElementById('w-city').innerText = dataC.address.city || dataC.address.town || "Hoy";
+                } catch (e) { document.getElementById('w-city').innerText = "Hoy"; }
+            }, () => { document.getElementById('w-city').innerText = "Hoy"; }, { timeout: 10000 });
         }
 
         function startGoogle() {
@@ -202,68 +197,8 @@
             });
             if (accessToken) {
                 document.getElementById('auth-btn').classList.add('vinculado');
-                // Retraso mínimo para asegurar que gapi está listo
                 setTimeout(cargarPrendas, 500);
             }
-        }
-
-        async function cargarPrendas() {
-            if (!accessToken) return;
-            setProgress(30);
-            const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center; padding-top:40px;">Buscando...</p>';
-            try {
-                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                setProgress(60);
-                const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
-                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, {
-                    headers: { 'Authorization': 'Bearer ' + accessToken }
-                });
-                const data = await res.json();
-                grid.innerHTML = '';
-                if (!data.files || data.files.length === 0) {
-                    grid.innerHTML = `<p style="color:rgba(255,255,255,0.5); grid-column:1/-1; text-align:center; margin-top:40px;">No hay nada en ${categoriaActual}.</p>`;
-                } else {
-                    data.files.forEach(file => {
-                        const nombreVisible = file.name.split('_')[2] || 'Prenda';
-                        grid.innerHTML += `<div class="prenda-card"><img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda"><span>${nombreVisible}</span></div>`;
-                    });
-                }
-                setProgress(100);
-            } catch (e) { 
-                grid.innerHTML = 'Error al conectar'; 
-                setProgress(100);
-            }
-        }
-
-        async function finalizarGuardado() {
-            const nombreRaw = document.getElementById('nombre-prenda').value;
-            if(!nombreRaw || !categoriaSeleccionada) return mostrarFeedback('error', 'Error', 'Faltan datos');
-            setProgress(10);
-            const btn = document.getElementById('btn-finalizar');
-            btn.disabled = true; btn.innerText = "SUBIENDO...";
-            try {
-                const imgBlob = await fetch(document.getElementById('preview-prenda').src).then(r => r.blob());
-                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                setProgress(40);
-                const catSafe = categoriaSeleccionada.toUpperCase();
-                const nomSafe = nombreRaw.toUpperCase().replace(/[^A-Z0-9]/g, ' ');
-                const fileName = `KINU_${catSafe}_${nomSafe}_${Date.now()}.jpg`;
-                const metadata = { name: fileName, parents: [folderId], mimeType: 'image/jpeg' };
-                const form = new FormData();
-                form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
-                form.append('file', imgBlob);
-                const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                    method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: form
-                });
-                if(res.ok) {
-                    setProgress(100);
-                    mostrarFeedback('success', '¡Listo!', 'Guardado en Drive');
-                    document.getElementById('modal-guardar').style.display = 'none';
-                    cargarPrendas();
-                }
-            } catch (e) { mostrarFeedback('error', 'Error', 'No se pudo subir'); setProgress(100); }
-            finally { btn.disabled = false; btn.innerText = "GUARDAR EN DRIVE"; }
         }
 
         async function obtenerOCrearCarpeta(name) {
@@ -281,14 +216,42 @@
             return folder.id;
         }
 
+        async function cargarPrendas() {
+            if (!accessToken) return;
+            setProgress(30);
+            const grid = document.getElementById('closet-grid');
+            grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center; padding-top:40px;">Buscando...</p>';
+            try {
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                setProgress(60);
+                const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                const data = await res.json();
+                grid.innerHTML = '';
+                if (!data.files || data.files.length === 0) {
+                    grid.innerHTML = `<p style="color:rgba(255,255,255,0.5); grid-column:1/-1; text-align:center; margin-top:40px;">No hay prendas aquí</p>`;
+                } else {
+                    data.files.forEach(file => {
+                        const nombreVisible = file.name.split('_')[2] || 'Prenda';
+                        grid.innerHTML += `<div class="prenda-card"><img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda"><span>${nombreVisible}</span></div>`;
+                    });
+                }
+                setProgress(100);
+            } catch (e) { setProgress(100); }
+        }
+
         function renderCats() {
             const container = document.getElementById('main-cats');
-            const modalGrid = document.getElementById('modal-grid-cats');
-            container.innerHTML = ''; modalGrid.innerHTML = '';
+            container.innerHTML = '';
             categorias.forEach((cat) => {
                 const isActive = cat.n.toUpperCase() === categoriaActual;
-                container.innerHTML += `<div class="cat-item ${isActive?'active':''}" onclick="cambiarCat(this, '${cat.n}')"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;
-                modalGrid.innerHTML += `<div class="cat-modal-item" onclick="selectCatModal(this, '${cat.n}')"><i class="ph ${cat.i}"></i><span>${cat.n}</span></div>`;
+                container.innerHTML += `
+                    <div class="cat-item ${isActive?'active':''}" onclick="cambiarCat(this, '${cat.n}')">
+                        <div class="cat-circle"><i class="ph ${cat.i}"></i></div>
+                        <span class="cat-label">${cat.n}</span>
+                    </div>`;
             });
         }
 
@@ -296,20 +259,7 @@
             document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
             categoriaActual = nombre.toUpperCase();
-            cargarPrendas();
-        }
-
-        function selectCatModal(el, nombre) {
-            document.querySelectorAll('.cat-modal-item').forEach(i => i.classList.remove('selected'));
-            el.classList.add('selected');
-            categoriaSeleccionada = nombre;
-        }
-
-        function procesarFoto(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            document.getElementById('preview-prenda').src = URL.createObjectURL(file);
-            document.getElementById('modal-guardar').style.display = 'flex';
+            if (accessToken) cargarPrendas();
         }
 
         function manejarDrive() {
@@ -329,15 +279,7 @@
         }
         function cerrarModal() { document.getElementById('modal-google').style.display = 'none'; }
 
-        function mostrarFeedback(tipo, tit, msg) {
-            document.getElementById('feedback-icon').className = `ph ph-${tipo==='success'?'check':'warning'}-circle status-icon color-${tipo}`;
-            document.getElementById('feedback-title').innerText = tit;
-            document.getElementById('feedback-msg').innerText = msg;
-            document.getElementById('modal-feedback').style.display = 'flex';
-            setTimeout(() => document.getElementById('modal-feedback').style.display = 'none', 2000);
-        }
-
-        window.onload = () => { renderCats(); startGoogle(); };
+        window.onload = () => { renderCats(); startGoogle(); updateWeather(); };
     </script>
 </body>
 </html>

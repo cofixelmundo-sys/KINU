@@ -54,7 +54,7 @@
         .prenda-card { 
             background: rgba(255,255,255,0.1); 
             border-radius: 20px; 
-            padding: 12px; 
+            padding: 10px; 
             text-align: center; 
             border: 1px solid rgba(255,255,255,0.1); 
             display: flex;
@@ -62,31 +62,29 @@
             align-items: center;
         }
         
-        /* ESTE CONTENEDOR ES LA CLAVE PARA QUE NO SE CORTE NADA */
-        .img-wrapper {
+        .img-container {
             width: 100%;
-            aspect-ratio: 1 / 1;
-            background: rgba(255,255,255,0.08);
+            aspect-ratio: 1 / 1; /* Cuadrado perfecto */
+            background: rgba(255,255,255,0.05);
             border-radius: 15px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            padding: 8px; /* Margen interno de seguridad */
+            padding: 5px; /* Espacio para que no toque los bordes */
         }
 
-        .img-wrapper img { 
+        .prenda-card img { 
             max-width: 100%; 
             max-height: 100%; 
-            width: auto;
-            height: auto;
-            object-fit: contain; /* Obliga a la imagen a caber entera */
-            border-radius: 8px;
+            object-fit: contain; /* Ajusta sin recortar */
+            border-radius: 10px;
         }
         
         .prenda-card span { color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+        /* NAVEGACIÓN */
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.5; cursor: pointer; }
@@ -97,6 +95,7 @@
         .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
         #cam-input { display: none; }
 
+        /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 85%; max-width: 320px; padding: 25px; border-radius: 30px; text-align: center; }
         .input-kinu { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #eee; margin: 10px 0; font-size: 14px; background: #f9f9f9; outline: none; }
@@ -167,8 +166,8 @@
     <div id="modal-guardar" class="modal-overlay">
         <div class="modal-content">
             <h3>Nueva Prenda</h3>
-            <div class="img-wrapper" style="width:140px; margin: 0 auto 10px;">
-                <img id="preview-prenda">
+            <div class="img-container" style="width:120px; height:120px; margin: 0 auto 10px;">
+                <img id="preview-prenda" style="max-width:100%; max-height:100%; object-fit:contain;">
             </div>
             <input type="text" id="nombre-prenda" class="input-kinu" placeholder="Nombre (ej: Short Baño)">
             <div class="grid-cats-modal" id="modal-grid-cats"></div>
@@ -250,7 +249,7 @@
                                 const nombre = file.name.split('_')[2] || 'Sin nombre';
                                 grid.innerHTML += `
                                     <div class="prenda-card">
-                                        <div class="img-wrapper">
+                                        <div class="img-container">
                                             <img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda">
                                         </div>
                                         <span>${nombre}</span>
@@ -267,14 +266,14 @@
                     const data = await res.json();
                     grid.innerHTML = '';
                     if (!data.files || data.files.length === 0) {
-                        grid.innerHTML = '<p style="color:rgba(255,255,255,0.5); grid-column:1/-1; text-align:center; margin-top:40px;">Sin prendas.</p>';
+                        grid.innerHTML = '<p style="color:rgba(255,255,255,0.5); grid-column:1/-1; text-align:center; margin-top:40px;">No hay prendas aquí.</p>';
                         return;
                     }
                     data.files.forEach(file => {
                         const nombre = file.name.split('_')[2] || 'Sin nombre';
                         grid.innerHTML += `
                             <div class="prenda-card">
-                                <div class="img-wrapper">
+                                <div class="img-container">
                                     <img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda">
                                 </div>
                                 <span>${nombre}</span>

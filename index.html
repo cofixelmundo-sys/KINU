@@ -34,19 +34,29 @@
         .logo-header { width: 75px; height: auto; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
 
-        /* DRIVE LOGO CON PULSO CUANDO ESTÁ INACTIVO */
+        /* DRIVE LOGO - AJUSTADO PARA VERSE MÁS */
         .drive-status-btn { grid-column: 3; justify-self: end; background: none; border: none; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .drive-status-btn img { width: 32px; height: auto; filter: grayscale(1) opacity(0.5); transition: 0.3s; }
         
-        /* Animación de pulso */
+        .drive-status-btn img { 
+            width: 32px; 
+            height: auto; 
+            filter: grayscale(1) opacity(0.8) brightness(1.2); /* Menos transparencia, se ve más */
+            transition: 0.3s; 
+        }
+        
+        /* Animación de pulso más notable */
         @keyframes pulse-logo {
-            0% { transform: scale(1); opacity: 0.4; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 0.4; }
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.15); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
         }
         .drive-status-btn:not(.vinculado) img { animation: pulse-logo 2s infinite ease-in-out; }
 
-        .drive-status-btn.vinculado img { filter: grayscale(0) opacity(1) drop-shadow(0 0 5px rgba(255,255,255,0.2)); animation: none; }
+        .drive-status-btn.vinculado img { 
+            filter: grayscale(0) opacity(1) drop-shadow(0 0 8px rgba(255,255,255,0.4)); 
+            animation: none; 
+            transform: scale(1.05);
+        }
         
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; }
@@ -73,7 +83,6 @@
         .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
         #cam-input { display: none; }
 
-        /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 85%; max-width: 320px; padding: 25px; border-radius: 30px; text-align: center; }
         .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; font-size: 13px; text-transform: uppercase; margin-top: 10px; }
@@ -229,7 +238,6 @@
             accessToken = null; 
             localStorage.removeItem('drive_token'); 
             document.getElementById('auth-btn').classList.remove('vinculado'); 
-            // LIMPIAR IMÁGENES AL DESVINCULAR
             document.getElementById('closet-grid').innerHTML = '';
             cerrarModal(); 
         }
@@ -257,7 +265,6 @@
         function procesarFoto(event) {
             const file = event.target.files[0];
             if (!file) return;
-            // Aquí llamarías a tu función de guardado
             console.log("Foto capturada lista para subir");
         }
 

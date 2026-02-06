@@ -44,9 +44,8 @@
         .cat-item.active .cat-circle { background: white; }
         .cat-item.active i { color: var(--verde-oscuro); }
         .cat-circle i { font-size: 24px; color: white; }
-        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
+        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
 
-        /* GRID DE PRENDAS */
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
         .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
         .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; }
@@ -96,8 +95,7 @@
         
         <div class="content">
             <div class="filter-scroll" id="main-cats"></div>
-            <div class="closet-grid" id="closet-grid">
-                </div>
+            <div class="closet-grid" id="closet-grid"></div>
         </div>
 
         <div class="nav-wrapper">
@@ -156,7 +154,14 @@
         let tokenClient;
         let categoriaActual = 'SUPERIOR';
 
-        // 1. INICIALIZACIÓN
+        // --- TODAS LAS CATEGORÍAS RECUPERADAS ---
+        const categorias = [
+            {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
+            {n: 'Enterizos', i: 'ph-dress'}, {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Accesorios', i: 'ph-sunglasses'},
+            {n: 'Vintage', i: 'ph-hourglass'}, {n: 'Deporte', i: 'ph-person-simple-run'}, {n: 'Dormir', i: 'ph-moon'}, {n: 'Donar', i: 'ph-hand-heart'}
+        ];
+        let categoriaSeleccionada = '';
+
         function startGoogle() {
             gapi.load('client', () => gapi.client.init({}));
             tokenClient = google.accounts.oauth2.initTokenClient({
@@ -175,73 +180,53 @@
             }
         }
 
-        // 2. GUARDAR CON NOMBRE ESTRUCTURADO
         async function finalizarGuardado() {
             const nombreRaw = document.getElementById('nombre-prenda').value;
             if(!nombreRaw || !categoriaSeleccionada) return mostrarFeedback('error', 'Error', 'Faltan datos');
-            
             const btn = document.getElementById('btn-finalizar');
             btn.disabled = true; btn.innerText = "SUBIENDO...";
-
             try {
                 const imgBlob = await fetch(document.getElementById('preview-prenda').src).then(r => r.blob());
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-
-                // NOMBRE ESTRUCTURADO: KINU_CATEGORIA_NOMBRE_TIMESTAMP.jpg
                 const catSafe = categoriaSeleccionada.toUpperCase();
                 const nomSafe = nombreRaw.toUpperCase().replace(/[^A-Z0-9]/g, ' ');
                 const fileName = `KINU_${catSafe}_${nomSafe}_${Date.now()}.jpg`;
-
                 const metadata = { name: fileName, parents: [folderId], mimeType: 'image/jpeg' };
                 const form = new FormData();
                 form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
                 form.append('file', imgBlob);
-
                 const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                     method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: form
                 });
-
                 if(res.ok) {
                     mostrarFeedback('success', '¡Listo!', 'Guardado en Drive');
                     document.getElementById('modal-guardar').style.display = 'none';
-                    cargarPrendas(); // Recargar vista
+                    cargarPrendas();
                 }
             } catch (e) { mostrarFeedback('error', 'Error', 'No se pudo subir'); }
             finally { btn.disabled = false; btn.innerText = "GUARDAR EN DRIVE"; }
         }
 
-        // 3. LEER PRENDAS DE DRIVE
         async function cargarPrendas() {
             if (!accessToken) return;
             const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center;">Buscando prendas...</p>';
-
+            grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center; padding-top:40px;">Buscando...</p>';
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                // Buscamos archivos que empiecen con KINU y tengan la categoría actual en el nombre
                 const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
                 const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, {
                     headers: { 'Authorization': 'Bearer ' + accessToken }
                 });
                 const data = await res.json();
-
                 grid.innerHTML = '';
                 if (!data.files || data.files.length === 0) {
-                    grid.innerHTML = '<p style="color:rgba(255,255,255,0.5); grid-column:1/-1; text-align:center; margin-top:40px;">No hay prendas en esta categoría.</p>';
+                    grid.innerHTML = '<p style="color:rgba(255,255,255,0.5); grid-column:1/-1; text-align:center; margin-top:40px;">No hay nada aquí.</p>';
                     return;
                 }
-
                 data.files.forEach(file => {
-                    // Extraer nombre legible del patrón KINU_CAT_NOMBRE_ID.jpg
                     const partes = file.name.split('_');
                     const nombreVisible = partes[2] || 'Sin nombre';
-                    
-                    grid.innerHTML += `
-                        <div class="prenda-card">
-                            <img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda">
-                            <span>${nombreVisible}</span>
-                        </div>
-                    `;
+                    grid.innerHTML += `<div class="prenda-card"><img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda"><span>${nombreVisible}</span></div>`;
                 });
             } catch (e) { grid.innerHTML = 'Error al cargar'; }
         }
@@ -253,7 +238,6 @@
             });
             const data = await res.json();
             if (data.files?.length > 0) return data.files[0].id;
-
             const create = await fetch('https://www.googleapis.com/drive/v3/files', {
                 method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder' })
@@ -262,16 +246,10 @@
             return folder.id;
         }
 
-        // --- INTERFAZ Y CLIMA ---
-        const categorias = [
-            {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
-            {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Accesorios', i: 'ph-sunglasses'}, {n: 'Deporte', i: 'ph-person-simple-run'}
-        ];
-        let categoriaSeleccionada = '';
-
         function renderCats() {
             const container = document.getElementById('main-cats');
             const modalGrid = document.getElementById('modal-grid-cats');
+            container.innerHTML = ''; modalGrid.innerHTML = '';
             categorias.forEach((cat, idx) => {
                 const isActive = cat.n.toUpperCase() === categoriaActual;
                 container.innerHTML += `<div class="cat-item ${isActive?'active':''}" onclick="cambiarCat(this, '${cat.n}')"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;

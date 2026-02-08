@@ -42,7 +42,6 @@
         }
         .drive-status-btn img { width: 32px; height: auto; filter: grayscale(1) opacity(0.8) brightness(1.2); transition: 0.3s; z-index: 2; }
         
-        /* Pulso de atención cuando está inactivo */
         .drive-status-btn:not(.vinculado)::after {
             content: ''; position: absolute; width: 32px; height: 32px;
             background: rgba(255, 255, 255, 0.4); border-radius: 50%;
@@ -64,7 +63,7 @@
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1); position: relative; }
         .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; }
         .prenda-card span { color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; }
 
@@ -79,6 +78,7 @@
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 85%; max-width: 320px; padding: 25px; border-radius: 30px; text-align: center; }
         .btn-action { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 900; cursor: pointer; font-size: 13px; text-transform: uppercase; margin-bottom: 8px; }
+        .btn-delete { background: var(--rojo-borrar); color: white; }
         .btn-ghost { background: none; border: none; color: #999; margin-top: 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; width: 100%; }
     </style>
 </head>
@@ -137,6 +137,15 @@
         </div>
     </div>
 
+    <div id="modal-prenda" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="margin:0 0 20px; font-size: 16px;">¿Quieres colaborar con esta prenda o quieres eliminarla?</h3>
+            <button class="btn-action" onclick="accionColaborar()">COLABORAR</button>
+            <button class="btn-action btn-delete" onclick="accionEliminar()">ELIMINAR</button>
+            <button class="btn-ghost" onclick="cerrarModales()">CANCELAR</button>
+        </div>
+    </div>
+
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata.readonly';
@@ -144,15 +153,14 @@
         let folderId = null;
         let tokenClient;
         let categoriaActual = 'SUPERIOR';
+        let prendaSeleccionada = null; // Guardamos el objeto completo del archivo
 
-        // --- TODAS LAS CATEGORÍAS ---
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
             {n: 'Enterizos', i: 'ph-dress'}, {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Accesorios', i: 'ph-sunglasses'},
             {n: 'Vintage', i: 'ph-hourglass'}, {n: 'Deporte', i: 'ph-person-simple-run'}, {n: 'Dormir', i: 'ph-moon'}, {n: 'Donar', i: 'ph-hand-heart'}
         ];
 
-        // --- CLIMA CON CIUDAD ---
         async function updateWeather() {
             if (!navigator.geolocation) return;
             navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -170,7 +178,6 @@
             });
         }
 
-        // --- DRIVE ---
         function startGoogle() {
             gapi.load('client', async () => {
                 await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
@@ -230,10 +237,61 @@
                 } else {
                     data.files.forEach(file => {
                         const name = file.name.split('_')[2] || 'Prenda';
-                        grid.innerHTML += `<div class="prenda-card"><img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="ropa"><span>${name}</span></div>`;
+                        const card = document.createElement('div');
+                        card.className = 'prenda-card';
+                        card.innerHTML = `<img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="ropa"><span>${name}</span>`;
+                        
+                        // Lógica de 1 segundo para el popup
+                        let timer;
+                        const startPress = () => {
+                            timer = setTimeout(() => {
+                                prendaSeleccionada = file;
+                                document.getElementById('modal-prenda').style.display = 'flex';
+                                if(navigator.vibrate) navigator.vibrate(40);
+                            }, 1000);
+                        };
+                        const endPress = () => clearTimeout(timer);
+
+                        card.addEventListener('touchstart', startPress);
+                        card.addEventListener('touchend', endPress);
+                        card.addEventListener('mousedown', startPress);
+                        card.addEventListener('mouseup', endPress);
+
+                        grid.appendChild(card);
                     });
                 }
             } catch (e) {}
+        }
+
+        // --- ACCIONES DE PRENDA ---
+        async function accionEliminar() {
+            if (!prendaSeleccionada) return;
+            try {
+                await fetch(`https://www.googleapis.com/drive/v3/files/${prendaSeleccionada.id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                cargarPrendas();
+            } catch (e) { alert("No se pudo eliminar."); }
+            cerrarModales();
+        }
+
+        async function accionColaborar() {
+            if (!prendaSeleccionada) return;
+            try {
+                // Renombrar para que aparezca en la categoría "DONAR" (Colaboro)
+                const nuevoNombre = prendaSeleccionada.name.replace(`KINU_${categoriaActual}`, 'KINU_DONAR');
+                await fetch(`https://www.googleapis.com/drive/v3/files/${prendaSeleccionada.id}`, {
+                    method: 'PATCH',
+                    headers: { 
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({ name: nuevoNombre })
+                });
+                cargarPrendas();
+            } catch (e) { alert("No se pudo mover a colaborar."); }
+            cerrarModales();
         }
 
         function actualizarDriveUI(vinculado) {
@@ -268,7 +326,10 @@
             accessToken = null; folderId = null; localStorage.removeItem('drive_token'); 
             actualizarDriveUI(false); document.getElementById('closet-grid').innerHTML = ''; cerrarModales(); 
         }
-        function cerrarModales() { document.getElementById('modal-google').style.display = 'none'; }
+        function cerrarModales() { 
+            document.getElementById('modal-google').style.display = 'none'; 
+            document.getElementById('modal-prenda').style.display = 'none';
+        }
 
         window.onload = () => { renderCats(); startGoogle(); updateWeather(); };
     </script>

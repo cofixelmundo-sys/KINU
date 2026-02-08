@@ -5,78 +5,127 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KINU Studio - AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-segmentation"></script>
+
     <style>
         .checkerboard {
             background-image: linear-gradient(45deg, #2a2a2a 25%, transparent 25%), 
                               linear-gradient(-45deg, #2a2a2a 25%, transparent 25%), 
                               linear-gradient(45deg, transparent 75%, #2a2a2a 75%), 
                               linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
-            background-size: 20px 20px; background-color: #1a1a1a;
+            background-size: 20px 20px;
+            background-color: #1a1a1a;
         }
-        .loader {
-            border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #fff;
-            border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite;
+        .loader-spin {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-zinc-900 text-white min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
+<body class="bg-zinc-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+
     <div class="relative w-full max-w-sm aspect-[3/4] bg-zinc-800 rounded-[30px] overflow-hidden border border-zinc-700 shadow-2xl checkerboard">
-        <div id="loading-overlay" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-900">
-            <div class="loader mb-4"></div>
-            <p id="status-text" class="text-[10px] font-bold tracking-widest uppercase opacity-60 text-center px-6">
-                RECORTANDO FONDO...<br>DAME UN MOMENTO
-            </p>
+        <div id="loading-overlay" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-900/90 backdrop-blur-md">
+            <div class="loader-spin mb-4"></div>
+            <p id="status-text" class="text-xs font-bold tracking-widest uppercase opacity-70">Cargando IA...</p>
         </div>
-        <canvas id="canvas" class="w-full h-full object-contain relative z-10"></canvas>
+        
+        <canvas id="outputCanvas" class="w-full h-full object-contain relative z-10 opacity-0 transition-opacity duration-500"></canvas>
+    </div>
+
+    <div class="mt-8 w-full max-w-sm flex flex-col gap-3">
+        <button id="btn-confirm" onclick="confirmarYVolver()" class="bg-white text-black font-black py-4 rounded-full text-xs uppercase tracking-widest shadow-xl disabled:opacity-50" disabled>
+            USAR ESTA PRENDA
+        </button>
+        <p class="text-[10px] text-center opacity-40 uppercase tracking-widest">Procesado local por TensorFlow.js</p>
     </div>
 
     <script>
-        let bodypix;
-        const canvas = document.getElementById('canvas');
+        let segmenter;
+        const canvas = document.getElementById('outputCanvas');
         const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('status-text');
 
-        async function setup() {
-            const options = { outputStride: 16, multiplier: 0.50, architecture: 'MobileNetV1' };
-            bodypix = ml5.bodyPix(options, () => {
-                const dataUrl = localStorage.getItem('imagen_transferida');
-                if (dataUrl) {
-                    const img = new Image();
-                    img.src = dataUrl;
-                    img.onload = () => procesar(img);
-                }
-            });
+        async function initAI() {
+            try {
+                // 1. Inicializar el segmentador
+                const model = bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
+                const segmenterConfig = {
+                    runtime: 'tfjs',
+                    modelType: 'general' // 'general' es más preciso para objetos/ropa
+                };
+                segmenter = await bodySegmentation.createSegmenter(model, segmenterConfig);
+                
+                statusText.innerText = "Procesando Imagen...";
+                procesarImagen();
+            } catch (err) {
+                console.error(err);
+                statusText.innerText = "Error al cargar IA";
+            }
         }
 
-        function procesar(img) {
-            const maxDim = 800;
-            let w = img.width, h = img.height;
-            if (w > h && w > maxDim) { h *= maxDim/w; w = maxDim; }
-            else if (h > maxDim) { w *= maxDim/h; h = maxDim; }
+        async function procesarImagen() {
+            const dataUrl = localStorage.getItem('imagen_transferida');
+            if (!dataUrl) return;
 
-            canvas.width = w; canvas.height = h;
-            ctx.drawImage(img, 0, 0, w, h);
+            const img = new Image();
+            img.src = dataUrl;
+            img.onload = async () => {
+                // Ajustar canvas al tamaño de la imagen original
+                canvas.width = img.width;
+                canvas.height = img.height;
 
-            bodypix.segment(canvas, (err, result) => {
-                if (!err) {
-                    const mask = result.backgroundMask;
-                    ctx.globalCompositeOperation = 'destination-in';
-                    ctx.drawImage(mask, 0, 0, w, h);
-                    
-                    // GUARDAR Y AVISAR AL PADRE AUTOMÁTICAMENTE
-                    localStorage.setItem('imagen_procesada', canvas.toDataURL("image/png"));
-                    
-                    // Esperamos un milisegundo para asegurar que se guardó
-                    setTimeout(() => {
-                        if (window.parent && window.parent.cerrarIA) {
-                            window.parent.cerrarIA();
-                        }
-                    }, 500);
+                // 2. Realizar la segmentación
+                const segmentation = await segmenter.segmentPeople(img);
+                
+                // 3. Crear máscara
+                const foregroundColor = {r: 255, g: 255, b: 255, a: 255};
+                const backgroundColor = {r: 0, g: 0, b: 0, a: 0};
+                const mask = await bodySegmentation.toBinaryMask(segmentation, foregroundColor, backgroundColor);
+
+                // 4. Dibujar imagen con el fondo eliminado
+                // Primero dibujamos la imagen original
+                ctx.drawImage(img, 0, 0);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const pixelData = imageData.data;
+
+                // Aplicamos la máscara (usando los datos de la máscara de MediaPipe)
+                // mask.data contiene 0 o 255 para cada píxel
+                for (let i = 0; i < pixelData.length; i += 4) {
+                    const maskValue = mask.data[i / 4];
+                    if (maskValue === 0) {
+                        pixelData[i + 3] = 0; // Hacemos transparente el fondo
+                    }
                 }
-            });
+
+                ctx.putImageData(imageData, 0, 0);
+
+                // Finalizar UI
+                document.getElementById('loading-overlay').style.display = 'none';
+                canvas.classList.remove('opacity-0');
+                document.getElementById('btn-confirm').disabled = false;
+                
+                // Guardar resultado
+                const finalBase64 = canvas.toDataURL("image/png");
+                localStorage.setItem('imagen_procesada', finalBase64);
+            };
         }
-        window.onload = setup;
+
+        function confirmarYVolver() {
+            if (window.parent && window.parent.cerrarIA) {
+                window.parent.cerrarIA();
+            }
+        }
+
+        // Iniciar al cargar la ventana
+        window.onload = initAI;
     </script>
 </body>
 </html>

@@ -3,50 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KINU Studio AI - Cloud Engine</title>
+    <title>KINU Studio - Total Free</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-zinc-950 text-white min-h-screen flex flex-col items-center justify-center p-6">
 
     <div class="mb-8 text-center">
         <h1 class="text-indigo-500 font-black tracking-widest text-xl uppercase">KINU STUDIO</h1>
-        <p class="text-zinc-500 text-[10px] mt-2 uppercase tracking-widest font-bold">Cloud Processing</p>
+        <p class="text-zinc-500 text-[10px] mt-2 uppercase tracking-widest font-bold">Ilimitado & Gratuito</p>
     </div>
 
     <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl">
         
         <div id="drop-zone" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-zinc-900 px-8 text-center">
-            <div class="w-20 h-20 bg-indigo-500/10 rounded-full flex items-center justify-center mb-6 border border-indigo-500/20">
+            <div class="w-20 h-20 bg-indigo-600/10 rounded-full flex items-center justify-center mb-6">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 </svg>
             </div>
-            <p class="text-sm font-bold mb-3 text-zinc-200">Subir Imagen</p>
-            <p class="text-zinc-400 text-[11px] mb-8 leading-relaxed">Procesamiento en la nube (Gratis e Ilimitado)</p>
-            
-            <label class="w-full bg-indigo-600 text-white text-[11px] font-black py-4 px-8 rounded-2xl cursor-pointer shadow-lg uppercase tracking-widest text-center">
-                ELEGIR ARCHIVO
+            <label class="w-full bg-indigo-600 text-white text-[11px] font-black py-4 px-8 rounded-2xl cursor-pointer shadow-lg uppercase tracking-widest">
+                TOMAR FOTO
                 <input type="file" id="file-input" class="hidden" accept="image/*">
             </label>
         </div>
 
         <div id="loading-overlay" class="hidden absolute inset-0 z-40 flex flex-col items-center justify-center bg-zinc-950/90 backdrop-blur-md px-6 text-center">
             <div class="w-12 h-12 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p class="text-[10px] font-black tracking-widest text-indigo-400 uppercase">Subiendo a la Nube...</p>
+            <p class="text-[10px] font-black tracking-widest text-indigo-400 uppercase">Eliminando fondo gratis...</p>
         </div>
 
         <img id="result-img" class="relative z-10 w-full h-full object-contain p-4 opacity-0 transition-opacity duration-500">
     </div>
 
     <button id="final-btn" onclick="confirmar()" disabled class="mt-10 w-full max-w-[320px] py-4 bg-zinc-800 text-zinc-600 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em]">
-        Confirmar y Guardar
+        Confirmar Retrato
     </button>
 
     <script>
-        // CONFIGURACIÓN DE CLOUDINARY (Crea tu cuenta gratis para tener tu propio cloud_name)
-        const CLOUD_NAME = "demo"; // Cambia "demo" por tu Cloud Name de Cloudinary
-        const UPLOAD_PRESET = "unsigned_preset"; // Debes crear un "Unsigned Upload Preset" en Cloudinary
-
         const fileInput = document.getElementById('file-input');
         
         fileInput.addEventListener('change', async (e) => {
@@ -56,52 +49,51 @@
             document.getElementById('loading-overlay').classList.remove('hidden');
             document.getElementById('drop-zone').classList.add('hidden');
 
+            // --- ESTA ES LA MAGIA GRATUITA ---
+            // Usamos un servicio de inferencia que no requiere API Key para procesamientos rápidos
             const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', UPLOAD_PRESET);
-            // Esta es la magia: Cloudinary quita el fondo al subir si añades este parámetro
-            // Nota: Requiere activar el add-on "Cloudinary AI Background Removal" (tiene capa gratuita)
-            formData.append('background_removal', 'cloudinary_ai'); 
+            formData.append('image', file);
 
             try {
-                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                // Usamos una API de código abierto (estilo rembg) alojada en espacios públicos de IA
+                const response = await fetch('https://hf.space/embed/optimum/Rembg/+/api/predict', {
                     method: 'POST',
-                    body: formData
+                    body: JSON.stringify({ data: [await toBase64(file)] }),
+                    headers: { "Content-Type": "application/json" }
                 });
 
-                const data = await response.json();
-
-                if (data.secure_url) {
-                    // Cloudinary devuelve la imagen. Aplicamos el recorte de bordes (trim) en la URL
-                    const finalUrl = data.secure_url.replace("/upload/", "/upload/e_trim/f_png/");
-                    
+                const result = await response.json();
+                
+                if (result.data && result.data[0]) {
                     const img = document.getElementById('result-img');
-                    img.src = finalUrl;
-                    img.crossOrigin = "anonymous";
+                    img.src = result.data[0];
                     img.onload = () => {
                         img.classList.remove('opacity-0');
                         document.getElementById('loading-overlay').classList.add('hidden');
                         const btn = document.getElementById('final-btn');
                         btn.disabled = false;
+                        btn.style.backgroundColor = "#4f46e5";
+                        btn.style.color = "white";
                         btn.innerText = "GUARDAR FOTO";
-                        btn.className = "mt-10 w-full max-w-[320px] py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl";
-                        
-                        // Guardar en la sesión
-                        sessionStorage.setItem('imagen_procesada', finalUrl);
+                        sessionStorage.setItem('imagen_procesada', result.data[0]);
                     };
-                } else {
-                    throw new Error("Error en la subida");
                 }
-
             } catch (error) {
-                alert("Error: Asegúrate de configurar tu Cloud Name y Preset correctamente.");
+                alert("El servidor gratuito está saturado. Intenta de nuevo en unos segundos.");
                 location.reload();
             }
         });
 
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
         function confirmar() {
             if (window.parent) window.parent.postMessage("completado", "*");
-            alert("¡Foto enviada a KINU Studio!");
+            alert("¡Listo! Foto guardada.");
         }
     </script>
 </body>

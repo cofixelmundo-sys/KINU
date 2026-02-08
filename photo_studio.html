@@ -14,7 +14,7 @@
 
     <div class="mb-8 text-center">
         <h1 class="text-indigo-500 font-black tracking-widest text-xl uppercase italic">KINU STUDIO</h1>
-        <p class="text-zinc-500 text-[10px] mt-2 uppercase tracking-widest font-bold">Conexión Directa KINU-Cloud</p>
+        <p class="text-zinc-500 text-[10px] mt-2 uppercase tracking-widest font-bold">AI Portrait Engine</p>
     </div>
 
     <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl mx-auto">
@@ -29,12 +29,11 @@
                 TOMAR FOTO
                 <input type="file" id="file-input" class="hidden" accept="image/*" capture="user">
             </label>
-            <p class="text-[9px] text-zinc-600 mt-6 uppercase tracking-widest font-bold">Servidor Privado Ilimitado</p>
         </div>
 
         <div id="loading-overlay" class="hidden absolute inset-0 z-40 flex flex-col items-center justify-center bg-zinc-950/95 backdrop-blur-md px-10 text-center">
             <div class="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p class="text-[10px] font-black tracking-widest text-indigo-400 uppercase">Recortando con IA...</p>
+            <p class="text-[10px] font-black tracking-widest text-indigo-400 uppercase">Eliminando fondo...</p>
         </div>
 
         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
@@ -42,14 +41,12 @@
     </div>
 
     <button id="final-btn" onclick="confirmar()" disabled class="mt-8 w-full max-w-[320px] py-4 bg-zinc-800 text-zinc-600 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] transition-all border border-white/5">
-        Confirmar Retrato
+        Confirmar y Categorizar
     </button>
 
     <script>
         const fileInput = document.getElementById('file-input');
-        
-        // REEMPLAZA CON TU NOMBRE DE USUARIO Y SPACE EXACTO
-        const SPACE_ID = "COFIXELMUNDO/recortador-imagen";
+        const SPACE_ID = "COFIXELMUNDO/recortador-imagen"; // Tu servidor IA
 
         fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
@@ -59,21 +56,21 @@
             document.getElementById('drop-zone').classList.add('hidden');
 
             try {
-                // 1. Redimensionar para velocidad
+                // 1. Optimizamos la imagen (800px) para que suba rápido
                 const base64Image = await resizeImage(file, 800);
 
-                // 2. Conectar usando el cliente oficial de Gradio
+                // 2. Conectamos con tu servidor Hugging Face
                 const app = await window.GradioClient(SPACE_ID);
                 const result = await app.predict("/predict", [base64Image]);
 
                 if (result.data && result.data[0]) {
                     mostrarResultado(result.data[0]);
                 } else {
-                    throw new Error("Respuesta fallida");
+                    throw new Error("Error en el procesado");
                 }
             } catch (err) {
                 console.error(err);
-                alert("El servidor se está iniciando o está ocupado. Intenta de nuevo en 15 segundos.");
+                alert("El servidor está despertando. Por favor, intenta de nuevo en 10 segundos.");
                 location.reload();
             }
         });
@@ -92,7 +89,7 @@
                         canvas.height = img.height * scale;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL("image/jpeg", 0.7));
+                        resolve(canvas.toDataURL("image/jpeg", 0.8));
                     };
                 };
             });
@@ -106,15 +103,26 @@
                 document.getElementById('loading-overlay').classList.add('hidden');
                 const btn = document.getElementById('final-btn');
                 btn.disabled = false;
-                btn.innerText = "¡LISTO! GUARDAR";
-                btn.className = "mt-8 w-full max-w-[320px] py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl";
+                btn.innerText = "LISTO PARA GUARDAR";
+                btn.className = "mt-8 w-full max-w-[320px] py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-indigo-600/30 active:scale-95 transition-all";
                 sessionStorage.setItem('imagen_procesada', src);
             };
         }
 
         function confirmar() {
-            if (window.parent) window.parent.postMessage("completado", "*");
-            alert("Retrato guardado.");
+            const imageData = sessionStorage.getItem('imagen_procesada');
+            if (!imageData) return;
+
+            // ENVIAR VALOR A GLIDE
+            if (window.parent) {
+                window.parent.postMessage({
+                    type: "glide-set-value",
+                    value: imageData 
+                }, "*");
+            }
+            
+            // Mensaje de éxito antes de que Glide dispare el Pop-up
+            alert("¡Imagen lista! Selecciona la categoría ahora.");
         }
     </script>
 </body>

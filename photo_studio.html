@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KINU Studio AI</title>
+    <title>KINU Studio AI - Free Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@latest/dist/bundle.js"></script>
     <style>
         .checkerboard {
             background-image: linear-gradient(45deg, #2a2a2a 25%, transparent 25%), 
@@ -13,203 +14,100 @@
                               linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
             background-size: 15px 15px;
         }
-        .loading-bar {
-            width: 0%;
-            height: 2px;
-            background: #6366f1;
-            transition: width 0.3s;
-        }
     </style>
 </head>
-<body class="bg-black text-white min-h-screen flex flex-col items-center justify-between p-6 overflow-hidden font-sans">
+<body class="bg-zinc-950 text-white min-h-screen flex flex-col items-center justify-center p-6">
 
-    <div class="w-full text-center mt-4">
-        <h1 class="text-indigo-500 font-black tracking-[0.4em] text-lg uppercase">KINU STUDIO</h1>
-        <div id="status-tag" class="mt-2 inline-block px-4 py-1 bg-zinc-900 border border-zinc-800 rounded-full text-[10px] text-zinc-400 uppercase tracking-widest">
-            Buscando Imagen...
-        </div>
+    <div class="mb-8 text-center">
+        <h1 class="text-indigo-500 font-black tracking-widest text-xl uppercase">KINU STUDIO</h1>
+        <p class="text-zinc-500 text-[10px] mt-2 uppercase tracking-widest font-bold">Procesamiento Local Ilimitado</p>
     </div>
 
-    <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden shadow-2xl border border-white/5">
+    <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl">
         
-        <div id="overlay" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950/90 backdrop-blur-md px-6 text-center">
-            <div id="spinner" class="w-12 h-12 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-6"></div>
+        <div id="drop-zone" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-zinc-900 px-8 text-center">
+            <div class="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 border border-emerald-500/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <p class="text-sm font-bold mb-3 text-zinc-200">Subir Foto Gratis</p>
+            <p class="text-zinc-500 text-[11px] mb-8 leading-relaxed">Selecciona una imagen. El fondo se borrará automáticamente sin usar créditos.</p>
             
-            <p id="msg-principal" class="text-sm font-bold text-zinc-200">Sincronizando con la Cámara</p>
-            <p id="msg-secundario" class="text-[11px] text-zinc-500 mt-2 leading-relaxed">Espera un momento mientras recibimos la imagen del sistema.</p>
-
-            <label id="rescue-btn" class="hidden mt-8 bg-zinc-800 hover:bg-zinc-700 text-white text-[10px] font-bold py-3 px-6 rounded-xl cursor-pointer transition-all border border-white/10 uppercase tracking-widest">
-                Subir manualmente
-                <input type="file" id="manual-upload" class="hidden" accept="image/*">
+            <label class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-black py-4 px-8 rounded-2xl cursor-pointer transition-all active:scale-95 shadow-lg shadow-emerald-600/20 uppercase tracking-widest text-center">
+                SELECCIONAR FOTO
+                <input type="file" id="file-input" class="hidden" accept="image/*">
             </label>
         </div>
 
-        <div class="absolute inset-0 checkerboard opacity-40"></div>
-        <img id="final-photo" class="relative z-10 w-full h-full object-contain p-4 opacity-0 transition-opacity duration-1000">
+        <div id="loading-overlay" class="hidden absolute inset-0 z-40 flex flex-col items-center justify-center bg-zinc-950/90 backdrop-blur-md px-6 text-center">
+            <div class="w-12 h-12 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-[10px] font-black tracking-widest text-emerald-400 uppercase">IA Analizando...</p>
+            <p class="text-[9px] text-zinc-500 mt-2 uppercase">Esto puede tardar unos segundos según la potencia de tu móvil</p>
+        </div>
+
+        <div class="absolute inset-0 checkerboard opacity-30"></div>
+        <img id="result-img" class="relative z-10 w-full h-full object-contain p-4 opacity-0 transition-opacity duration-500">
     </div>
 
-    <div class="w-full max-w-[320px] mb-6">
-        <div class="w-full bg-zinc-900 h-[2px] mb-4 rounded-full overflow-hidden">
-            <div id="progress-bar" class="loading-bar"></div>
-        </div>
-        <button id="main-btn" disabled onclick="enviarApp()" class="w-full py-4 bg-zinc-900 text-zinc-600 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all border border-white/5">
-            Procesando...
-        </button>
-    </div>
+    <button id="final-btn" onclick="confirmar()" disabled class="mt-10 w-full max-w-[320px] py-4 bg-zinc-800 text-zinc-600 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] transition-all">
+        Confirmar y Guardar
+    </button>
 
     <script>
-        const API_KEY = 'DMyvHPSJGrrKqVpFzkMB1ua8';
-        let found = false;
+        const fileInput = document.getElementById('file-input');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const dropZone = document.getElementById('drop-zone');
+        const resultImg = document.getElementById('result-img');
+        const finalBtn = document.getElementById('final-btn');
 
-        // 1. LÓGICA DE DETECCIÓN MULTIMODAL
-        async function detectarImagen() {
-            if (found) return;
-
-            // Intentar desde URL (?image=...)
-            const urlParams = new URLSearchParams(window.location.search);
-            const imgUrl = urlParams.get('image');
-            
-            // Intentar desde SessionStorage
-            const sessionImg = sessionStorage.getItem('temp_img_url') || sessionStorage.getItem('glide_image_url');
-
-            const target = imgUrl || sessionImg;
-
-            if (target && target.startsWith('http')) {
-                found = true;
-                procesarImagen(target);
-            } else {
-                // Si pasan 5 segundos y no hay nada, mostrar botón de rescate
-                setTimeout(() => {
-                    if (!found) {
-                        document.getElementById('rescue-btn').classList.remove('hidden');
-                        document.getElementById('msg-principal').innerText = "Vaya, la app no responde";
-                    }
-                }, 5000);
-                
-                // Reintento en bucle cada 1 segundo
-                setTimeout(detectarImagen, 1000);
-            }
-        }
-
-        // 2. LÓGICA DE SUBIDA MANUAL (RESCATE)
-        document.getElementById('manual-upload').addEventListener('change', async (e) => {
+        fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            if (file) {
-                found = true;
-                document.getElementById('rescue-btn').classList.add('hidden');
-                document.getElementById('spinner').classList.remove('hidden');
-                actualizarUI("Cargando", "Subiendo archivo...");
+            if (!file) return;
+
+            // Mostrar UI de carga
+            loadingOverlay.classList.remove('hidden');
+            dropZone.classList.add('hidden');
+
+            try {
+                // Configuración de la librería gratuita
+                const config = {
+                    progress: (res, progress) => {
+                        console.log(`Cargando modelo: ${Math.round(progress * 100)}%`);
+                    }
+                };
+
+                // Ejecutar eliminación de fondo (Local, sin API)
+                const imageBlob = await imglyRemoveBackground(file, config);
                 
-                const formData = new FormData();
-                formData.append('image_file', file);
-                procesarConIA(formData, true);
+                // Mostrar resultado
+                const url = URL.createObjectURL(imageBlob);
+                resultImg.src = url;
+                resultImg.onload = () => {
+                    resultImg.classList.remove('opacity-0');
+                    loadingOverlay.classList.add('hidden');
+                    
+                    finalBtn.disabled = false;
+                    finalBtn.innerText = "¡LISTO! GUARDAR FOTO";
+                    finalBtn.className = "mt-10 w-full max-w-[320px] py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-emerald-600/30";
+                    
+                    // Guardar para la App
+                    const reader = new FileReader();
+                    reader.onloadend = () => sessionStorage.setItem('imagen_procesada', reader.result);
+                    reader.readAsDataURL(imageBlob);
+                };
+
+            } catch (error) {
+                console.error(error);
+                alert("Hubo un error al procesar la imagen localmente.");
+                location.reload();
             }
         });
 
-        // 3. PROCESAMIENTO IA
-        async function procesarImagen(url) {
-            actualizarUI("IA Activa", "Eliminando fondo...");
-            const body = JSON.stringify({ image_url: url, size: 'auto' });
-            procesarConIA(body, false);
-        }
-
-        async function procesarConIA(data, isFile) {
-            document.getElementById('progress-bar').style.width = "50%";
-            
-            try {
-                const headers = { 'X-Api-Key': API_KEY };
-                if (!isFile) headers['Content-Type'] = 'application/json';
-
-                const response = await fetch('https://api.remove.bg/v1.0/removebg', {
-                    method: 'POST',
-                    headers: headers,
-                    body: data
-                });
-
-                if (response.ok) {
-                    const blob = await response.blob();
-                    recortarFinal(blob);
-                } else {
-                    errorUI("Error: Sin Créditos");
-                }
-            } catch (e) {
-                errorUI("Error de Conexión");
-            }
-        }
-
-        // 4. RECORTE Y PRESENTACIÓN
-        function recortarFinal(blob) {
-            actualizarUI("Ajustando", "Recorte automático...");
-            document.getElementById('progress-bar').style.width = "80%";
-            
-            const img = new Image();
-            img.src = URL.createObjectURL(blob);
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d', { willReadFrequently: true });
-                
-                const max = 1000;
-                let w = img.width, h = img.height;
-                if(w > max || h > max) {
-                    const r = Math.min(max/w, max/h);
-                    w *= r; h *= r;
-                }
-                canvas.width = w; canvas.height = h;
-                ctx.drawImage(img, 0, 0, w, h);
-                
-                const pixels = ctx.getImageData(0,0,w,h).data;
-                let minX=w, minY=h, maxX=0, maxY=0;
-                for(let y=0; y<h; y+=4) {
-                    for(let x=0; x<w; x+=4) {
-                        if(pixels[(y*w+x)*4+3] > 30) {
-                            if(x<minX) minX=x; if(y<minY) minY=y;
-                            if(x>maxX) maxX=x; if(y>maxY) maxY=y;
-                        }
-                    }
-                }
-
-                const finalCanvas = document.createElement('canvas');
-                const p = 10;
-                finalCanvas.width = (maxX-minX)+p;
-                finalCanvas.height = (maxY-minY)+p;
-                finalCanvas.getContext('2d').drawImage(img, minX, minY, maxX-minX, maxY-minY, p/2, p/2, maxX-minX, maxY-minY);
-                
-                const base64 = finalCanvas.toDataURL("image/png", 0.8);
-                
-                // Mostrar Foto
-                document.getElementById('final-photo').src = base64;
-                document.getElementById('final-photo').classList.remove('opacity-0');
-                document.getElementById('overlay').style.display = 'none';
-                document.getElementById('progress-bar').style.width = "100%";
-                
-                // Activar Botón
-                const btn = document.getElementById('main-btn');
-                btn.disabled = false;
-                btn.innerText = "Confirmar y Guardar";
-                btn.className = "w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-indigo-500/40 active:scale-95 transition-all";
-                
-                sessionStorage.setItem('imagen_procesada', base64);
-                actualizarUI("Listo", "Foto optimizada");
-            };
-        }
-
-        function actualizarUI(tag, principal) {
-            document.getElementById('status-tag').innerText = tag;
-            document.getElementById('msg-principal').innerText = principal;
-        }
-
-        function errorUI(msg) {
-            document.getElementById('spinner').classList.add('hidden');
-            document.getElementById('msg-principal').innerText = msg;
-            document.getElementById('msg-principal').classList.add('text-red-500');
-        }
-
-        function enviarApp() {
+        function confirmar() {
             if (window.parent) window.parent.postMessage("completado", "*");
-            alert("¡Imagen guardada! Regresa a la aplicación.");
+            alert("Foto guardada con éxito.");
         }
-
-        window.onload = detectarImagen;
     </script>
 </body>
 </html>

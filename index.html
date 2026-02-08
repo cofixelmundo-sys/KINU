@@ -19,7 +19,13 @@
             --verde-oliva: #6B705C; --verde-oscuro: #2D4636; --blanco: #FFFFFF; 
             --google-blue: #4285F4; --rojo-borrar: #E63946;
         }
-        * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
+        * { 
+            box-sizing: border-box; 
+            transition: all 0.2s ease; 
+            -webkit-tap-highlight-color: transparent; 
+            /* Evita que se seleccione texto en toda la app */
+            user-select: none; -webkit-user-select: none;
+        }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
         
@@ -64,13 +70,14 @@
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
         
-        /* AJUSTE: user-select none para evitar selección de texto al mantener pulsado */
         .prenda-card { 
             background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; 
             text-align: center; border: 1px solid rgba(255,255,255,0.1); 
             position: relative; 
-            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+            /* Evita menú nativo de móviles */
+            -webkit-touch-callout: none;
         }
+        /* Importante: pointer-events none evita que el navegador intente "abrir" o "arrastrar" la imagen */
         .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
         .prenda-card span { color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; }
 
@@ -88,7 +95,6 @@
         .btn-delete { background: var(--rojo-borrar); color: white; }
         .btn-ghost { background: none; border: none; color: #999; margin-top: 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; width: 100%; }
 
-        /* Estilo para el cargador */
         .loader-dots { display: flex; justify-content: center; gap: 5px; margin-top: 15px; }
         .dot { width: 8px; height: 8px; background: var(--verde-oscuro); border-radius: 50%; animation: blink 1.4s infinite both; }
         .dot:nth-child(2) { animation-delay: 0.2s; }
@@ -266,6 +272,8 @@
                         
                         let timer;
                         const startPress = (e) => {
+                            // Previene comportamiento nativo de selección o menú contextual
+                            if(e.type === 'touchstart') e.preventDefault(); 
                             timer = setTimeout(() => {
                                 prendaSeleccionada = file;
                                 document.getElementById('modal-prenda').style.display = 'flex';
@@ -274,11 +282,12 @@
                         };
                         const endPress = () => clearTimeout(timer);
 
-                        card.addEventListener('touchstart', startPress);
+                        // Eventos para móvil y PC bloqueando nativos
+                        card.addEventListener('touchstart', startPress, {passive: false});
                         card.addEventListener('touchend', endPress);
                         card.addEventListener('mousedown', startPress);
                         card.addEventListener('mouseup', endPress);
-                        card.addEventListener('contextmenu', e => e.preventDefault()); // Bloquea menú derecho
+                        card.addEventListener('contextmenu', e => e.preventDefault());
 
                         grid.appendChild(card);
                     });
@@ -293,7 +302,7 @@
 
         async function accionEliminar() {
             if (!prendaSeleccionada) return;
-            cerrarModales(); // Cierra el modal de opciones
+            cerrarModales();
             showLoading("Eliminando prenda...");
             try {
                 await fetch(`https://www.googleapis.com/drive/v3/files/${prendaSeleccionada.id}`, {

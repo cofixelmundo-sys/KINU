@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KINU Studio AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@latest/dist/bundle.js"></script>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-6 font-sans">
 
     <div class="mb-8 text-center">
         <h1 class="text-indigo-500 font-black tracking-widest text-xl uppercase italic">KINU STUDIO</h1>
-        <p class="text-zinc-500 text-[10px] mt-2 uppercase tracking-widest font-bold">Motor Local Ultra-Ligero</p>
+        <p class="text-zinc-500 text-[10px] mt-2 uppercase tracking-widest font-bold">Conectado a KINU Private Engine</p>
     </div>
 
     <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl">
@@ -19,31 +18,28 @@
         <div id="drop-zone" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-zinc-900 px-8 text-center">
             <label class="w-full bg-indigo-600 text-white text-[11px] font-black py-4 px-8 rounded-2xl cursor-pointer shadow-lg uppercase tracking-widest active:scale-95 transition-all text-center">
                 TOMAR FOTO
-                <input type="file" id="file-input" class="hidden" accept="image/*" capture="user">
+                <input type="file" id="file-input" class="hidden" accept="image/*">
             </label>
-            <p class="text-[9px] text-zinc-600 mt-6 uppercase tracking-widest">Sin servidores • No falla nunca</p>
         </div>
 
         <div id="loading-overlay" class="hidden absolute inset-0 z-40 flex flex-col items-center justify-center bg-zinc-950/95 backdrop-blur-md px-10 text-center">
             <div class="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p id="loader-msg" class="text-[10px] font-black tracking-widest text-indigo-400 uppercase">Analizando...</p>
-            <div class="w-full bg-zinc-800 h-1 rounded-full mt-4 overflow-hidden">
-                <div id="progress-bar" class="bg-indigo-500 h-full w-0 transition-all duration-300"></div>
-            </div>
+            <p class="text-[10px] font-black tracking-widest text-indigo-400 uppercase">Procesando en KINU Cloud...</p>
         </div>
 
         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
         <img id="result-img" class="relative z-10 w-full h-full object-contain p-4 opacity-0 transition-opacity duration-500">
     </div>
 
-    <button id="final-btn" onclick="confirmar()" disabled class="mt-8 w-full max-w-[320px] py-4 bg-zinc-800 text-zinc-500 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] transition-all">
+    <button id="final-btn" onclick="confirmar()" disabled class="mt-8 w-full max-w-[320px] py-4 bg-zinc-800 text-zinc-500 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] transition-all border border-white/5">
         Confirmar Resultado
     </button>
 
     <script>
         const fileInput = document.getElementById('file-input');
-        const progressBar = document.getElementById('progress-bar');
-        const loaderMsg = document.getElementById('loader-msg');
+        
+        // URL DE TU PROPIO SPACE
+        const HF_ENDPOINT = "https://cofixelmundo-recortador-imagen.hf.space/run/predict";
 
         fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
@@ -53,30 +49,28 @@
             document.getElementById('drop-zone').classList.add('hidden');
 
             try {
-                // 1. REDIMENSIÓN AGRESIVA (640px es suficiente para un retrato de App y no crashea)
-                loaderMsg.innerText = "Optimizando Foto...";
-                const optimizedBlob = await resizeImage(file, 640);
-                
-                // 2. PROCESO IA LOCAL
-                const config = {
-                    publicPath: "https://cdn.jsdelivr.net/npm/@imgly/background-removal@latest/dist/",
-                    device: "cpu", // Forzamos CPU para evitar errores de drivers de video en móviles
-                    progress: (res, progress) => {
-                        const percent = Math.round(progress * 100);
-                        progressBar.style.width = percent + "%";
-                        if (res === 'fetch') loaderMsg.innerText = "Cargando IA...";
-                        if (res === 'compute') loaderMsg.innerText = "Quitando Fondo (" + percent + "%)";
-                    }
-                };
+                // 1. Redimensionamos para que la subida sea instantánea
+                const base64Image = await resizeImage(file, 800);
 
-                const resultBlob = await imglyRemoveBackground(optimizedBlob, config);
-                
-                const url = URL.createObjectURL(resultBlob);
-                mostrarResultado(url);
+                // 2. Enviamos a TU Space de Hugging Face
+                const response = await fetch(HF_ENDPOINT, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        data: [base64Image] // El formato que espera Hugging Face Gradio
+                    })
+                });
 
+                const json = await response.json();
+                
+                if (json.data && json.data[0]) {
+                    mostrarResultado(json.data[0]);
+                } else {
+                    throw new Error("Respuesta inválida del servidor");
+                }
             } catch (err) {
                 console.error(err);
-                alert("Error de memoria. Prueba con una foto de la galería o reinicia el navegador.");
+                alert("El servidor está despertando. Inténtalo de nuevo en 10 segundos.");
                 location.reload();
             }
         });
@@ -95,7 +89,7 @@
                         canvas.height = img.height * scale;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.8);
+                        resolve(canvas.toDataURL("image/png", 0.8));
                     };
                 };
             });
@@ -110,14 +104,14 @@
                 const btn = document.getElementById('final-btn');
                 btn.disabled = false;
                 btn.innerText = "CONFIRMAR Y GUARDAR";
-                btn.className = "mt-8 w-full max-w-[320px] py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-indigo-600/30";
+                btn.className = "mt-8 w-full max-w-[320px] py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl";
                 sessionStorage.setItem('imagen_procesada', src);
             };
         }
 
         function confirmar() {
             if (window.parent) window.parent.postMessage("completado", "*");
-            alert("¡Guardado! El retrato está listo.");
+            alert("¡Guardado en KINU Studio!");
         }
     </script>
 </body>

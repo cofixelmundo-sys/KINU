@@ -23,7 +23,6 @@
             box-sizing: border-box; 
             transition: all 0.2s ease; 
             -webkit-tap-highlight-color: transparent; 
-            /* Evita que se seleccione texto en toda la app */
             user-select: none; -webkit-user-select: none;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
@@ -74,16 +73,21 @@
             background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; 
             text-align: center; border: 1px solid rgba(255,255,255,0.1); 
             position: relative; 
-            /* Evita menú nativo de móviles */
             -webkit-touch-callout: none;
         }
-        /* Importante: pointer-events none evita que el navegador intente "abrir" o "arrastrar" la imagen */
         .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
         .prenda-card span { color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; }
 
+        /* SECCIÓN SUBIDA (Recuperada) */
+        .upload-section { background: white; border-radius: 25px; padding: 20px; margin-bottom: 20px; display: none; }
+        .upload-section.active { display: block; }
+        .upload-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 10px; font-size: 14px; }
+        .btn-upload-confirm { background: var(--verde-oscuro); color: white; border: none; width: 100%; padding: 15px; border-radius: 50px; font-weight: bold; }
+
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
-        .nav-icon { color: white; font-size: 22px; opacity: 0.5; }
+        .nav-icon { color: white; font-size: 22px; opacity: 0.5; cursor: pointer; }
+        .nav-icon.active { opacity: 1; }
         .cam-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
         .cam-trigger { width: 68px; height: 68px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -95,6 +99,9 @@
         .btn-delete { background: var(--rojo-borrar); color: white; }
         .btn-ghost { background: none; border: none; color: #999; margin-top: 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; width: 100%; }
 
+        /* MODAL IA (Recuperado) */
+        #modal-ia { position: fixed; inset: 0; background: white; z-index: 4000; display: none; flex-direction: column; }
+        
         .loader-dots { display: flex; justify-content: center; gap: 5px; margin-top: 15px; }
         .dot { width: 8px; height: 8px; background: var(--verde-oscuro); border-radius: 50%; animation: blink 1.4s infinite both; }
         .dot:nth-child(2) { animation-delay: 0.2s; }
@@ -123,23 +130,39 @@
             </div>
         </header>
         
-        <div class="content">
+        <div class="content" id="main-content">
+            <div id="upload-panel" class="upload-section">
+                <h3 style="margin-top:0; font-size:16px; color:var(--verde-oscuro)">NUEVA PRENDA</h3>
+                <img id="preview-img" style="width:100%; height:150px; object-fit:contain; margin-bottom:15px; border-radius:15px; background:#f9f9f9;">
+                <input type="text" id="prenda-nombre" class="upload-input" placeholder="Nombre (ej: Camisa Lino)">
+                <button class="btn-upload-confirm" onclick="procesarSubidaFinal()">GUARDAR EN CLOSET</button>
+                <button class="btn-ghost" onclick="cancelarSubida()">CANCELAR</button>
+            </div>
+
             <div class="filter-scroll" id="main-cats"></div>
             <div class="closet-grid" id="closet-grid"></div>
         </div>
 
         <div class="nav-wrapper">
             <nav>
-                <div class="nav-icon"><i class="ph ph-house-simple"></i></div>
-                <div class="nav-icon"><i class="ph ph-archive"></i></div>
+                <div class="nav-icon active" id="nav-home" onclick="cambiarSeccion('home')"><i class="ph ph-house-simple"></i></div>
+                <div class="nav-icon" id="nav-closet" onclick="cambiarSeccion('closet')"><i class="ph ph-archive"></i></div>
             </nav>
             <div class="cam-container">
                 <label for="cam-input" class="cam-trigger">
                     <div class="cam-inner"><i class="ph ph-camera"></i></div>
                 </label>
-                <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none">
+                <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="abrirEditor(this.files[0])">
             </div>
         </div>
+    </div>
+
+    <div id="modal-ia">
+        <div style="background:var(--verde-oscuro); color:white; padding:15px; display:flex; align-items:center; gap:10px;">
+            <button onclick="cerrarIA()" style="background:none; border:none; color:white; font-size:20px;"><i class="ph ph-arrow-left"></i></button>
+            <span style="font-weight:bold;">STUDIO IA - QUITAR FONDO</span>
+        </div>
+        <iframe id="iframe-ia" style="width:100%; flex-grow:1; border:none;"></iframe>
     </div>
 
     <div id="modal-google" class="modal-overlay">
@@ -166,7 +189,7 @@
         </div>
     </div>
 
-    <div id="modal-loading" class="modal-overlay" style="z-index: 3000;">
+    <div id="modal-loading" class="modal-overlay" style="z-index: 5000;">
         <div class="modal-content" style="padding: 40px 20px;">
             <h3 id="loading-text" style="margin:0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Procesando...</h3>
             <div class="loader-dots">
@@ -177,12 +200,13 @@
 
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata.readonly';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.resource';
         let accessToken = localStorage.getItem('drive_token');
         let folderId = null;
         let tokenClient;
         let categoriaActual = 'SUPERIOR';
         let prendaSeleccionada = null;
+        let imagenProcesadaIA = null;
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
@@ -190,30 +214,95 @@
             {n: 'Vintage', i: 'ph-hourglass'}, {n: 'Deporte', i: 'ph-person-simple-run'}, {n: 'Dormir', i: 'ph-moon'}, {n: 'Donar', i: 'ph-hand-heart'}
         ];
 
+        // --- FLUJO DE CÁMARA E IA (Recuperado) ---
+        function abrirEditor(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                localStorage.setItem('imagen_transferida', reader.result);
+                document.getElementById('iframe-ia').src = 'photo_studio.html';
+                document.getElementById('modal-ia').style.display = 'flex';
+            }
+            reader.readAsDataURL(file);
+        }
+
+        window.cerrarIA = function() {
+            document.getElementById('modal-ia').style.display = 'none';
+            const procesada = localStorage.getItem('imagen_procesada');
+            if (procesada) {
+                imagenProcesadaIA = procesada;
+                document.getElementById('preview-img').src = procesada;
+                document.getElementById('upload-panel').classList.add('active');
+                // Hacer scroll al panel de subida
+                document.getElementById('upload-panel').scrollIntoView({behavior: 'smooth'});
+            }
+        };
+
+        function cancelarSubida() {
+            document.getElementById('upload-panel').classList.remove('active');
+            imagenProcesadaIA = null;
+        }
+
+        async function procesarSubidaFinal() {
+            if (!imagenProcesadaIA || !accessToken) {
+                alert("Vincula Drive primero");
+                return;
+            }
+            
+            const nombre = document.getElementById('prenda-nombre').value || "Prenda";
+            const fileName = `KINU_${categoriaActual}_${nombre.toUpperCase()}_${Date.now()}.png`;
+            
+            showLoading("Guardando en Drive...");
+            
+            try {
+                const base64Data = imagenProcesadaIA.split(',')[1];
+                const metadata = { name: fileName, parents: [folderId] };
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                form.append('file', new Blob([Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))], { type: 'image/png' }));
+                
+                const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST', 
+                    headers: { Authorization: `Bearer ${accessToken}` }, 
+                    body: form
+                });
+
+                if (resp.ok) {
+                    cancelarSubida();
+                    cargarPrendas();
+                }
+            } catch (e) { alert("Error al subir"); }
+            document.getElementById('modal-loading').style.display = 'none';
+        }
+
+        // --- GESTIÓN DE CLIMA Y SECCIONES ---
         async function updateWeather() {
             if (!navigator.geolocation) return;
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
+                const lat = pos.coords.latitude; const lon = pos.coords.longitude;
                 try {
                     const resW = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
                     const dataW = await resW.json();
                     document.getElementById('w-temp').innerText = Math.round(dataW.current_weather.temperature) + '°';
                     const resC = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
                     const dataC = await resC.json();
-                    const city = dataC.address.city || dataC.address.town || dataC.address.village || "Tu Ciudad";
-                    document.getElementById('w-city').innerText = city;
+                    document.getElementById('w-city').innerText = dataC.address.city || dataC.address.town || "Hoy";
                 } catch (e) { document.getElementById('w-city').innerText = "Hoy"; }
             });
         }
 
+        function cambiarSeccion(sec) {
+            document.querySelectorAll('.nav-icon').forEach(n => n.classList.remove('active'));
+            if(sec === 'home') document.getElementById('nav-home').classList.add('active');
+            else document.getElementById('nav-closet').classList.add('active');
+            // Aquí podrías añadir lógica de filtrado de pestañas si fuera necesario
+        }
+
+        // --- LÓGICA DE DRIVE (Manteniendo lo hecho) ---
         function startGoogle() {
             gapi.load('client', async () => {
                 await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
-                if (accessToken) {
-                    actualizarDriveUI(true);
-                    obtenerOCrearCarpeta();
-                }
+                if (accessToken) { actualizarDriveUI(true); obtenerOCrearCarpeta(); }
             });
 
             tokenClient = google.accounts.oauth2.initTokenClient({
@@ -221,9 +310,7 @@
                 callback: (resp) => {
                     accessToken = resp.access_token;
                     localStorage.setItem('drive_token', accessToken);
-                    actualizarDriveUI(true);
-                    obtenerOCrearCarpeta();
-                    cerrarModales();
+                    actualizarDriveUI(true); obtenerOCrearCarpeta(); cerrarModales();
                 }
             });
         }
@@ -235,16 +322,14 @@
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 const data = await res.json();
-                if (data.files && data.files.length > 0) {
-                    folderId = data.files[0].id;
-                } else {
+                if (data.files && data.files.length > 0) folderId = data.files[0].id;
+                else {
                     const create = await fetch('https://www.googleapis.com/drive/v3/files', {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
                         body: JSON.stringify({ name: 'KINU_CLOSET', mimeType: 'application/vnd.google-apps.folder' })
                     });
-                    const folder = await create.json();
-                    folderId = folder.id;
+                    const folder = await create.json(); folderId = folder.id;
                 }
                 cargarPrendas();
             } catch (e) {}
@@ -272,7 +357,6 @@
                         
                         let timer;
                         const startPress = (e) => {
-                            // Previene comportamiento nativo de selección o menú contextual
                             if(e.type === 'touchstart') e.preventDefault(); 
                             timer = setTimeout(() => {
                                 prendaSeleccionada = file;
@@ -281,14 +365,11 @@
                             }, 1000);
                         };
                         const endPress = () => clearTimeout(timer);
-
-                        // Eventos para móvil y PC bloqueando nativos
                         card.addEventListener('touchstart', startPress, {passive: false});
                         card.addEventListener('touchend', endPress);
                         card.addEventListener('mousedown', startPress);
                         card.addEventListener('mouseup', endPress);
                         card.addEventListener('contextmenu', e => e.preventDefault());
-
                         grid.appendChild(card);
                     });
                 }
@@ -303,21 +384,20 @@
         async function accionEliminar() {
             if (!prendaSeleccionada) return;
             cerrarModales();
-            showLoading("Eliminando prenda...");
+            showLoading("Eliminando...");
             try {
                 await fetch(`https://www.googleapis.com/drive/v3/files/${prendaSeleccionada.id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                    method: 'DELETE', headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 await cargarPrendas();
-            } catch (e) { alert("Error al eliminar"); }
+            } catch (e) {}
             document.getElementById('modal-loading').style.display = 'none';
         }
 
         async function accionColaborar() {
             if (!prendaSeleccionada) return;
             cerrarModales();
-            showLoading("Enviando a colaborar...");
+            showLoading("Colaborando...");
             try {
                 const nuevoNombre = prendaSeleccionada.name.replace(`KINU_${categoriaActual}`, 'KINU_DONAR');
                 await fetch(`https://www.googleapis.com/drive/v3/files/${prendaSeleccionada.id}`, {
@@ -326,7 +406,7 @@
                     body: JSON.stringify({ name: nuevoNombre })
                 });
                 await cargarPrendas();
-            } catch (e) { alert("Error al mover"); }
+            } catch (e) {}
             document.getElementById('modal-loading').style.display = 'none';
         }
 

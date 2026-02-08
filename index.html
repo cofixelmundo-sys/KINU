@@ -1,39 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KINU Studio - Editor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .checkerboard {
-            background-image: linear-gradient(45deg, #2a2a2a 25%, transparent 25%), 
-                              linear-gradient(-45deg, #2a2a2a 25%, transparent 25%), 
-                              linear-gradient(45deg, transparent 75%, #2a2a2a 75%), 
-                              linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
-            background-size: 15px 15px;
-        }
-    </style>
-</head>
-<body class="bg-zinc-900 text-white min-h-screen flex flex-col items-center justify-center p-6">
 
-    <div class="relative w-full max-w-xs aspect-[3/4] bg-zinc-800 rounded-[30px] overflow-hidden border border-zinc-700 shadow-xl">
-        <div id="loading" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-900/80 backdrop-blur-sm">
-            <div class="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-            <p id="statusText" class="text-indigo-400 text-sm font-medium">Procesando fondo...</p>
-        </div>
-
-        <div class="absolute inset-0 checkerboard"></div>
-        <img id="resultImage" class="relative z-10 w-full h-full object-contain p-4 opacity-0 transition-opacity duration-500" alt="Resultado">
-    </div>
-
-    <div class="mt-8 text-center max-w-xs">
-        <p class="text-zinc-400 text-sm mb-6 leading-relaxed">
-            Al hacer clic en <b>OK</b>, volverás a KINU para guardar tu foto en Google Drive.
-        </p>
-        
-        <button id="saveBtn" onclick="confirmarYVolver()" class="inline-block px-10 py-3 bg-zinc-100 text-zinc-900 rounded-full font-bold text-sm hover:bg-white active:scale-95 transition-all shadow-md opacity-50 cursor-not-allowed" disabled>
-            OK
         </button>
     </div>
 

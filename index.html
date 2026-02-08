@@ -202,10 +202,10 @@
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
             {n: 'Enterizos', i: 'ph-dress'}, {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Accesorios', i: 'ph-sunglasses'},
-            {n: 'Vintage', i: 'ph-hourglass'}, {n: 'Deporte', i: 'ph-person-simple-run'}, {n: 'Dormir', i: 'ph-moon'}, {n: 'Donar', i: 'ph-hand-heart'}
+            {n: 'Vintage', i: 'ph-hourglass'}, {n: 'Deporte', i: 'ph-person-simple-run'}, {n: 'Dormir', i: 'ph-moon'}, 
+            {n: 'Colabora', i: 'ph-hands-clapping'}
         ];
 
-        // --- INICIO Y DRIVE ---
         function startGoogle() {
             gapi.load('client', async () => {
                 await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
@@ -229,9 +229,8 @@
 
         async function obtenerOCrearCarpeta() {
             try {
-                // Buscamos la carpeta KINU_CLOSET
                 const q = "name = 'KINU_CLOSET' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
-                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, {
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&spaces=drive`, {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 const data = await res.json();
@@ -247,46 +246,38 @@
                     const folder = await create.json();
                     folderId = folder.id;
                 }
-                console.log("Carpeta KINU ID:", folderId);
                 cargarPrendas();
             } catch (e) { console.error("Error carpeta:", e); }
         }
 
         async function cargarPrendas() {
-            if (!accessToken || !folderId) return;
-            
+            if (!accessToken) return;
             const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center; padding-top:40px; opacity:0.5;">Cargando...</p>';
+            grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center; padding-top:40px; opacity:0.5;">Cargando closet...</p>';
             
             try {
-                // Consulta más flexible: busca archivos que tengan el prefijo de la categoría
-                const query = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
-                const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,thumbnailLink,webContentLink)&pageSize=100`;
-                
+                let query = `name contains 'KINU_${categoriaActual}' and trashed = false`;
+                if (folderId) {
+                    query = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
+                }
+
+                const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,thumbnailLink)&pageSize=100`;
                 const res = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
                 const data = await res.json();
-                
                 grid.innerHTML = '';
 
                 if (!data.files || data.files.length === 0) {
-                    grid.innerHTML = `<p style="color:rgba(255,255,255,0.4); grid-column:1/-1; text-align:center; padding-top:40px;">No hay prendas aquí</p>`;
+                    grid.innerHTML = `<p style="color:rgba(255,255,255,0.4); grid-column:1/-1; text-align:center; padding-top:40px;">No hay prendas en ${categoriaActual.toLowerCase()}</p>`;
                 } else {
                     data.files.forEach(file => {
-                        const nameParts = file.name.split('_');
-                        const displayName = nameParts[2] || 'Prenda';
-                        
+                        const name = file.name.split('_')[2] || 'Prenda';
                         const card = document.createElement('div');
                         card.className = 'prenda-card';
-                        
-                        // Si no hay thumbnail, intentamos usar una imagen genérica
                         const thumb = file.thumbnailLink ? file.thumbnailLink.replace('=s220', '=s500') : 'https://i.imgur.com/yTIrTq2.png';
+                        card.innerHTML = `<img src="${thumb}"><span>${name}</span>`;
                         
-                        card.innerHTML = `<img src="${thumb}" alt="ropa"><span>${displayName}</span>`;
-                        
-                        // Eventos para el popup
                         let timer;
-                        const startPress = (e) => {
-                            if(e.type === 'touchstart') e.preventDefault(); 
+                        const startPress = () => {
                             timer = setTimeout(() => {
                                 prendaSeleccionada = file;
                                 document.getElementById('modal-prenda').style.display = 'flex';
@@ -294,23 +285,16 @@
                             }, 800);
                         };
                         const endPress = () => clearTimeout(timer);
-                        
-                        card.addEventListener('touchstart', startPress, {passive: false});
+                        card.addEventListener('touchstart', startPress);
                         card.addEventListener('touchend', endPress);
                         card.addEventListener('mousedown', startPress);
                         card.addEventListener('mouseup', endPress);
-                        card.addEventListener('contextmenu', e => e.preventDefault());
-                        
                         grid.appendChild(card);
                     });
                 }
-            } catch (e) { 
-                console.error("Error carga:", e);
-                grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center;">Error al conectar con Drive</p>'; 
-            }
+            } catch (e) { grid.innerHTML = '<p style="color:white; grid-column:1/-1; text-align:center;">Error de conexión</p>'; }
         }
 
-        // --- EDITOR IA ---
         function abrirEditor(file) {
             if (!file) return;
             const reader = new FileReader();
@@ -344,29 +328,23 @@
             showLoading("Subiendo...");
             const nombre = document.getElementById('prenda-nombre').value || "PRENDA";
             const fileName = `KINU_${categoriaActual}_${nombre.toUpperCase()}_${Date.now()}.png`;
-            
             try {
                 const base64Data = imagenProcesadaIA.split(',')[1];
                 const metadata = { name: fileName, parents: [folderId] };
                 const form = new FormData();
                 form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
                 form.append('file', new Blob([Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))], { type: 'image/png' }));
-                
                 await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                     method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body: form
                 });
-
-                cancelarSubida();
-                cargarPrendas();
+                cancelarSubida(); cargarPrendas();
             } catch (e) { alert("Error al subir"); }
             document.getElementById('modal-loading').style.display = 'none';
         }
 
-        // --- ACCIONES PRENDA ---
         async function accionEliminar() {
             if (!prendaSeleccionada) return;
-            cerrarModales();
-            showLoading("Borrando...");
+            cerrarModales(); showLoading("Borrando...");
             try {
                 await fetch(`https://www.googleapis.com/drive/v3/files/${prendaSeleccionada.id}`, {
                     method: 'DELETE', headers: { 'Authorization': `Bearer ${accessToken}` }
@@ -378,10 +356,9 @@
 
         async function accionColaborar() {
             if (!prendaSeleccionada) return;
-            cerrarModales();
-            showLoading("Moviendo...");
+            cerrarModales(); showLoading("Moviendo...");
             try {
-                const nuevoNombre = prendaSeleccionada.name.replace(`KINU_${categoriaActual}`, 'KINU_DONAR');
+                const nuevoNombre = prendaSeleccionada.name.replace(`KINU_${categoriaActual}`, 'KINU_COLABORA');
                 await fetch(`https://www.googleapis.com/drive/v3/files/${prendaSeleccionada.id}`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
@@ -392,7 +369,6 @@
             document.getElementById('modal-loading').style.display = 'none';
         }
 
-        // --- UI ---
         function renderCats() {
             const container = document.getElementById('main-cats');
             container.innerHTML = '';

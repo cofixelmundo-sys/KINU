@@ -199,11 +199,12 @@
         let prendaSeleccionada = null;
         let imagenProcesadaIA = null;
 
+        // --- CAMBIO AQUÍ: "Colabora" con icono ph-hand-heart ---
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
             {n: 'Enterizos', i: 'ph-dress'}, {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Accesorios', i: 'ph-sunglasses'},
             {n: 'Vintage', i: 'ph-hourglass'}, {n: 'Deporte', i: 'ph-person-simple-run'}, {n: 'Dormir', i: 'ph-moon'}, 
-            {n: 'Colabora', i: 'ph-hands-clapping'}
+            {n: 'Colabora', i: 'ph-hand-heart'}
         ];
 
         function startGoogle() {
@@ -358,6 +359,7 @@
             if (!prendaSeleccionada) return;
             cerrarModales(); showLoading("Moviendo...");
             try {
+                // CAMBIO AQUÍ: Nombre de categoría actualizado a COLABORA
                 const nuevoNombre = prendaSeleccionada.name.replace(`KINU_${categoriaActual}`, 'KINU_COLABORA');
                 await fetch(`https://www.googleapis.com/drive/v3/files/${prendaSeleccionada.id}`, {
                     method: 'PATCH',

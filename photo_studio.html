@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KINU Studio - AI Editor</title>
+    <title>KINU Studio AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .checkerboard {
@@ -13,161 +13,134 @@
                               linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
             background-size: 15px 15px;
         }
-        .loading-ring {
-            border-top-color: #6366f1;
-            animation: spinner 0.6s linear infinite;
-        }
-        @keyframes spinner { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-zinc-950 text-white min-h-screen flex flex-col items-center justify-center p-6">
 
-    <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-zinc-800 shadow-2xl">
-        <div id="overlay" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950/90 backdrop-blur-md">
-            <div id="loader" class="w-12 h-12 border-4 border-zinc-800 loading-ring rounded-full mb-4"></div>
-            <p id="status" class="text-indigo-400 text-sm font-bold tracking-widest uppercase">Buscando Foto...</p>
-            <p id="substatus" class="text-zinc-500 text-[11px] mt-2 px-8 text-center">Asegúrate de haber subido la foto en la app antes de abrir este editor.</p>
+    <div class="mb-8 text-center">
+        <h1 class="text-indigo-500 font-black tracking-widest text-xl uppercase">KINU STUDIO</h1>
+        <p id="status-text" class="text-zinc-500 text-xs mt-2 uppercase tracking-widest">Editor de Retrato IA</p>
+    </div>
+
+    <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/5 shadow-2xl">
+        
+        <div id="drop-zone" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-zinc-900 px-6 text-center">
+            <div class="w-16 h-16 bg-indigo-600/20 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <p class="text-sm font-bold mb-2">Paso 1: Selecciona tu foto</p>
+            <p class="text-zinc-500 text-[11px] mb-6">La IA detectará tu silueta y eliminará el fondo automáticamente.</p>
+            
+            <label class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-3 px-8 rounded-full cursor-pointer transition-all active:scale-95">
+                ELEGIR IMAGEN
+                <input type="file" id="file-input" class="hidden" accept="image/*">
+            </label>
         </div>
 
-        <div class="absolute inset-0 checkerboard"></div>
-        <img id="preview" class="relative z-10 w-full h-full object-contain p-4 opacity-0 transition-opacity duration-700">
+        <div id="loading-overlay" class="hidden absolute inset-0 z-40 flex flex-col items-center justify-center bg-zinc-950/90 backdrop-blur-md">
+            <div class="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p id="loader-msg" class="text-xs font-bold tracking-widest text-indigo-400 uppercase">Procesando...</p>
+        </div>
+
+        <div class="absolute inset-0 checkerboard opacity-30"></div>
+        <img id="result-img" class="relative z-10 w-full h-full object-contain p-4 opacity-0 transition-opacity duration-500">
     </div>
 
-    <div class="mt-10 w-full max-w-[320px]">
-        <button id="mainBtn" onclick="finalizar()" disabled class="w-full py-4 bg-zinc-800 text-zinc-500 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all duration-300">
-            Esperando Procesamiento
-        </button>
-        <p class="text-[9px] text-zinc-600 text-center mt-6 tracking-[0.3em] uppercase">KINU Studio © 2026 • AI Engine</p>
-    </div>
+    <button id="final-btn" onclick="confirmar()" disabled class="mt-10 w-full max-w-[320px] py-4 bg-zinc-800 text-zinc-600 rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all">
+        Confirmar Resultado
+    </button>
 
     <script>
         const API_KEY = 'DMyvHPSJGrrKqVpFzkMB1ua8';
-        const IMG_KEYS = ['temp_img_url', 'glide_image_url', 'last_photo', 'image_url'];
-        let checkInterval;
+        const fileInput = document.getElementById('file-input');
+        
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        // 1. ESCUCHA ACTIVA: Busca la foto cada 500ms
-        function iniciarEscucha() {
-            checkInterval = setInterval(() => {
-                let foundUrl = null;
-                for (let key of IMG_KEYS) {
-                    let val = sessionStorage.getItem(key);
-                    if (val && val.startsWith('http')) {
-                        foundUrl = val;
-                        break;
-                    }
-                }
-
-                if (foundUrl) {
-                    clearInterval(checkInterval); // Detener búsqueda
-                    ejecutarIA(foundUrl);
-                }
-            }, 500);
-        }
-
-        // 2. PROCESO CON REMOVE.BG
-        async function ejecutarIA(url) {
-            actualizarEstado("Eliminando Fondo", "Conectando con la IA...");
+            // Mostrar carga
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            document.getElementById('drop-zone').classList.add('hidden');
             
             try {
-                const res = await fetch('https://api.remove.bg/v1.0/removebg', {
+                const formData = new FormData();
+                formData.append('image_file', file);
+                formData.append('size', 'auto');
+
+                const response = await fetch('https://api.remove.bg/v1.0/removebg', {
                     method: 'POST',
-                    headers: { 'X-Api-Key': API_KEY, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image_url: url, size: 'auto' })
+                    headers: { 'X-Api-Key': API_KEY },
+                    body: formData
                 });
 
-                if (res.ok) {
-                    const blob = await res.blob();
-                    recortarYOptimizar(blob);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    procesarRecorte(blob);
                 } else {
-                    mostrarError("Error de Créditos", "Revisa tu cuenta de remove.bg");
+                    alert("Error en la IA. Verifica tus créditos de remove.bg");
+                    location.reload();
                 }
-            } catch (e) {
-                mostrarError("Error de Red", "Revisa tu conexión a internet");
+            } catch (err) {
+                alert("Error de conexión");
+                location.reload();
             }
-        }
+        });
 
-        // 3. RECORTAR BORDES TRANSPARENTES (AUTOCROP)
-        function recortarYOptimizar(blob) {
-            actualizarEstado("Ajustando Foto", "Recortando espacios vacíos...");
+        function procesarRecorte(blob) {
             const img = new Image();
             img.src = URL.createObjectURL(blob);
-            
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d', { willReadFrequently: true });
                 
-                // Limitar tamaño para rapidez en móviles
-                const max = 1200;
-                let w = img.width, h = img.height;
-                if(w > max || h > max) {
-                    const r = Math.min(max/w, max/h);
-                    w *= r; h *= r;
-                }
-
-                canvas.width = w; canvas.height = h;
-                ctx.drawImage(img, 0, 0, w, h);
+                // Optimización de tamaño
+                const scale = Math.min(1000 / img.width, 1);
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 
-                const pixels = ctx.getImageData(0, 0, w, h).data;
-                let minX = w, minY = h, maxX = 0, maxY = 0, hasPixels = false;
+                const data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+                let minX=canvas.width, minY=canvas.height, maxX=0, maxY=0;
 
-                for (let y = 0; y < h; y += 4) {
-                    for (let x = 0; x < w; x += 4) {
-                        if (pixels[(y * w + x) * 4 + 3] > 30) {
-                            if (x < minX) minX = x; if (y < minY) minY = y;
-                            if (x > maxX) maxX = x; if (y > maxY) maxY = y;
-                            hasPixels = true;
+                for(let y=0; y<canvas.height; y+=4) {
+                    for(let x=0; x<canvas.width; x+=4) {
+                        if(data[(y*canvas.width+x)*4+3] > 30) {
+                            if(x<minX) minX=x; if(y<minY) minY=y;
+                            if(x>maxX) maxX=x; if(y>maxY) maxY=y;
                         }
                     }
                 }
 
                 const finalCanvas = document.createElement('canvas');
-                const pad = 20;
-                if (!hasPixels) { minX=0; minY=0; maxX=w; maxY=h; }
-
-                finalCanvas.width = (maxX - minX) + pad;
-                finalCanvas.height = (maxY - minY) + pad;
-                const fCtx = finalCanvas.getContext('2d');
-                fCtx.drawImage(img, minX, minY, (maxX-minX), (maxY-minY), pad/2, pad/2, (maxX-minX), (maxY-minY));
+                const p = 20;
+                finalCanvas.width = (maxX-minX)+p;
+                finalCanvas.height = (maxY-minY)+p;
+                finalCanvas.getContext('2d').drawImage(img, minX, minY, maxX-minX, maxY-minY, p/2, p/2, maxX-minX, maxY-minY);
                 
-                const result = finalCanvas.toDataURL("image/png", 0.8);
+                const base64 = finalCanvas.toDataURL("image/png", 0.8);
                 
-                // Mostrar resultado
-                document.getElementById('preview').src = result;
-                document.getElementById('preview').classList.remove('opacity-0');
-                document.getElementById('overlay').style.display = 'none';
+                // Mostrar UI final
+                document.getElementById('result-img').src = base64;
+                document.getElementById('result-img').classList.remove('opacity-0');
+                document.getElementById('loading-overlay').classList.add('hidden');
                 
-                // Activar Botón
-                const btn = document.getElementById('mainBtn');
+                const btn = document.getElementById('final-btn');
                 btn.disabled = false;
-                btn.innerText = "Confirmar y Guardar";
-                btn.className = "w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(99,102,241,0.4)] active:scale-95 transition-all";
-
-                sessionStorage.setItem('imagen_procesada', result);
-            };
+                btn.innerText = "CONFIRMAR Y GUARDAR";
+                btn.className = "mt-10 w-full max-w-[320px] py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-indigo-500/20 active:scale-95 transition-all";
+                
+                sessionStorage.setItem('imagen_procesada', base64);
+            }
         }
 
-        function actualizarEstado(txt, sub) {
-            document.getElementById('status').innerText = txt;
-            document.getElementById('substatus').innerText = sub;
-        }
-
-        function mostrarError(txt, sub) {
-            document.getElementById('loader').style.borderColor = "#ef4444";
-            document.getElementById('status').innerText = txt;
-            document.getElementById('status').className = "text-red-500 text-sm font-bold uppercase";
-            document.getElementById('substatus').innerText = sub;
-        }
-
-        function finalizar() {
-            // Comunicación con la App principal
+        function confirmar() {
             if (window.parent) {
                 window.parent.postMessage("completado", "*");
-                try { window.parent.cerrarIA(); } catch(e) {}
             }
-            alert("¡Foto lista! Ya puedes volver.");
+            alert("¡Foto guardada correctamente!");
         }
-
-        window.onload = iniciarEscucha;
     </script>
 </body>
 </html>

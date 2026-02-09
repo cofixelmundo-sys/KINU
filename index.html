@@ -17,38 +17,42 @@
     <style>
         :root { 
             --verde-oliva: #6B705C; --verde-oscuro: #2D4636; --blanco: #FFFFFF; 
-            --google-blue: #4285F4; --rojo-borrar: #E63946;
+            --google-blue: #4285F4;
         }
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
         
-        /* Layout */
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        
         header { padding: calc(env(safe-area-inset-top) + 15px) 25px 10px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; }
         .logo-header { width: 75px; height: auto; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
 
-        /* Drive UI */
         .drive-status-btn { grid-column: 3; justify-self: end; background: none; border: none; cursor: pointer; }
         .drive-status-btn img { width: 32px; filter: grayscale(1) opacity(0.8); }
         .drive-status-btn.vinculado img { filter: grayscale(0) opacity(1); transform: scale(1.1); }
 
-        /* Progress Bar */
         .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.1); display: none; z-index: 100; }
         .progress-bar { width: 0%; height: 100%; background: white; transition: width 0.3s ease; }
 
-        /* Content */
-        .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
-        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; }
+        /* Categorías Superiores */
+        .filter-scroll { display: flex; gap: 15px; overflow-x: auto; padding: 10px 20px 25px; scrollbar-width: none; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; opacity: 0.5; cursor: pointer; }
+        .cat-item.active { opacity: 1; }
+        .cat-circle { width: 55px; height: 55px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+        .cat-item.active .cat-circle { background: white; color: var(--verde-oscuro); }
+        .cat-label { font-size: 9px; color: white; font-weight: 700; text-transform: uppercase; }
 
-        /* Nav */
+        .content { flex: 1; overflow-y: auto; padding: 0 15px 100px; }
+        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .prenda-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 15px; }
+
         nav { position: fixed; bottom: 30px; left: 25px; right: 25px; height: 60px; background: var(--verde-oscuro); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .cam-trigger { width: 70px; height: 70px; background: white; border-radius: 50%; position: absolute; top: -35px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .cam-trigger { width: 70px; height: 70px; background: white; border-radius: 50%; position: absolute; top: -35px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); cursor: pointer; }
 
-        /* Modales */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 5000; backdrop-filter: blur(8px); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 5000; backdrop-filter: blur(10px); }
         #modal-prenda iframe { width: 100%; height: 100dvh; border: none; }
         
         .cat-grid-select { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
@@ -61,7 +65,7 @@
 
     <div class="main-container">
         <header>
-            <div></div>
+            <div style="font-size:10px; color:white; font-weight:bold; opacity:0.7;">STUDIO</div>
             <div class="header-center" style="display:flex; flex-direction:column; align-items:center;">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
                 <div class="brand-text">KINU</div>
@@ -75,7 +79,7 @@
         </header>
         
         <div class="content">
-            <div class="filter-scroll" id="main-cats" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:20px;"></div>
+            <div class="filter-scroll" id="main-cats"></div>
             <div class="closet-grid" id="closet-grid"></div>
         </div>
 
@@ -95,16 +99,9 @@
 
     <div id="modal-categoria" class="modal-overlay">
         <div style="background:white; width:90%; max-width:320px; padding:30px; border-radius:35px; text-align:center;">
-            <h2 style="color:var(--verde-oscuro); font-weight:900; font-size:16px; text-transform:uppercase;">Guardar en...</h2>
+            <h2 style="color:var(--verde-oscuro); font-weight:900; font-size:15px; text-transform:uppercase;">Guardar en...</h2>
             <div id="cat-selector-list" class="cat-grid-select"></div>
             <button onclick="cerrarModales()" style="margin-top:20px; background:none; border:none; color:#aaa; font-size:11px; font-weight:bold;">CANCELAR</button>
-        </div>
-    </div>
-
-    <div id="modal-google" class="modal-overlay">
-        <div style="background:white; padding:30px; border-radius:30px; text-align:center;">
-            <h3 style="margin-bottom:20px;">Google Drive</h3>
-            <button onclick="loginGoogle()" style="background:var(--google-blue); color:white; padding:15px 30px; border-radius:20px; border:none; width:100%; font-weight:bold;">CONECTAR CUENTA</button>
         </div>
     </div>
 
@@ -129,8 +126,28 @@
             if(p >= 100) setTimeout(() => cont.style.display = 'none', 800);
         }
 
-        // --- CÁMARA Y STUDIO ---
-        async function enviarAStudio(input) {
+        // --- RENDERIZAR CATEGORÍAS SUPERIORES ---
+        function renderCategorias() {
+            const container = document.getElementById('main-cats');
+            container.innerHTML = '';
+            categorias.forEach(cat => {
+                const isActive = cat.n.toUpperCase() === categoriaActual;
+                container.innerHTML += `
+                    <div class="cat-item ${isActive ? 'active' : ''}" onclick="cambiarCategoria('${cat.n.toUpperCase()}')">
+                        <div class="cat-circle"><i class="ph ${cat.i}" style="font-size:24px;"></i></div>
+                        <span class="cat-label">${cat.n}</span>
+                    </div>`;
+            });
+        }
+
+        function cambiarCategoria(cat) {
+            categoriaActual = cat;
+            renderCategorias();
+            cargarPrendas();
+        }
+
+        // --- CÁMARA Y COMUNICACIÓN CON STUDIO ---
+        function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
@@ -155,16 +172,16 @@
             }
         }
 
-        // --- RECIBIR DEL STUDIO ---
+        // --- ESCUCHAR RETORNO DEL STUDIO ---
         window.addEventListener("message", async (event) => {
             if (event.data.type === "IMAGEN_LISTA") {
-                imagenRecortadaTemporal = event.data.data; // Recibimos la foto recortada
-                cerrarModales(); // Cerramos el iframe
-                abrirSelectorCategorias(); // Preguntamos categoría
+                imagenRecortadaTemporal = event.data.data;
+                cerrarModales(); // Esto cierra el iFrame del Studio
+                abrirSelectorGuardado(); // Abre el popup de categorías
             }
         });
 
-        function abrirSelectorCategorias() {
+        function abrirSelectorGuardado() {
             const list = document.getElementById('cat-selector-list');
             list.innerHTML = '';
             categorias.forEach(cat => {
@@ -174,14 +191,14 @@
                 btn.onclick = () => {
                     categoriaActual = cat.n.toUpperCase();
                     document.getElementById('modal-categoria').style.display = 'none';
-                    subirPrendaFinal();
+                    subirFinalADrive();
                 };
                 list.appendChild(btn);
             });
             document.getElementById('modal-categoria').style.display = 'flex';
         }
 
-        async function subirPrendaFinal() {
+        async function subirFinalADrive() {
             if (!accessToken || !imagenRecortadaTemporal) return;
             setProgress(30);
             try {
@@ -203,26 +220,10 @@
                 setProgress(100);
                 imagenRecortadaTemporal = null;
                 cargarPrendas();
-            } catch (e) { alert("Error al subir a Drive"); setProgress(100); }
+            } catch (e) { alert("Error al subir"); setProgress(100); }
         }
 
         // --- DRIVE CORE ---
-        function startGoogle() {
-            gapi.load('client', () => {
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID, scope: SCOPES,
-                    callback: (r) => { 
-                        accessToken = r.access_token; 
-                        localStorage.setItem('drive_token', accessToken); 
-                        actualizarDriveUI(true); 
-                        cargarPrendas(); 
-                        cerrarModales(); 
-                    }
-                });
-                if(accessToken) { actualizarDriveUI(true); cargarPrendas(); }
-            });
-        }
-
         async function obtenerOCrearCarpeta(n) {
             const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
             const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
@@ -238,6 +239,7 @@
         async function cargarPrendas() {
             if(!accessToken) return;
             const grid = document.getElementById('closet-grid');
+            grid.innerHTML = '<p style="color:white; opacity:0.5; grid-column:1/-1; text-align:center;">Cargando...</p>';
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
                 const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
@@ -246,18 +248,39 @@
                 });
                 const data = await res.json();
                 grid.innerHTML = '';
+                if(data.files.length === 0) grid.innerHTML = '<p style="color:white; opacity:0.3; grid-column:1/-1; text-align:center; padding-top:40px;">No hay prendas aquí</p>';
                 data.files?.forEach(f => {
                     grid.innerHTML += `<div class="prenda-card"><img src="${f.thumbnailLink.replace('=s220','=s500')}"></div>`;
                 });
             } catch(e) {}
         }
 
-        function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); }
-        function loginGoogle() { tokenClient.requestAccessToken(); }
-        function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
-        function manejarDrive() { document.getElementById('modal-google').style.display='flex'; }
+        function manejarDrive() { 
+            if(!accessToken) tokenClient.requestAccessToken();
+            else alert("Drive ya está conectado");
+        }
 
-        window.onload = () => { startGoogle(); };
+        function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+
+        window.onload = () => {
+            renderCategorias();
+            gapi.load('client', () => {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID, scope: SCOPES,
+                    callback: (r) => { 
+                        accessToken = r.access_token; 
+                        localStorage.setItem('drive_token', accessToken); 
+                        document.getElementById('auth-btn').classList.add('vinculado');
+                        cargarPrendas(); 
+                        cerrarModales(); 
+                    }
+                });
+            });
+            if(accessToken) {
+                document.getElementById('auth-btn').classList.add('vinculado');
+                cargarPrendas();
+            }
+        };
     </script>
 </body>
 </html>

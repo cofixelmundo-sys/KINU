@@ -21,71 +21,53 @@
         }
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
+        
+        /* Layout */
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
-        
         header { padding: calc(env(safe-area-inset-top) + 15px) 25px 10px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; }
-
-        .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.1); display: none; overflow: hidden; z-index: 100; }
-        .progress-bar { width: 0%; height: 100%; background: white; box-shadow: 0 0 10px rgba(255,255,255,0.5); transition: width 0.3s ease; }
-
-        .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 55px; }
-        .weather-icon { font-size: 24px; color: rgba(255, 255, 255, 0.7); }
-        .temp-text { font-size: 16px; font-weight: 700; color: rgba(255, 255, 255, 0.7); }
-        .city-label { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); letter-spacing: 0.5px; }
-        
-        .header-center { display: flex; flex-direction: column; align-items: center; grid-column: 2; }
         .logo-header { width: 75px; height: auto; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
 
-        .drive-status-btn { grid-column: 3; justify-self: end; background: none; border: none; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .drive-status-btn img { width: 32px; height: auto; filter: grayscale(1) opacity(0.8); transition: 0.3s; }
-        .drive-status-btn.vinculado img { filter: grayscale(0) opacity(1); transform: scale(1.05); }
-        
-        .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; opacity: 0.6; cursor: pointer; }
-        .cat-item.active { opacity: 1; }
-        .cat-circle { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
-        .cat-item.active .cat-circle { background: white; }
-        .cat-item.active i { color: var(--verde-oscuro); }
-        .cat-circle i { font-size: 24px; color: white; }
-        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
+        /* Drive UI */
+        .drive-status-btn { grid-column: 3; justify-self: end; background: none; border: none; cursor: pointer; }
+        .drive-status-btn img { width: 32px; filter: grayscale(1) opacity(0.8); }
+        .drive-status-btn.vinculado img { filter: grayscale(0) opacity(1); transform: scale(1.1); }
 
+        /* Progress Bar */
+        .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.1); display: none; z-index: 100; }
+        .progress-bar { width: 0%; height: 100%; background: white; transition: width 0.3s ease; }
+
+        /* Content */
+        .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
         .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; }
-        .prenda-card span { color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; }
+        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; }
 
-        .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
-        nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
-        .nav-icon { color: white; font-size: 22px; opacity: 0.5; }
-        .cam-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-        .cam-trigger { width: 68px; height: 68px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
+        /* Nav */
+        nav { position: fixed; bottom: 30px; left: 25px; right: 25px; height: 60px; background: var(--verde-oscuro); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .cam-trigger { width: 70px; height: 70px; background: white; border-radius: 50%; position: absolute; top: -35px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(10px); }
-        .modal-content { background: white; width: 90%; max-width: 340px; padding: 25px; border-radius: 30px; text-align: center; }
-        
-        #modal-prenda { padding: 0; border: none; }
+        /* Modales */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 5000; backdrop-filter: blur(8px); }
         #modal-prenda iframe { width: 100%; height: 100dvh; border: none; }
+        
+        .cat-grid-select { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .cat-btn { background: #f8f8f8; border: none; padding: 15px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .cat-btn i { font-size: 24px; color: var(--verde-oscuro); }
+        .cat-btn span { font-size: 10px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <div class="main-container">
         <header>
-            <div class="header-left-info">
-                <i class="ph ph-sun weather-icon"></i>
-                <span class="temp-text">24°</span>
-                <span class="city-label">Hoy</span>
-            </div>
-            <div class="header-center">
+            <div></div>
+            <div class="header-center" style="display:flex; flex-direction:column; align-items:center;">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
                 <div class="brand-text">KINU</div>
             </div>
             <div id="auth-btn" class="drive-status-btn" onclick="manejarDrive()">
-                <img src="https://i.imgur.com/Go2a4Hs.png" alt="Drive">
+                <img src="https://i.imgur.com/Go2a4Hs.png">
             </div>
             <div class="progress-container" id="global-progress">
                 <div class="progress-bar" id="inner-bar"></div>
@@ -93,33 +75,36 @@
         </header>
         
         <div class="content">
-            <div class="filter-scroll" id="main-cats"></div>
+            <div class="filter-scroll" id="main-cats" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:20px;"></div>
             <div class="closet-grid" id="closet-grid"></div>
         </div>
 
-        <div class="nav-wrapper">
-            <nav>
-                <div class="nav-icon"><i class="ph ph-house-simple"></i></div>
-                <div class="nav-icon"><i class="ph ph-archive"></i></div>
-            </nav>
-            <div class="cam-container">
-                <label for="cam-input" class="cam-trigger">
-                    <div class="cam-inner"><i class="ph ph-camera"></i></div>
-                </label>
-                <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="enviarAStudio(this)">
-            </div>
-        </div>
+        <nav>
+            <i class="ph ph-house-simple" style="color:white; font-size:24px; opacity:0.5;"></i>
+            <label for="cam-input" class="cam-trigger">
+                <i class="ph ph-camera" style="font-size:30px; color:var(--verde-oscuro)"></i>
+            </label>
+            <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="enviarAStudio(this)">
+            <i class="ph ph-archive" style="color:white; font-size:24px; opacity:0.5;"></i>
+        </nav>
     </div>
 
     <div id="modal-prenda" class="modal-overlay">
         <iframe src="about:blank"></iframe>
     </div>
 
+    <div id="modal-categoria" class="modal-overlay">
+        <div style="background:white; width:90%; max-width:320px; padding:30px; border-radius:35px; text-align:center;">
+            <h2 style="color:var(--verde-oscuro); font-weight:900; font-size:16px; text-transform:uppercase;">Guardar en...</h2>
+            <div id="cat-selector-list" class="cat-grid-select"></div>
+            <button onclick="cerrarModales()" style="margin-top:20px; background:none; border:none; color:#aaa; font-size:11px; font-weight:bold;">CANCELAR</button>
+        </div>
+    </div>
+
     <div id="modal-google" class="modal-overlay">
-        <div class="modal-content">
-            <h3>Google Drive</h3>
-            <button onclick="loginGoogle()" style="background:var(--google-blue); color:white; padding:15px; border-radius:20px; border:none; width:100%; font-weight:bold;">CONECTAR</button>
-            <button onclick="cerrarModales()" style="background:none; border:none; margin-top:15px; color:#666;">CERRAR</button>
+        <div style="background:white; padding:30px; border-radius:30px; text-align:center;">
+            <h3 style="margin-bottom:20px;">Google Drive</h3>
+            <button onclick="loginGoogle()" style="background:var(--google-blue); color:white; padding:15px 30px; border-radius:20px; border:none; width:100%; font-weight:bold;">CONECTAR CUENTA</button>
         </div>
     </div>
 
@@ -129,10 +114,11 @@
         let accessToken = localStorage.getItem('drive_token');
         let tokenClient;
         let categoriaActual = 'SUPERIOR';
+        let imagenRecortadaTemporal = null;
 
         const categorias = [
-            {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
-            {n: 'Enterizos', i: 'ph-dress'}, {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Accesorios', i: 'ph-sunglasses'}
+            {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, 
+            {n: 'Abrigos', i: 'ph-hoodie'}, {n: 'Calzado', i: 'ph-sneaker'}
         ];
 
         function setProgress(p) {
@@ -143,27 +129,24 @@
             if(p >= 100) setTimeout(() => cont.style.display = 'none', 800);
         }
 
-        // --- LÓGICA DE CÁMARA Y SINCRONIZACIÓN ---
+        // --- CÁMARA Y STUDIO ---
         async function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const base64Image = e.target.result;
-                    sessionStorage.setItem('imagen_para_procesar', base64Image);
+                    const base64 = e.target.result;
+                    sessionStorage.setItem('imagen_para_procesar', base64);
                     
                     const modal = document.getElementById('modal-prenda');
                     const iframe = modal.querySelector('iframe');
                     
-                    const receptorListo = (event) => {
+                    const receptorStudio = (event) => {
                         if (event.data.type === 'STUDIO_LISTO') {
-                            iframe.contentWindow.postMessage({ 
-                                type: 'PROCESAR_IMAGEN_DIRECTA', 
-                                data: base64Image 
-                            }, '*');
-                            window.removeEventListener('message', receptorListo);
+                            iframe.contentWindow.postMessage({ type: 'PROCESAR_IMAGEN_DIRECTA', data: base64 }, '*');
+                            window.removeEventListener('message', receptorStudio);
                         }
                     };
-                    window.addEventListener('message', receptorListo);
+                    window.addEventListener('message', receptorStudio);
                     
                     modal.style.display = 'flex';
                     iframe.src = 'photo_studio.html'; 
@@ -172,36 +155,56 @@
             }
         }
 
-        // --- RECIBIR DEL STUDIO Y SUBIR ---
+        // --- RECIBIR DEL STUDIO ---
         window.addEventListener("message", async (event) => {
             if (event.data.type === "IMAGEN_LISTA") {
-                cerrarModales();
-                if (!accessToken) { alert("Conecta Drive"); return; }
-                
-                setProgress(30);
-                const base64 = event.data.data;
-                const blob = await (await fetch(base64)).blob();
-                
-                try {
-                    const fId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                    const name = `KINU_${categoriaActual}_${Date.now()}.png`;
-                    
-                    const metadata = { name: name, parents: [fId] };
-                    const formData = new FormData();
-                    formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
-                    formData.append('file', blob);
-
-                    await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                        method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + accessToken },
-                        body: formData
-                    });
-                    
-                    setProgress(100);
-                    cargarPrendas();
-                } catch (e) { alert("Error Drive"); setProgress(100); }
+                imagenRecortadaTemporal = event.data.data; // Recibimos la foto recortada
+                cerrarModales(); // Cerramos el iframe
+                abrirSelectorCategorias(); // Preguntamos categoría
             }
         });
+
+        function abrirSelectorCategorias() {
+            const list = document.getElementById('cat-selector-list');
+            list.innerHTML = '';
+            categorias.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'cat-btn';
+                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
+                btn.onclick = () => {
+                    categoriaActual = cat.n.toUpperCase();
+                    document.getElementById('modal-categoria').style.display = 'none';
+                    subirPrendaFinal();
+                };
+                list.appendChild(btn);
+            });
+            document.getElementById('modal-categoria').style.display = 'flex';
+        }
+
+        async function subirPrendaFinal() {
+            if (!accessToken || !imagenRecortadaTemporal) return;
+            setProgress(30);
+            try {
+                const blob = await (await fetch(imagenRecortadaTemporal)).blob();
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                const name = `KINU_${categoriaActual}_${Date.now()}.png`;
+                
+                const metadata = { name: name, parents: [folderId] };
+                const formData = new FormData();
+                formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+                formData.append('file', blob);
+
+                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + accessToken },
+                    body: formData
+                });
+                
+                setProgress(100);
+                imagenRecortadaTemporal = null;
+                cargarPrendas();
+            } catch (e) { alert("Error al subir a Drive"); setProgress(100); }
+        }
 
         // --- DRIVE CORE ---
         function startGoogle() {
@@ -235,32 +238,18 @@
         async function cargarPrendas() {
             if(!accessToken) return;
             const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center;">Actualizando...</p>';
             try {
-                const fId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                const q = `'${fId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
-                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, {
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,thumbnailLink)`, {
                     headers: { 'Authorization': 'Bearer ' + accessToken }
                 });
                 const data = await res.json();
                 grid.innerHTML = '';
                 data.files?.forEach(f => {
-                    grid.innerHTML += `<div class="prenda-card"><img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>Prenda</span></div>`;
+                    grid.innerHTML += `<div class="prenda-card"><img src="${f.thumbnailLink.replace('=s220','=s500')}"></div>`;
                 });
             } catch(e) {}
-        }
-
-        function renderCats() {
-            const c = document.getElementById('main-cats');
-            categorias.forEach(cat => {
-                const act = cat.n.toUpperCase() === categoriaActual;
-                c.innerHTML += `<div class="cat-item ${act?'active':''}" onclick="cambiarCat(this,'${cat.n}')"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;
-            });
-        }
-
-        function cambiarCat(el,n) {
-            document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('active'));
-            el.classList.add('active'); categoriaActual = n.toUpperCase(); cargarPrendas();
         }
 
         function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); }
@@ -268,7 +257,7 @@
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
         function manejarDrive() { document.getElementById('modal-google').style.display='flex'; }
 
-        window.onload = () => { renderCats(); startGoogle(); };
+        window.onload = () => { startGoogle(); };
     </script>
 </body>
 </html>

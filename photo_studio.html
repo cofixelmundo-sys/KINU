@@ -11,31 +11,24 @@
         const SPACE_ID = "COFIXELMUNDO/mi-recortador-objetos"; 
         let app;
 
-        // 1. Conexión con el servidor de IA
         async function conectarIA() {
             try {
-                console.log("Conectando con KINU AI Engine...");
                 app = await client(SPACE_ID);
-                
-                // Avisar al Index que el motor está listo para recibir la foto
                 window.parent.postMessage({ type: 'STUDIO_LISTO' }, '*');
                 
-                // Verificar si ya dejaron una foto en el sessionStorage
                 const imgPendiente = sessionStorage.getItem('imagen_para_procesar');
                 if (imgPendiente) {
                     procesarImagen(imgPendiente);
                     sessionStorage.removeItem('imagen_para_procesar');
                 }
             } catch (e) {
-                console.error("Error de conexión:", e);
-                document.getElementById('status-text').innerText = "Reintentando conexión...";
-                setTimeout(conectarIA, 3000);
+                document.getElementById('status-text').innerText = "Reintentando motor...";
+                setTimeout(conectarIA, 3000); 
             }
         }
 
         window.onload = conectarIA;
 
-        // 2. Escuchar la orden de procesar desde el Index
         window.addEventListener("message", async (event) => {
             if (event.data.type === 'PROCESAR_IMAGEN_DIRECTA') {
                 procesarImagen(event.data.data);
@@ -50,16 +43,13 @@
             try {
                 const response = await fetch(base64);
                 const blob = await response.blob();
-                
-                // Petición al Space de Hugging Face
                 const result = await app.predict("/predict", [blob]);
 
                 if (result.data && result.data[0]) {
                     const resUrl = result.data[0].url;
+                    const finalImg = await resizeImageFromUrl(resUrl, 800);
                     
-                    // Redimensionar para que no pese tanto en Drive
-                    const finalImg = await resizeImage(resUrl, 800);
-                    
+                    // CORRECCIÓN: Guardar con el nombre correcto
                     sessionStorage.setItem('imagen_procesada', finalImg);
                     document.getElementById('preview').src = finalImg;
                     
@@ -67,13 +57,12 @@
                     document.getElementById('result').classList.remove('hidden');
                 }
             } catch (err) {
-                console.error("Error procesando:", err);
                 alert("Error en el recorte. Reintentando...");
                 location.reload();
             }
         }
 
-        function resizeImage(url, maxWidth) {
+        function resizeImageFromUrl(url, maxWidth) {
             return new Promise(async (resolve) => {
                 const res = await fetch(url);
                 const blob = await res.blob();
@@ -91,44 +80,37 @@
             });
         }
 
-        // 3. FUNCIÓN CRÍTICA: Enviar de vuelta al Index y cerrar
+        // FUNCIÓN CORREGIDA PARA VOLVER A KINU
         window.confirmar = function() {
             const dataProcesada = sessionStorage.getItem('imagen_procesada');
             const previewSrc = document.getElementById('preview').src;
-            const imagenAEnviar = dataProcesada || previewSrc;
+            const finalData = dataProcesada || previewSrc;
 
-            if (imagenAEnviar && imagenAEnviar.startsWith('data:image')) {
-                // Enviamos el mensaje que el Index está escuchando
-                window.parent.postMessage({ 
-                    type: "IMAGEN_LISTA", 
-                    data: imagenAEnviar 
-                }, "*");
-                
-                // Limpiamos memoria
+            if (finalData && finalData.startsWith('data:image') && window.parent) {
+                // Enviar mensaje al Index para cerrar el modal y subir
+                window.parent.postMessage({ type: "IMAGEN_LISTA", data: finalData }, "*");
                 sessionStorage.removeItem('imagen_procesada');
             } else {
-                alert("Espera a que el proceso termine.");
+                alert("Espera a que termine el proceso.");
             }
         }
     </script>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
-
     <div class="mb-6 text-center">
-        <h1 class="text-indigo-500 font-black tracking-widest text-xl italic uppercase">Kinu Studio</h1>
+        <h1 class="text-indigo-500 font-black tracking-widest text-xl italic">KINU STUDIO</h1>
         <p class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">AI Background Remover</p>
     </div>
 
-    <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl">
-        
-        <div id="drop-zone" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-zinc-900 text-center px-6">
+    <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl mx-auto">
+        <div id="drop-zone" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-zinc-900 px-8 text-center">
             <div class="w-12 h-12 border-2 border-zinc-800 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
             <p id="status-text" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Iniciando Motor IA...</p>
         </div>
 
         <div id="loading" class="absolute inset-0 z-40 hidden flex flex-col items-center justify-center bg-zinc-900/90 backdrop-blur-md">
             <div class="w-12 h-12 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-[10px] font-black tracking-[0.2em] text-indigo-500 animate-pulse uppercase">Recortando Prenda...</p>
+            <p class="text-[10px] font-black tracking-[0.2em] text-indigo-500 animate-pulse uppercase">Recortando Fondo...</p>
         </div>
 
         <div id="result" class="absolute inset-0 z-50 hidden flex flex-col">
@@ -137,10 +119,9 @@
             </div>
             <div class="p-6 bg-zinc-900 border-t border-white/5 flex gap-3">
                 <button onclick="location.reload()" class="flex-1 py-4 bg-zinc-800 rounded-2xl text-[10px] font-black text-zinc-400 uppercase tracking-widest">Repetir</button>
-                <button onclick="confirmar()" class="flex-[2] py-4 bg-indigo-600 rounded-2xl text-[10px] font-black text-white uppercase tracking-widest shadow-lg shadow-indigo-500/20">Aceptar</button>
+                <button onclick="confirmar()" class="flex-[2] py-4 bg-indigo-600 rounded-2xl text-[10px] font-black text-white uppercase shadow-lg shadow-indigo-500/20 tracking-widest">Aceptar</button>
             </div>
         </div>
     </div>
-
 </body>
 </html>

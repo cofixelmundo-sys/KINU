@@ -69,7 +69,6 @@
         
         #modal-prenda iframe { width: 100%; height: 100dvh; border: none; }
 
-        /* Estilo para los botones de categoría al guardar */
         .cat-grid-save { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
         .cat-btn-save { background: #f0f0f0; border: none; padding: 15px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
         .cat-btn-save i { font-size: 22px; color: var(--verde-oscuro); }
@@ -122,7 +121,7 @@
 
     <div id="modal-categoria" class="modal-overlay">
         <div class="modal-content">
-            <h2 style="color:var(--verde-oscuro); font-weight:900; font-size:15px; text-transform:uppercase;">¿Dónde lo guardamos?</h2>
+            <h2 style="color:var(--verde-oscuro); font-weight:900; font-size:15px; text-transform:uppercase;">Guardar en...</h2>
             <div id="cat-save-list" class="cat-grid-save"></div>
             <button onclick="cerrarModales()" style="margin-top:20px; background:none; border:none; color:#aaa; font-size:11px; font-weight:bold;">CANCELAR</button>
         </div>
@@ -132,7 +131,6 @@
         <div class="modal-content">
             <h3>Google Drive</h3>
             <button onclick="loginGoogle()" style="background:var(--google-blue); color:white; padding:15px; border-radius:20px; border:none; width:100%; font-weight:bold;">CONECTAR</button>
-            <button onclick="cerrarModales()" style="background:none; border:none; margin-top:15px; color:#666;">CERRAR</button>
         </div>
     </div>
 
@@ -145,8 +143,8 @@
         let imagenTemporal = null;
 
         const categorias = [
-            {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'},
-            {n: 'Enterizos', i: 'ph-dress'}, {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Accesorios', i: 'ph-sunglasses'}
+            {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, 
+            {n: 'Abrigos', i: 'ph-hoodie'}, {n: 'Calzado', i: 'ph-sneaker'}
         ];
 
         function setProgress(p) {
@@ -157,18 +155,18 @@
             if(p >= 100) setTimeout(() => cont.style.display = 'none', 800);
         }
 
-        async function enviarAStudio(input) {
+        function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const base64Image = e.target.result;
-                    sessionStorage.setItem('imagen_para_procesar', base64Image);
+                    const base64 = e.target.result;
+                    sessionStorage.setItem('imagen_para_procesar', base64);
                     const modal = document.getElementById('modal-prenda');
                     const iframe = modal.querySelector('iframe');
                     
                     const receptorListo = (event) => {
                         if (event.data.type === 'STUDIO_LISTO') {
-                            iframe.contentWindow.postMessage({ type: 'PROCESAR_IMAGEN_DIRECTA', data: base64Image }, '*');
+                            iframe.contentWindow.postMessage({ type: 'PROCESAR_IMAGEN_DIRECTA', data: base64 }, '*');
                             window.removeEventListener('message', receptorListo);
                         }
                     };
@@ -180,16 +178,16 @@
             }
         }
 
-        // --- ESCUCHAR RETORNO DE STUDIO ---
-        window.addEventListener("message", async (event) => {
+        // --- ESCUCHA DE STUDIO ---
+        window.addEventListener("message", (event) => {
             if (event.data.type === "IMAGEN_LISTA") {
                 imagenTemporal = event.data.data;
-                cerrarModales(); // Cierra el Studio
-                abrirSelectorGuardado(); // Abre el popup de categorías
+                document.getElementById('modal-prenda').style.display = 'none';
+                abrirSelectorCategorias();
             }
         });
 
-        function abrirSelectorGuardado() {
+        function abrirSelectorCategorias() {
             const list = document.getElementById('cat-save-list');
             list.innerHTML = '';
             categorias.forEach(cat => {
@@ -213,8 +211,7 @@
                 const blob = await (await fetch(imagenTemporal)).blob();
                 const fId = await obtenerOCrearCarpeta('KINU_CLOSET');
                 const name = `KINU_${categoriaActual}_${Date.now()}.png`;
-                
-                const metadata = { name: name, parents: [fId] };
+                const metadata = { name, parents: [fId] };
                 const formData = new FormData();
                 formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
                 formData.append('file', blob);
@@ -224,14 +221,13 @@
                     headers: { 'Authorization': 'Bearer ' + accessToken },
                     body: formData
                 });
-                
                 setProgress(100);
                 imagenTemporal = null;
                 cargarPrendas();
-            } catch (e) { alert("Error Drive"); setProgress(100); }
+            } catch (e) { alert("Error al subir"); setProgress(100); }
         }
 
-        // --- DRIVE CORE ---
+        // --- DRIVE LOGIC ---
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -272,7 +268,6 @@
                 });
                 const data = await res.json();
                 grid.innerHTML = '';
-                if(data.files.length === 0) grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.3; margin-top:20px;">Vacío</p>';
                 data.files?.forEach(f => {
                     grid.innerHTML += `<div class="prenda-card"><img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${categoriaActual}</span></div>`;
                 });

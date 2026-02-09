@@ -19,91 +19,93 @@
 
     <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl mx-auto">
         <div id="drop-zone" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-zinc-900 px-8">
-            <label class="w-full bg-indigo-600 text-white text-[11px] font-black py-4 rounded-2xl cursor-pointer uppercase tracking-widest text-center shadow-lg active:scale-95 transition-all">
-                TOMAR FOTO
-                <input type="file" id="file-input" class="hidden" accept="image/*" capture="user">
-            </label>
+            <div class="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mb-4 border border-indigo-500/20">
+                <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"></path></svg>
+            </div>
+            <p class="text-sm font-bold text-zinc-300">CARGAR PRENDA</p>
+            <input type="file" id="file-input" class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*">
         </div>
 
-        <div id="loading-overlay" class="hidden absolute inset-0 z-40 flex flex-col items-center justify-center bg-zinc-950/90 backdrop-blur-md">
-            <div class="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p class="text-[10px] font-black tracking-widest text-indigo-400 uppercase">Eliminando fondo...</p>
+        <div id="loading" class="absolute inset-0 z-40 hidden flex flex-col items-center justify-center bg-zinc-900/90 backdrop-blur-md">
+            <div class="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+            <p class="text-xs font-black tracking-[0.2em] text-indigo-500 animate-pulse">QUITANDO FONDO...</p>
         </div>
 
-        <img id="result-img" class="relative z-10 w-full h-full object-contain p-4 opacity-0 transition-opacity duration-500">
+        <div id="result" class="absolute inset-0 z-50 hidden flex flex-col">
+            <div class="flex-1 bg-zinc-800 flex items-center justify-center p-4">
+                <img id="preview" class="max-w-full max-h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+            </div>
+            <div class="p-6 bg-zinc-900 border-t border-white/5 flex gap-3">
+                <button onclick="location.reload()" class="flex-1 py-4 bg-zinc-800 rounded-2xl text-[10px] font-black tracking-widest text-zinc-400 uppercase">Repetir</button>
+                <button onclick="confirmar()" class="flex-[2] py-4 bg-indigo-600 rounded-2xl text-[10px] font-black tracking-widest text-white uppercase shadow-lg shadow-indigo-500/20">Confirmar</button>
+            </div>
+        </div>
     </div>
 
-    <button id="final-btn" onclick="confirmar()" disabled class="mt-6 w-full max-w-[320px] py-4 bg-zinc-800 text-zinc-600 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] border border-white/5 transition-all">
-        Esperando proceso...
-    </button>
-
     <script>
-        const fileInput = document.getElementById('file-input');
-        const finalBtn = document.getElementById('final-btn');
-        const SPACE_ID = "COFIXELMUNDO/recortador-imagen";
-
-        fileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            document.getElementById('loading-overlay').classList.remove('hidden');
-            document.getElementById('drop-zone').classList.add('hidden');
-
-            try {
-                const base64Image = await resizeImage(file, 800);
-                const app = await window.GradioClient(SPACE_ID);
-                const result = await app.predict("/predict", [base64Image]);
-
-                if (result.data && result.data[0]) {
-                    const img = document.getElementById('result-img');
-                    img.src = result.data[0];
-                    img.onload = () => {
-                        img.classList.remove('opacity-0');
-                        document.getElementById('loading-overlay').classList.add('hidden');
-                        
-                        finalBtn.disabled = false;
-                        finalBtn.innerText = "VOLVER A KINU";
-                        finalBtn.className = "mt-6 w-full max-w-[320px] py-4 bg-green-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-green-600/30 active:scale-95 transition-all";
-                        
-                        sessionStorage.setItem('imagen_procesada', result.data[0]);
-                    };
-                }
-            } catch (err) {
-                alert("Error. Reintenta.");
-                location.reload();
+        // --- DETECCIÓN AUTOMÁTICA ---
+        window.addEventListener('load', async () => {
+            const autoImage = sessionStorage.getItem('imagen_para_procesar');
+            if (autoImage) {
+                sessionStorage.removeItem('imagen_para_procesar');
+                // Convertir Base64 a File para el Gradio
+                const res = await fetch(autoImage);
+                const blob = await res.blob();
+                const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+                handleFile(file);
             }
         });
 
-        function resizeImage(file, maxWidth) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const scale = maxWidth / img.width;
-                        canvas.width = maxWidth;
-                        canvas.height = img.height * scale;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL("image/jpeg", 0.7));
-                    };
+        const fileInput = document.getElementById('file-input');
+        fileInput.onchange = (e) => handleFile(e.target.files[0]);
+
+        async function handleFile(file) {
+            if (!file) return;
+            document.getElementById('drop-zone').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            try {
+                const app = await window.GradioClient("fffiloni/rmbg-2.0");
+                const result = await app.predict("/predict", [file]);
+
+                if (result.data && result.data[0]) {
+                    const imgUrl = result.data[0].url;
+                    // Redimensionar antes de enviar al padre para evitar lag
+                    const finalBase64 = await resizeImageFromUrl(imgUrl, 800);
+                    
+                    sessionStorage.setItem('imagen_procesada', finalBase64);
+                    document.getElementById('preview').src = finalBase64;
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('result').classList.remove('hidden');
+                }
+            } catch (err) {
+                alert("Error AI: " + err.message);
+                location.reload();
+            }
+        }
+
+        function resizeImageFromUrl(url, maxWidth) {
+            return new Promise(async (resolve) => {
+                const res = await fetch(url);
+                const blob = await res.blob();
+                const img = new Image();
+                img.src = URL.createObjectURL(blob);
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const scale = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL("image/png"));
                 };
             });
         }
 
         function confirmar() {
-            const imageData = sessionStorage.getItem('imagen_procesada');
-            if (window.parent && imageData) {
-                // Enviar imagen a la columna
-                window.parent.postMessage({ type: "glide-set-value", value: imageData }, "*");
-                
-                // Forzar salida
-                setTimeout(() => {
-                    window.parent.postMessage("completado", "*");
-                }, 200);
+            const data = sessionStorage.getItem('imagen_procesada');
+            if (data && window.parent) {
+                window.parent.postMessage({ type: "IMAGEN_LISTA", data: data }, "*");
             }
         }
     </script>

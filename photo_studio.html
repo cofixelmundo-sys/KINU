@@ -7,79 +7,57 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
-        window.GradioClient = client;
-    </script>
-</head>
-<body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
+        
+        // --- CONFIGURACIÓN DE TU SPACE ---
+        const SPACE_ID = "COFIXELMUNDO/mi-recortador-objetos"; 
+        let app;
 
-    <div class="mb-6 text-center">
-        <h1 class="text-indigo-500 font-black tracking-widest text-xl italic">KINU STUDIO</h1>
-        <p class="text-zinc-500 text-[10px] uppercase tracking-widest">AI Portrait Engine</p>
-    </div>
+        // 1. Al cargar, conectamos con Hugging Face y avisamos al Index
+        window.onload = async () => {
+            try {
+                app = await client(SPACE_ID);
+                console.log("IA Conectada exitosamente");
+                // Avisamos al index.html que el motor está listo
+                window.parent.postMessage({ type: 'STUDIO_LISTO' }, '*');
+            } catch (e) {
+                console.error("Error al conectar con el Space:", e);
+                document.getElementById('status-text').innerText = "Error de conexión con IA";
+            }
+        };
 
-    <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl mx-auto">
-        <div id="drop-zone" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-zinc-900 px-8">
-            <div class="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mb-4 border border-indigo-500/20">
-                <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"></path></svg>
-            </div>
-            <p class="text-sm font-bold text-zinc-300">CARGAR PRENDA</p>
-            <input type="file" id="file-input" class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*">
-        </div>
-
-        <div id="loading" class="absolute inset-0 z-40 hidden flex flex-col items-center justify-center bg-zinc-900/90 backdrop-blur-md">
-            <div class="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-xs font-black tracking-[0.2em] text-indigo-500 animate-pulse">QUITANDO FONDO...</p>
-        </div>
-
-        <div id="result" class="absolute inset-0 z-50 hidden flex flex-col">
-            <div class="flex-1 bg-zinc-800 flex items-center justify-center p-4">
-                <img id="preview" class="max-w-full max-h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-            </div>
-            <div class="p-6 bg-zinc-900 border-t border-white/5 flex gap-3">
-                <button onclick="location.reload()" class="flex-1 py-4 bg-zinc-800 rounded-2xl text-[10px] font-black tracking-widest text-zinc-400 uppercase">Repetir</button>
-                <button onclick="confirmar()" class="flex-[2] py-4 bg-indigo-600 rounded-2xl text-[10px] font-black tracking-widest text-white uppercase shadow-lg shadow-indigo-500/20">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // --- DETECCIÓN AUTOMÁTICA ---
-        window.addEventListener('load', async () => {
-            const autoImage = sessionStorage.getItem('imagen_para_procesar');
-            if (autoImage) {
-                sessionStorage.removeItem('imagen_para_procesar');
-                // Convertir Base64 a File para el Gradio
-                const res = await fetch(autoImage);
-                const blob = await res.blob();
-                const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
-                handleFile(file);
+        // 2. Escuchamos la imagen que viene directamente de la cámara
+        window.addEventListener("message", async (event) => {
+            if (event.data.type === 'PROCESAR_IMAGEN_DIRECTA') {
+                procesarImagen(event.data.data);
             }
         });
 
-        const fileInput = document.getElementById('file-input');
-        fileInput.onchange = (e) => handleFile(e.target.files[0]);
-
-        async function handleFile(file) {
-            if (!file) return;
+        async function procesarImagen(base64) {
+            // Cambiamos la interfaz a modo "Procesando"
             document.getElementById('drop-zone').classList.add('hidden');
             document.getElementById('loading').classList.remove('hidden');
 
             try {
-                const app = await window.GradioClient("fffiloni/rmbg-2.0");
-                const result = await app.predict("/predict", [file]);
+                const response = await fetch(base64);
+                const blob = await response.blob();
+
+                // Llamada a la función predict de tu app.py
+                const result = await app.predict("/predict", [blob]);
 
                 if (result.data && result.data[0]) {
-                    const imgUrl = result.data[0].url;
-                    // Redimensionar antes de enviar al padre para evitar lag
-                    const finalBase64 = await resizeImageFromUrl(imgUrl, 800);
+                    const resUrl = result.data[0].url;
                     
-                    sessionStorage.setItem('imagen_procesada', finalBase64);
-                    document.getElementById('preview').src = finalBase64;
+                    // Redimensionamos para que la subida a Drive sea rápida
+                    const finalImg = await resizeImageFromUrl(resUrl, 800);
+                    
+                    sessionStorage.setItem('imagen_procesada', finalImg);
+                    document.getElementById('preview').src = finalImg;
                     document.getElementById('loading').classList.add('hidden');
                     document.getElementById('result').classList.remove('hidden');
                 }
             } catch (err) {
-                alert("Error AI: " + err.message);
+                console.error(err);
+                alert("La IA no responde. Asegúrate de que el Space esté 'Running'.");
                 location.reload();
             }
         }
@@ -102,12 +80,44 @@
             });
         }
 
-        function confirmar() {
+        window.confirmar = function() {
             const data = sessionStorage.getItem('imagen_procesada');
             if (data && window.parent) {
+                // Enviamos la imagen final al index.html para que la suba a Drive
                 window.parent.postMessage({ type: "IMAGEN_LISTA", data: data }, "*");
             }
         }
     </script>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
+
+    <div class="mb-6 text-center">
+        <h1 class="text-indigo-500 font-black tracking-widest text-xl italic">KINU STUDIO</h1>
+        <p class="text-zinc-500 text-[10px] uppercase tracking-widest">AI Portrait Engine</p>
+    </div>
+
+    <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl mx-auto">
+        
+        <div id="drop-zone" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-zinc-900 px-8">
+            <div class="w-12 h-12 border-2 border-zinc-700 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+            <p id="status-text" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-center">Iniciando Motor IA...</p>
+        </div>
+
+        <div id="loading" class="absolute inset-0 z-40 hidden flex flex-col items-center justify-center bg-zinc-900/90 backdrop-blur-md">
+            <div class="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+            <p class="text-[10px] font-black tracking-[0.2em] text-indigo-500 animate-pulse uppercase">Recortando Fondo...</p>
+        </div>
+
+        <div id="result" class="absolute inset-0 z-50 hidden flex flex-col">
+            <div class="flex-1 bg-zinc-800/50 flex items-center justify-center p-4">
+                <img id="preview" class="max-w-full max-h-full object-contain drop-shadow-2xl">
+            </div>
+            <div class="p-6 bg-zinc-900 border-t border-white/5 flex gap-3">
+                <button onclick="location.reload()" class="flex-1 py-4 bg-zinc-800 rounded-2xl text-[10px] font-black text-zinc-400 uppercase tracking-widest">Borrar</button>
+                <button onclick="confirmar()" class="flex-[2] py-4 bg-indigo-600 rounded-2xl text-[10px] font-black text-white uppercase shadow-lg shadow-indigo-500/20 tracking-widest">Guardar</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

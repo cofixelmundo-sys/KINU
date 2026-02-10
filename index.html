@@ -25,7 +25,7 @@
             -webkit-tap-highlight-color: transparent; 
             user-select: none; 
             -webkit-user-select: none;
-            -webkit-touch-callout: none; /* Evita menú nativo en iOS */
+            -webkit-touch-callout: none;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
@@ -71,7 +71,7 @@
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 5000; backdrop-filter: blur(10px); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 5000; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 92%; max-width: 400px; padding: 25px; border-radius: 35px; text-align: center; max-height: 85vh; display: flex; flex-direction: column; }
         
         .cat-grid-save { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; overflow-y: auto; padding: 5px; scrollbar-width: none; }
@@ -81,12 +81,16 @@
 
         .desc-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #ddd; margin-bottom: 15px; font-size: 14px; font-family: inherit; }
 
-        /* Estilos Popup Acciones */
-        .action-popup { background: white; border-radius: 25px; width: 80%; max-width: 300px; overflow: hidden; }
-        .action-btn { width: 100%; padding: 20px; border: none; background: white; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 1px solid #f0f0f0; }
-        .action-btn i { font-size: 18px; }
-        .action-btn.delete { color: var(--rojo-borrar); }
-        .action-btn.colab { color: var(--verde-oscuro); }
+        /* POPUP DE ACCIONES ESTILIZADO */
+        .action-popup { background: white; border-radius: 30px; width: 85%; max-width: 320px; padding: 10px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: popupIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popupIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .action-header { padding: 15px 10px 10px; color: var(--verde-oscuro); font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; }
+        .action-btn { width: 100%; padding: 18px; border: none; background: #f8f8f8; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: space-between; border-radius: 20px; margin-bottom: 8px; color: var(--verde-oscuro); }
+        .action-btn i { font-size: 20px; }
+        .action-btn.colab { background: var(--verde-oscuro); color: white; }
+        .action-btn.delete { color: var(--rojo-borrar); background: #fff1f1; }
+        .action-btn:active { transform: scale(0.96); }
+        .cancel-btn { background: none; border: none; padding: 15px; color: #bbb; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; width: 100%; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -152,13 +156,16 @@
 
     <div id="modal-acciones" class="modal-overlay">
         <div class="action-popup">
+            <div class="action-header">Gestionar Prenda</div>
             <button class="action-btn colab" id="btn-mover-colab">
-                <i class="ph ph-handshake"></i> COLABORO
+                <span>Mover a Colaboro</span>
+                <i class="ph ph-handshake"></i>
             </button>
             <button class="action-btn delete" id="btn-eliminar-prenda">
-                <i class="ph ph-trash"></i> ELIMINAR
+                <span>Eliminar Prenda</span>
+                <i class="ph ph-trash"></i>
             </button>
-            <button onclick="cerrarModales()" class="action-btn" style="color:#bbb; border:none;">CANCELAR</button>
+            <button onclick="cerrarModales()" class="cancel-btn">Cancelar</button>
         </div>
     </div>
 
@@ -187,7 +194,6 @@
             if(p >= 100) setTimeout(() => cont.style.display = 'none', 800);
         }
 
-        // GOOGLE DRIVE
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -206,7 +212,6 @@
         function manejarDrive() { if (!accessToken) { document.getElementById('modal-google').style.display='flex'; } }
         function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); }
 
-        // ESTUDIO Y GUARDADO
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -272,7 +277,6 @@
             } catch (e) { setProgress(100); }
         }
 
-        // CARGAR Y GESTIONAR PRENDAS
         async function cargarPrendas() {
             if(!accessToken) return;
             const grid = document.getElementById('closet-grid');
@@ -292,22 +296,16 @@
                 data.files.forEach(f => {
                     const partes = f.name.split('_');
                     let textoParaMostrar = (partes.length >= 4) ? partes[2] : categoriaActual;
-                    
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
                     card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${textoParaMostrar}</span>`;
                     
-                    // Lógica de Long Press
                     let timer;
                     const start = () => { timer = setTimeout(() => abrirAcciones(f.id, f.name), 800); };
                     const cancel = () => clearTimeout(timer);
-                    
-                    card.addEventListener('touchstart', start);
-                    card.addEventListener('touchend', cancel);
-                    card.addEventListener('mousedown', start);
-                    card.addEventListener('mouseup', cancel);
+                    card.addEventListener('touchstart', start); card.addEventListener('touchend', cancel);
+                    card.addEventListener('mousedown', start); card.addEventListener('mouseup', cancel);
                     card.addEventListener('mouseleave', cancel);
-
                     grid.appendChild(card);
                 });
             } catch(e) { grid.innerHTML = ''; }
@@ -337,7 +335,6 @@
             cerrarModales();
             setProgress(50);
             try {
-                // Renombramos el archivo cambiando la categoría a COLABORO
                 const nuevoNombre = nombrePrendaSeleccionada.replace(`KINU_${categoriaActual}`, "KINU_COLABORO");
                 await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaSeleccionada}`, {
                     method: 'PATCH',
@@ -378,7 +375,6 @@
         }
 
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
-
         window.onload = () => { renderCats(); startGoogle(); };
     </script>
 </body>

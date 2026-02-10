@@ -15,19 +15,18 @@
             try {
                 app = await client(SPACE_ID);
                 window.parent.postMessage({ type: 'STUDIO_LISTO' }, '*');
-                const imgPendiente = sessionStorage.getItem('imagen_para_procesar');
-                if (imgPendiente) { procesarImagen(imgPendiente); sessionStorage.removeItem('imagen_para_procesar'); }
+                const img = sessionStorage.getItem('imagen_para_procesar');
+                if (img) procesarImagen(img);
             } catch (e) { setTimeout(conectarIA, 3000); }
         }
 
         window.onload = conectarIA;
 
-        window.addEventListener("message", async (event) => {
-            if (event.data.type === 'PROCESAR_IMAGEN_DIRECTA') { procesarImagen(event.data.data); }
+        window.addEventListener("message", (e) => {
+            if (e.data.type === 'PROCESAR_IMAGEN_DIRECTA') procesarImagen(e.data.data);
         });
 
         async function procesarImagen(base64) {
-            document.getElementById('drop-zone').classList.add('hidden');
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('result').classList.add('hidden');
             try {
@@ -35,48 +34,44 @@
                 const blob = await response.blob();
                 const result = await app.predict("/predict", [blob]);
                 if (result.data && result.data[0]) {
-                    const finalImg = result.data[0].url;
-                    document.getElementById('preview').src = finalImg;
+                    document.getElementById('preview').src = result.data[0].url;
                     document.getElementById('loading').classList.add('hidden');
                     document.getElementById('result').classList.remove('hidden');
                 }
-            } catch (err) { location.reload(); }
+            } catch (err) { alert("Error al procesar"); location.reload(); }
         }
 
-        // ESTA FUNCIÓN ES LA QUE VUELVE A KINU
-        window.confirmarYEnviar = function() {
-            const src = document.getElementById('preview').src;
-            if (src && src.startsWith('http')) {
-                // Enviamos el mensaje de éxito al Index
-                window.parent.postMessage({ type: "IMAGEN_LISTA", data: src }, "*");
-            } else {
-                alert("Espera a que termine el recorte...");
+        // FUNCIÓN CLAVE PARA SALIR
+        window.enviarAKinu = function() {
+            const imageData = document.getElementById('preview').src;
+            if (imageData.startsWith('http') || imageData.startsWith('data:image')) {
+                window.parent.postMessage({ type: "IMAGEN_LISTA", data: imageData }, "*");
             }
         }
     </script>
 </head>
-<body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
-    <div class="mb-6 text-center">
-        <h1 class="text-indigo-500 font-black tracking-widest text-xl italic uppercase">Kinu Studio</h1>
+<body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="mb-4 text-center">
+        <h1 class="text-indigo-500 font-black tracking-widest text-xl">KINU STUDIO</h1>
     </div>
 
     <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl">
-        <div id="drop-zone" class="absolute inset-0 flex flex-col items-center justify-center">
-            <div class="w-10 h-10 border-2 border-t-indigo-500 rounded-full animate-spin"></div>
-        </div>
-
-        <div id="loading" class="absolute inset-0 hidden flex flex-col items-center justify-center bg-zinc-900/90">
-            <div class="w-12 h-12 border-4 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">Recortando...</p>
+        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900">
+            <div class="w-10 h-10 border-2 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+            <p class="text-[10px] uppercase font-bold text-zinc-500">Procesando IA...</p>
         </div>
 
         <div id="result" class="absolute inset-0 hidden flex flex-col">
-            <div class="flex-1 flex items-center justify-center p-4">
-                <img id="preview" class="max-w-full max-h-full object-contain shadow-2xl">
+            <div class="flex-1 flex items-center justify-center p-6">
+                <img id="preview" class="max-w-full max-h-full object-contain drop-shadow-2xl">
             </div>
-            <div class="p-6 bg-zinc-950 flex gap-3">
-                <button onclick="location.reload()" class="flex-1 py-4 bg-zinc-800 rounded-2xl text-[10px] font-bold">REPETIR</button>
-                <button onclick="confirmarYEnviar()" class="flex-[2] py-4 bg-indigo-600 rounded-2xl text-[10px] font-bold text-white shadow-lg shadow-indigo-500/30">GUARDAR PRENDA</button>
+            <div class="p-6 bg-zinc-950 flex flex-col gap-3">
+                <button onclick="enviarAKinu()" class="w-full py-4 bg-indigo-600 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-500/30 text-white">
+                    Continuar a Kinu
+                </button>
+                <button onclick="location.reload()" class="w-full py-2 text-zinc-500 text-[10px] font-bold uppercase">
+                    Repetir Foto
+                </button>
             </div>
         </div>
     </div>

@@ -88,6 +88,7 @@
         .action-btn i { font-size: 20px; }
         .action-btn.colab { background: var(--verde-oscuro); color: white; }
         .action-btn.delete { color: var(--rojo-borrar); background: #fff1f1; }
+        .action-btn.logout { color: var(--rojo-borrar); background: #fdf2f2; }
         .action-btn:active { transform: scale(0.96); }
         .cancel-btn { background: none; border: none; padding: 15px; color: #bbb; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; width: 100%; }
     </style>
@@ -153,6 +154,17 @@
         </div>
     </div>
 
+    <div id="modal-drive-logout" class="modal-overlay">
+        <div class="action-popup">
+            <div class="action-header">Cuenta Vinculada</div>
+            <button class="action-btn logout" onclick="logoutGoogle()">
+                <span>Cerrar Sesión Drive</span>
+                <i class="ph ph-sign-out"></i>
+            </button>
+            <button onclick="cerrarModales()" class="cancel-btn">Cancelar</button>
+        </div>
+    </div>
+
     <div id="modal-acciones" class="modal-overlay">
         <div class="action-popup">
             <div class="action-header">Gestionar Prenda</div>
@@ -185,59 +197,23 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // FUNCIÓN CLIMA REAL
+        // --- CLIMA ---
         async function actualizarClima() {
-            if (!navigator.geolocation) {
-                document.getElementById('w-city').innerText = 'Sin GPS';
-                return;
-            }
-
+            if (!navigator.geolocation) return;
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-
+                const lat = pos.coords.latitude; const lon = pos.coords.longitude;
                 try {
-                    // 1. Obtener nombre de ciudad (Geocoding inverso suave)
                     const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
                     const geoData = await geoRes.json();
-                    const ciudad = geoData.address.city || geoData.address.town || geoData.address.village || "Ubicación";
-                    document.getElementById('w-city').innerText = ciudad;
-
-                    // 2. Obtener Clima real
+                    document.getElementById('w-city').innerText = geoData.address.city || geoData.address.town || "Ubicación";
                     const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
                     const weatherData = await weatherRes.json();
-                    const temp = Math.round(weatherData.current_weather.temperature);
-                    const code = weatherData.current_weather.weathercode;
-
-                    document.getElementById('w-temp').innerText = temp + '°';
-
-                    // 3. Mapear iconos según código Open-Meteo
-                    let iconClass = 'ph-sun';
-                    if (code >= 1 && code <= 3) iconClass = 'ph-cloud-sun';
-                    if (code >= 45 && code <= 48) iconClass = 'ph-cloud-fog';
-                    if (code >= 51 && code <= 67) iconClass = 'ph-cloud-rain';
-                    if (code >= 71 && code <= 77) iconClass = 'ph-snowflake';
-                    if (code >= 80 && code <= 99) iconClass = 'ph-cloud-lightning';
-
-                    const iconEl = document.getElementById('w-icon');
-                    iconEl.className = `ph ${iconClass} weather-icon`;
-                } catch (e) {
-                    document.getElementById('w-city').innerText = 'Montevideo';
-                }
-            }, () => {
-                document.getElementById('w-city').innerText = 'Montevideo';
-                document.getElementById('w-temp').innerText = '24°';
+                    document.getElementById('w-temp').innerText = Math.round(weatherData.current_weather.temperature) + '°';
+                } catch (e) { document.getElementById('w-city').innerText = 'Montevideo'; }
             });
         }
 
-        function setProgress(p) {
-            const bar = document.getElementById('inner-bar');
-            const cont = document.getElementById('global-progress');
-            cont.style.display = 'block';
-            bar.style.width = p + '%';
-            if(p >= 100) setTimeout(() => cont.style.display = 'none', 800);
-        }
-
+        // --- DRIVE ---
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -252,10 +228,30 @@
                 if(accessToken) { actualizarDriveUI(true); cargarPrendas(); }
             });
         }
-        function loginGoogle() { if (tokenClient) tokenClient.requestAccessToken(); }
-        function manejarDrive() { if (!accessToken) { document.getElementById('modal-google').style.display='flex'; } }
-        function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); }
 
+        function manejarDrive() {
+            if (!accessToken) {
+                document.getElementById('modal-google').style.display='flex';
+            } else {
+                document.getElementById('modal-drive-logout').style.display='flex';
+            }
+        }
+
+        function loginGoogle() { if (tokenClient) tokenClient.requestAccessToken(); }
+
+        function logoutGoogle() {
+            localStorage.removeItem('drive_token');
+            accessToken = null;
+            actualizarDriveUI(false);
+            document.getElementById('closet-grid').innerHTML = '';
+            cerrarModales();
+        }
+
+        function actualizarDriveUI(v) { 
+            document.getElementById('auth-btn').classList.toggle('vinculado', v); 
+        }
+
+        // --- FUNCIONES PRENDAS ---
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -356,15 +352,13 @@
         }
 
         function abrirAcciones(id, nombre) {
-            idPrendaSeleccionada = id;
-            nombrePrendaSeleccionada = nombre;
+            idPrendaSeleccionada = id; nombrePrendaSeleccionada = nombre;
             document.getElementById('modal-acciones').style.display = 'flex';
         }
 
         document.getElementById('btn-eliminar-prenda').onclick = async () => {
             if(!idPrendaSeleccionada) return;
-            cerrarModales();
-            setProgress(50);
+            cerrarModales(); setProgress(50);
             try {
                 await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaSeleccionada}`, {
                     method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken }
@@ -376,8 +370,7 @@
 
         document.getElementById('btn-mover-colab').onclick = async () => {
             if(!idPrendaSeleccionada) return;
-            cerrarModales();
-            setProgress(50);
+            cerrarModales(); setProgress(50);
             try {
                 const nuevoNombre = nombrePrendaSeleccionada.replace(`KINU_${categoriaActual}`, "KINU_COLABORO");
                 await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaSeleccionada}`, {
@@ -402,6 +395,13 @@
             const f = await res.json(); return f.id;
         }
 
+        function setProgress(p) {
+            const bar = document.getElementById('inner-bar');
+            const cont = document.getElementById('global-progress');
+            cont.style.display = 'block'; bar.style.width = p + '%';
+            if(p >= 100) setTimeout(() => cont.style.display = 'none', 800);
+        }
+
         function renderCats() {
             const c = document.getElementById('main-cats');
             c.innerHTML = '';
@@ -413,19 +413,11 @@
 
         function cambiarCat(el,n) {
             document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('active'));
-            el.classList.add('active'); 
-            categoriaActual = n.toUpperCase(); 
-            cargarPrendas();
+            el.classList.add('active'); categoriaActual = n.toUpperCase(); cargarPrendas();
         }
 
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
-        
-        // AL CARGAR LA WEB
-        window.onload = () => { 
-            renderCats(); 
-            startGoogle(); 
-            actualizarClima(); // Nueva función de clima real
-        };
+        window.onload = () => { renderCats(); startGoogle(); actualizarClima(); };
     </script>
 </body>
 </html>

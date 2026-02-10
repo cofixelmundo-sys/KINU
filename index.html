@@ -197,46 +197,41 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- CLIMA 100% AUTOMÁTICO ---
+        // --- CLIMA SILENCIOSO (POR IP) ---
         async function actualizarClima() {
             const iconEl = document.getElementById('w-icon');
             const cityEl = document.getElementById('w-city');
             const tempEl = document.getElementById('w-temp');
 
-            const fallback = () => {
-                cityEl.innerText = 'Montevideo';
-                tempEl.innerText = '--°';
+            try {
+                // 1. Obtener ubicación por IP (No pide permiso)
+                const ipRes = await fetch('https://ipapi.co/json/');
+                const ipData = await ipRes.json();
+                const { city, latitude, longitude } = ipData;
+                
+                cityEl.innerText = city || "Montevideo";
+
+                // 2. Obtener Clima
+                const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+                const weatherData = await weatherRes.json();
+                const { temperature, weathercode } = weatherData.current_weather;
+
+                tempEl.innerText = Math.round(temperature) + '°';
+
+                // 3. Icono
+                let icon = 'ph-sun';
+                if (weathercode >= 1 && weathercode <= 3) icon = 'ph-cloud-sun';
+                else if (weathercode >= 45 && weathercode <= 48) icon = 'ph-cloud-fog';
+                else if (weathercode >= 51 && weathercode <= 67) icon = 'ph-cloud-rain';
+                else if (weathercode >= 71 && weathercode <= 77) icon = 'ph-snowflake';
+                else if (weathercode >= 80 && weathercode <= 99) icon = 'ph-cloud-lightning';
+
+                iconEl.className = `ph ${icon} weather-icon`;
+            } catch (e) {
+                cityEl.innerText = "Montevideo";
+                tempEl.innerText = "--°";
                 iconEl.className = 'ph ph-sun weather-icon';
-            };
-
-            if (!navigator.geolocation) { fallback(); return; }
-
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                try {
-                    const { latitude: lat, longitude: lon } = pos.coords;
-                    
-                    // Ciudad
-                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
-                    const geoData = await geoRes.json();
-                    cityEl.innerText = geoData.address.city || geoData.address.town || geoData.address.village || "Ubicación";
-
-                    // Clima
-                    const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-                    const weatherData = await weatherRes.json();
-                    const { temperature: temp, weathercode: code } = weatherData.current_weather;
-
-                    tempEl.innerText = Math.round(temp) + '°';
-
-                    let icon = 'ph-sun';
-                    if (code >= 1 && code <= 3) icon = 'ph-cloud-sun';
-                    else if (code >= 45 && code <= 48) icon = 'ph-cloud-fog';
-                    else if (code >= 51 && code <= 67) icon = 'ph-cloud-rain';
-                    else if (code >= 71 && code <= 77) icon = 'ph-snowflake';
-                    else if (code >= 80 && code <= 99) icon = 'ph-cloud-lightning';
-
-                    iconEl.className = `ph ${icon} weather-icon`;
-                } catch (e) { fallback(); }
-            }, fallback, { timeout: 5000 });
+            }
         }
 
         // --- DRIVE & UI ---
@@ -440,7 +435,7 @@
         window.onload = () => { 
             renderCats(); 
             startGoogle(); 
-            actualizarClima(); 
+            actualizarClima(); // Se ejecuta silenciosamente
         };
     </script>
 </body>

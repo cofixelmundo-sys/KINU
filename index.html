@@ -135,6 +135,14 @@
         </div>
     </div>
 
+    <div id="modal-google" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color:var(--verde-oscuro); text-transform:uppercase; font-size:14px; margin-bottom: 20px;">Google Drive</h3>
+            <button onclick="loginGoogle()" style="background:var(--google-blue); color:white; padding:16px; border-radius:20px; border:none; width:100%; font-weight:bold; cursor:pointer;">CONECTAR CUENTA</button>
+            <button onclick="cerrarModales()" style="margin-top:15px; background:none; border:none; color:#bbb; font-size:10px; font-weight:bold;">MÁS TARDE</button>
+        </div>
+    </div>
+
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
@@ -152,7 +160,7 @@
             {n: 'Bolsos', i: 'ph-handbag'},
             {n: 'Accesorios', i: 'ph-watch'},
             {n: 'Vintage', i: 'ph-hourglass-high'}, 
-            {n: 'Colaboro', i: 'ph-handshake'}, // CAMBIO REALIZADO AQUÍ
+            {n: 'Colaboro', i: 'ph-handshake'}, 
             {n: 'Deporte', i: 'ph-barbell'},
             {n: 'Interior', i: 'ph-heart-straight'},
             {n: 'Joyas', i: 'ph-sketch-logo'}
@@ -166,6 +174,45 @@
             if(p >= 100) setTimeout(() => cont.style.display = 'none', 800);
         }
 
+        // GOOGLE DRIVE AUTH LOGIC
+        function startGoogle() {
+            gapi.load('client', () => {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID, scope: SCOPES,
+                    callback: (r) => { 
+                        if (r.error) return;
+                        accessToken = r.access_token; 
+                        localStorage.setItem('drive_token', accessToken); 
+                        actualizarDriveUI(true); 
+                        cargarPrendas(); 
+                        cerrarModales(); 
+                    }
+                });
+                if(accessToken) { 
+                    actualizarDriveUI(true); 
+                    cargarPrendas(); 
+                }
+            });
+        }
+
+        function loginGoogle() { 
+            if (tokenClient) tokenClient.requestAccessToken(); 
+        }
+
+        function manejarDrive() { 
+            if (!accessToken) {
+                document.getElementById('modal-google').style.display='flex'; 
+            } else {
+                // Si ya está conectado, podríamos añadir una opción de cerrar sesión aquí si quisieras
+                alert("Ya estás conectado a Google Drive");
+            }
+        }
+
+        function actualizarDriveUI(v) { 
+            document.getElementById('auth-btn').classList.toggle('vinculado', v); 
+        }
+
+        // STUDIO LOGIC
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -215,7 +262,10 @@
         }
 
         async function ejecutarSubidaDrive() {
-            if (!accessToken || !imagenParaGuardar) return;
+            if (!accessToken || !imagenParaGuardar) {
+                if(!accessToken) manejarDrive();
+                return;
+            };
             setProgress(30);
             try {
                 const response = await fetch(imagenParaGuardar);
@@ -243,7 +293,7 @@
         async function cargarPrendas() {
             if(!accessToken) return;
             const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Buscando...</p>';
+            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Cargando closet...</p>';
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
                 const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
@@ -252,29 +302,13 @@
                 });
                 const data = await res.json();
                 grid.innerHTML = '';
-                if(data.files.length === 0) {
-                    grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.3; margin-top:30px;">Vacío</p>';
+                if(!data.files || data.files.length === 0) {
+                    grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.3; margin-top:30px;">Carpeta vacía</p>';
                 }
                 data.files?.forEach(f => {
                     grid.innerHTML += `<div class="prenda-card"><img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${categoriaActual}</span></div>`;
                 });
             } catch(e) {}
-        }
-
-        function startGoogle() {
-            gapi.load('client', () => {
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID, scope: SCOPES,
-                    callback: (r) => { 
-                        accessToken = r.access_token; 
-                        localStorage.setItem('drive_token', accessToken); 
-                        actualizarDriveUI(true); 
-                        cargarPrendas(); 
-                        cerrarModales(); 
-                    }
-                });
-                if(accessToken) { actualizarDriveUI(true); cargarPrendas(); }
-            });
         }
 
         async function obtenerOCrearCarpeta(n) {
@@ -305,10 +339,7 @@
             cargarPrendas();
         }
 
-        function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); }
-        function loginGoogle() { tokenClient.requestAccessToken(); }
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
-        function manejarDrive() { document.getElementById('modal-google').style.display='flex'; }
 
         window.onload = () => { renderCats(); startGoogle(); };
     </script>

@@ -35,10 +35,10 @@
         .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.1); display: none; overflow: hidden; z-index: 100; }
         .progress-bar { width: 0%; height: 100%; background: white; box-shadow: 0 0 10px rgba(255,255,255,0.5); transition: width 0.3s ease; }
 
-        .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 55px; }
-        .weather-icon { font-size: 24px; color: rgba(255, 255, 255, 0.7); }
-        .temp-text { font-size: 16px; font-weight: 700; color: rgba(255, 255, 255, 0.7); }
-        .city-label { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); letter-spacing: 0.5px; }
+        .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 65px; }
+        .weather-icon { font-size: 24px; color: rgba(255, 255, 255, 0.9); }
+        .temp-text { font-size: 16px; font-weight: 700; color: rgba(255, 255, 255, 0.9); }
+        .city-label { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.5px; text-align: center; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
         .header-center { display: flex; flex-direction: column; align-items: center; grid-column: 2; }
         .logo-header { width: 75px; height: auto; }
@@ -81,7 +81,6 @@
 
         .desc-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #ddd; margin-bottom: 15px; font-size: 14px; font-family: inherit; }
 
-        /* POPUP DE ACCIONES ESTILIZADO */
         .action-popup { background: white; border-radius: 30px; width: 85%; max-width: 320px; padding: 10px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: popupIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popupIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .action-header { padding: 15px 10px 10px; color: var(--verde-oscuro); font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; }
@@ -97,10 +96,10 @@
 
     <div class="main-container">
         <header>
-            <div class="header-left-info">
-                <i class="ph ph-sun weather-icon"></i>
-                <span class="temp-text">24°</span>
-                <span class="city-label">Hoy</span>
+            <div class="header-left-info" id="weather-box">
+                <i class="ph ph-circle-notch weather-icon" id="w-icon"></i>
+                <span class="temp-text" id="w-temp">--°</span>
+                <span class="city-label" id="w-city">Cargando...</span>
             </div>
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
@@ -185,6 +184,51 @@
             {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Colaboro', i: 'ph-handshake'}, 
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
+
+        // FUNCIÓN CLIMA REAL
+        async function actualizarClima() {
+            if (!navigator.geolocation) {
+                document.getElementById('w-city').innerText = 'Sin GPS';
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+
+                try {
+                    // 1. Obtener nombre de ciudad (Geocoding inverso suave)
+                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+                    const geoData = await geoRes.json();
+                    const ciudad = geoData.address.city || geoData.address.town || geoData.address.village || "Ubicación";
+                    document.getElementById('w-city').innerText = ciudad;
+
+                    // 2. Obtener Clima real
+                    const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                    const weatherData = await weatherRes.json();
+                    const temp = Math.round(weatherData.current_weather.temperature);
+                    const code = weatherData.current_weather.weathercode;
+
+                    document.getElementById('w-temp').innerText = temp + '°';
+
+                    // 3. Mapear iconos según código Open-Meteo
+                    let iconClass = 'ph-sun';
+                    if (code >= 1 && code <= 3) iconClass = 'ph-cloud-sun';
+                    if (code >= 45 && code <= 48) iconClass = 'ph-cloud-fog';
+                    if (code >= 51 && code <= 67) iconClass = 'ph-cloud-rain';
+                    if (code >= 71 && code <= 77) iconClass = 'ph-snowflake';
+                    if (code >= 80 && code <= 99) iconClass = 'ph-cloud-lightning';
+
+                    const iconEl = document.getElementById('w-icon');
+                    iconEl.className = `ph ${iconClass} weather-icon`;
+                } catch (e) {
+                    document.getElementById('w-city').innerText = 'Montevideo';
+                }
+            }, () => {
+                document.getElementById('w-city').innerText = 'Montevideo';
+                document.getElementById('w-temp').innerText = '24°';
+            });
+        }
 
         function setProgress(p) {
             const bar = document.getElementById('inner-bar');
@@ -375,7 +419,13 @@
         }
 
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
-        window.onload = () => { renderCats(); startGoogle(); };
+        
+        // AL CARGAR LA WEB
+        window.onload = () => { 
+            renderCats(); 
+            startGoogle(); 
+            actualizarClima(); // Nueva función de clima real
+        };
     </script>
 </body>
 </html>

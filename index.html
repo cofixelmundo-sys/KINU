@@ -81,6 +81,17 @@
         .cat-btn-save { background: #f4f4f4; border: none; padding: 12px 5px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
         .cat-btn-save i { font-size: 20px; color: var(--verde-oscuro); }
         .cat-btn-save span { font-size: 8px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; text-align: center; line-height: 1; }
+
+        /* Estilo para el input de descripción */
+        .desc-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-family: inherit;
+        }
     </style>
 </head>
 <body>
@@ -129,7 +140,8 @@
 
     <div id="modal-categoria" class="modal-overlay">
         <div class="modal-content">
-            <h2 style="color:var(--verde-oscuro); font-weight:900; font-size:14px; text-transform:uppercase; margin:0;">Clasificar Prenda</h2>
+            <h2 style="color:var(--verde-oscuro); font-weight:900; font-size:14px; text-transform:uppercase; margin:0 0 15px;">Clasificar Prenda</h2>
+            <input type="text" id="prenda-desc" class="desc-input" placeholder="Ej: Pantalón Levis azul...">
             <div id="cat-save-list" class="cat-grid-save"></div>
             <button onclick="cerrarModales()" style="margin-top:20px; background:none; border:none; color:#bbb; font-size:10px; font-weight:bold; letter-spacing:1px;">CANCELAR</button>
         </div>
@@ -174,7 +186,6 @@
             if(p >= 100) setTimeout(() => cont.style.display = 'none', 800);
         }
 
-        // GOOGLE DRIVE AUTH LOGIC
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -195,24 +206,10 @@
             });
         }
 
-        function loginGoogle() { 
-            if (tokenClient) tokenClient.requestAccessToken(); 
-        }
+        function loginGoogle() { if (tokenClient) tokenClient.requestAccessToken(); }
+        function manejarDrive() { if (!accessToken) { document.getElementById('modal-google').style.display='flex'; } }
+        function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); }
 
-        function manejarDrive() { 
-            if (!accessToken) {
-                document.getElementById('modal-google').style.display='flex'; 
-            } else {
-                // Si ya está conectado, podríamos añadir una opción de cerrar sesión aquí si quisieras
-                alert("Ya estás conectado a Google Drive");
-            }
-        }
-
-        function actualizarDriveUI(v) { 
-            document.getElementById('auth-btn').classList.toggle('vinculado', v); 
-        }
-
-        // STUDIO LOGIC
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -221,7 +218,6 @@
                     sessionStorage.setItem('imagen_para_procesar', base64);
                     const modal = document.getElementById('modal-prenda');
                     const iframe = modal.querySelector('iframe');
-                    
                     const receptorListo = (event) => {
                         if (event.data.type === 'STUDIO_LISTO') {
                             iframe.contentWindow.postMessage({ type: 'PROCESAR_IMAGEN_DIRECTA', data: base64 }, '*');
@@ -245,6 +241,7 @@
         });
 
         function abrirSelectorGuardado() {
+            document.getElementById('prenda-desc').value = ''; // Limpiar descripción
             const list = document.getElementById('cat-save-list');
             list.innerHTML = '';
             categorias.forEach(cat => {
@@ -253,7 +250,6 @@
                 btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
                 btn.onclick = () => {
                     categoriaActual = cat.n.toUpperCase();
-                    document.getElementById('modal-categoria').style.display = 'none';
                     ejecutarSubidaDrive();
                 };
                 list.appendChild(btn);
@@ -262,16 +258,21 @@
         }
 
         async function ejecutarSubidaDrive() {
-            if (!accessToken || !imagenParaGuardar) {
-                if(!accessToken) manejarDrive();
-                return;
-            };
+            if (!accessToken || !imagenParaGuardar) return;
+            
+            const descripcion = document.getElementById('prenda-desc').value.trim();
+            const nombreMostrar = descripcion || categoriaActual;
+            
+            document.getElementById('modal-categoria').style.display = 'none';
             setProgress(30);
+            
             try {
                 const response = await fetch(imagenParaGuardar);
                 const blob = await response.blob();
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                const nombreArchivo = `KINU_${categoriaActual}_${Date.now()}.png`;
+                
+                // Guardamos con un formato que nos permita recuperar la descripción: KINU_CATEGORIA_DESCRIPCION_TIMESTAMP.png
+                const nombreArchivo = `KINU_${categoriaActual}_${nombreMostrar}_${Date.now()}.png`;
 
                 const metadata = { name: nombreArchivo, parents: [folderId] };
                 const formData = new FormData();
@@ -297,18 +298,30 @@
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
                 const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
-                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, {
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)&orderBy=createdTime desc`, {
                     headers: { 'Authorization': 'Bearer ' + accessToken }
                 });
                 const data = await res.json();
                 grid.innerHTML = '';
                 if(!data.files || data.files.length === 0) {
                     grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.3; margin-top:30px;">Carpeta vacía</p>';
+                    return;
                 }
-                data.files?.forEach(f => {
-                    grid.innerHTML += `<div class="prenda-card"><img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${categoriaActual}</span></div>`;
+                data.files.forEach(f => {
+                    // Extraer la descripción del nombre del archivo: KINU_CAT_DESCRIPCION_TIMESTAMP.png
+                    const partes = f.name.split('_');
+                    let textoParaMostrar = categoriaActual;
+                    if(partes.length >= 4) {
+                        textoParaMostrar = partes[2]; // La descripción que guardamos
+                    }
+
+                    grid.innerHTML += `
+                        <div class="prenda-card">
+                            <img src="${f.thumbnailLink.replace('=s220','=s500')}">
+                            <span>${textoParaMostrar}</span>
+                        </div>`;
                 });
-            } catch(e) {}
+            } catch(e) { grid.innerHTML = ''; }
         }
 
         async function obtenerOCrearCarpeta(n) {

@@ -16,7 +16,10 @@
     
     <style>
         :root { 
-            --verde-oliva: #6B705C; --verde-oscuro: #2D4636; --blanco: #FFFFFF; 
+            /* COLORES ACTUALIZADOS A TONO MARRÓN CLARO */
+            --verde-oliva: #8C826B; 
+            --verde-oscuro: #3E4131; 
+            --blanco: #FFFFFF; 
             --google-blue: #4285F4; --rojo-borrar: #E63946;
         }
         * { 
@@ -197,35 +200,25 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- CLIMA SILENCIOSO (POR IP) ---
         async function actualizarClima() {
             const iconEl = document.getElementById('w-icon');
             const cityEl = document.getElementById('w-city');
             const tempEl = document.getElementById('w-temp');
-
             try {
-                // 1. Obtener ubicación por IP (No pide permiso)
                 const ipRes = await fetch('https://ipapi.co/json/');
                 const ipData = await ipRes.json();
                 const { city, latitude, longitude } = ipData;
-                
                 cityEl.innerText = city || "Montevideo";
-
-                // 2. Obtener Clima
                 const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
                 const weatherData = await weatherRes.json();
                 const { temperature, weathercode } = weatherData.current_weather;
-
                 tempEl.innerText = Math.round(temperature) + '°';
-
-                // 3. Icono
                 let icon = 'ph-sun';
                 if (weathercode >= 1 && weathercode <= 3) icon = 'ph-cloud-sun';
                 else if (weathercode >= 45 && weathercode <= 48) icon = 'ph-cloud-fog';
                 else if (weathercode >= 51 && weathercode <= 67) icon = 'ph-cloud-rain';
                 else if (weathercode >= 71 && weathercode <= 77) icon = 'ph-snowflake';
                 else if (weathercode >= 80 && weathercode <= 99) icon = 'ph-cloud-lightning';
-
                 iconEl.className = `ph ${icon} weather-icon`;
             } catch (e) {
                 cityEl.innerText = "Montevideo";
@@ -234,7 +227,6 @@
             }
         }
 
-        // --- DRIVE & UI ---
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -435,7 +427,7 @@
         window.onload = () => { 
             renderCats(); 
             startGoogle(); 
-            actualizarClima(); // Se ejecuta silenciosamente
+            actualizarClima();
         };
     </script>
 </body>

@@ -41,39 +41,61 @@
             } catch (err) { alert("Error al procesar"); location.reload(); }
         }
 
-        // FUNCIÓN CLAVE PARA SALIR
         window.enviarAKinu = function() {
             const imageData = document.getElementById('preview').src;
-            if (imageData.startsWith('http') || imageData.startsWith('data:image')) {
+            if (imageData && (imageData.startsWith('http') || imageData.startsWith('data:image'))) {
                 window.parent.postMessage({ type: "IMAGEN_LISTA", data: imageData }, "*");
             }
         }
     </script>
+    <style>
+        /* Forzamos que el contenedor de la imagen no la deje desbordar */
+        .image-container {
+            height: 65%; /* Ocupa el 65% del espacio disponible */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #preview {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Evita que la imagen se estire o tape los botones */
+        }
+        .buttons-container {
+            height: 35%; /* El resto del espacio para botones */
+            background: #09090b; /* Zinc 950 */
+        }
+    </style>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4">
+    
     <div class="mb-4 text-center">
         <h1 class="text-indigo-500 font-black tracking-widest text-xl">KINU STUDIO</h1>
     </div>
 
-    <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl">
-        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900">
+    <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl flex flex-col">
+        
+        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-50">
             <div class="w-10 h-10 border-2 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-[10px] uppercase font-bold text-zinc-500">Procesando IA...</p>
+            <p class="text-[10px] uppercase font-bold text-zinc-500">Recortando Prenda...</p>
         </div>
 
-        <div id="result" class="absolute inset-0 hidden flex flex-col">
-            <div class="flex-1 flex items-center justify-center p-6">
-                <img id="preview" class="max-w-full max-h-full object-contain drop-shadow-2xl">
+        <div id="result" class="flex flex-col h-full w-full hidden">
+            <div class="image-container">
+                <img id="preview" class="drop-shadow-[0_20px_50px_rgba(79,70,229,0.3)]">
             </div>
-            <div class="p-6 bg-zinc-950 flex flex-col gap-3">
-                <button onclick="enviarAKinu()" class="w-full py-4 bg-indigo-600 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-500/30 text-white">
-                    Continuar a Kinu
+
+            <div class="buttons-container p-6 flex flex-col justify-center gap-3">
+                <button onclick="enviarAKinu()" class="w-full py-4 bg-indigo-600 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-500/30 text-white active:scale-95 transition-transform">
+                    ACEPTAR Y GUARDAR
                 </button>
-                <button onclick="location.reload()" class="w-full py-2 text-zinc-500 text-[10px] font-bold uppercase">
-                    Repetir Foto
+                <button onclick="location.reload()" class="w-full py-2 text-zinc-500 text-[10px] font-bold uppercase tracking-widest hover:text-white">
+                    REPETIR FOTO
                 </button>
             </div>
         </div>
     </div>
+
 </body>
 </html>

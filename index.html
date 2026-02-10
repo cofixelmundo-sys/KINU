@@ -38,7 +38,7 @@
         .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 65px; }
         .weather-icon { font-size: 24px; color: rgba(255, 255, 255, 0.9); }
         .temp-text { font-size: 16px; font-weight: 700; color: rgba(255, 255, 255, 0.9); }
-        .city-label { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.5px; text-align: center; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .city-label { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.5px; text-align: center; max-width: 75px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
         .header-center { display: flex; flex-direction: column; align-items: center; grid-column: 2; }
         .logo-header { width: 75px; height: auto; }
@@ -98,9 +98,9 @@
     <div class="main-container">
         <header>
             <div class="header-left-info" id="weather-box">
-                <i class="ph ph-circle-notch weather-icon" id="w-icon"></i>
+                <i class="ph ph-sun weather-icon" id="w-icon"></i>
                 <span class="temp-text" id="w-temp">--°</span>
-                <span class="city-label" id="w-city">Cargando...</span>
+                <span class="city-label" id="w-city">...</span>
             </div>
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
@@ -197,23 +197,49 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- CLIMA ---
+        // --- CLIMA 100% AUTOMÁTICO ---
         async function actualizarClima() {
-            if (!navigator.geolocation) return;
+            const iconEl = document.getElementById('w-icon');
+            const cityEl = document.getElementById('w-city');
+            const tempEl = document.getElementById('w-temp');
+
+            const fallback = () => {
+                cityEl.innerText = 'Montevideo';
+                tempEl.innerText = '--°';
+                iconEl.className = 'ph ph-sun weather-icon';
+            };
+
+            if (!navigator.geolocation) { fallback(); return; }
+
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                const lat = pos.coords.latitude; const lon = pos.coords.longitude;
                 try {
+                    const { latitude: lat, longitude: lon } = pos.coords;
+                    
+                    // Ciudad
                     const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
                     const geoData = await geoRes.json();
-                    document.getElementById('w-city').innerText = geoData.address.city || geoData.address.town || "Ubicación";
+                    cityEl.innerText = geoData.address.city || geoData.address.town || geoData.address.village || "Ubicación";
+
+                    // Clima
                     const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
                     const weatherData = await weatherRes.json();
-                    document.getElementById('w-temp').innerText = Math.round(weatherData.current_weather.temperature) + '°';
-                } catch (e) { document.getElementById('w-city').innerText = 'Montevideo'; }
-            });
+                    const { temperature: temp, weathercode: code } = weatherData.current_weather;
+
+                    tempEl.innerText = Math.round(temp) + '°';
+
+                    let icon = 'ph-sun';
+                    if (code >= 1 && code <= 3) icon = 'ph-cloud-sun';
+                    else if (code >= 45 && code <= 48) icon = 'ph-cloud-fog';
+                    else if (code >= 51 && code <= 67) icon = 'ph-cloud-rain';
+                    else if (code >= 71 && code <= 77) icon = 'ph-snowflake';
+                    else if (code >= 80 && code <= 99) icon = 'ph-cloud-lightning';
+
+                    iconEl.className = `ph ${icon} weather-icon`;
+                } catch (e) { fallback(); }
+            }, fallback, { timeout: 5000 });
         }
 
-        // --- DRIVE ---
+        // --- DRIVE & UI ---
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -230,15 +256,11 @@
         }
 
         function manejarDrive() {
-            if (!accessToken) {
-                document.getElementById('modal-google').style.display='flex';
-            } else {
-                document.getElementById('modal-drive-logout').style.display='flex';
-            }
+            if (!accessToken) document.getElementById('modal-google').style.display='flex';
+            else document.getElementById('modal-drive-logout').style.display='flex';
         }
 
         function loginGoogle() { if (tokenClient) tokenClient.requestAccessToken(); }
-
         function logoutGoogle() {
             localStorage.removeItem('drive_token');
             accessToken = null;
@@ -247,11 +269,8 @@
             cerrarModales();
         }
 
-        function actualizarDriveUI(v) { 
-            document.getElementById('auth-btn').classList.toggle('vinculado', v); 
-        }
+        function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); }
 
-        // --- FUNCIONES PRENDAS ---
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -417,7 +436,12 @@
         }
 
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
-        window.onload = () => { renderCats(); startGoogle(); actualizarClima(); };
+
+        window.onload = () => { 
+            renderCats(); 
+            startGoogle(); 
+            actualizarClima(); 
+        };
     </script>
 </body>
 </html>

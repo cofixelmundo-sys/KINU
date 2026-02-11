@@ -16,7 +16,6 @@
     
     <style>
         :root { 
-            /* TONO VERDE MUSGO SUAVE */
             --verde-oliva: #848464; 
             --verde-oscuro: #313628; 
             --blanco: #FFFFFF; 
@@ -149,14 +148,49 @@
         </div>
     </div>
 
+    <div id="modal-google" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color:var(--verde-oscuro); text-transform:uppercase; font-size:14px; margin-bottom: 20px;">Google Drive</h3>
+            <button onclick="loginGoogle()" style="background:var(--google-blue); color:white; padding:16px; border-radius:20px; border:none; width:100%; font-weight:bold; cursor:pointer;">CONECTAR CUENTA</button>
+            <button onclick="cerrarModales()" style="margin-top:15px; background:none; border:none; color:#bbb; font-size:10px; font-weight:bold;">MÁS TARDE</button>
+        </div>
+    </div>
+
+    <div id="modal-drive-logout" class="modal-overlay">
+        <div class="action-popup">
+            <div class="action-header">Cuenta Vinculada</div>
+            <button class="action-btn logout" onclick="logoutGoogle()">
+                <span>Cerrar Sesión Drive</span>
+                <i class="ph ph-sign-out"></i>
+            </button>
+            <button onclick="cerrarModales()" class="cancel-btn">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="modal-acciones" class="modal-overlay">
+        <div class="action-popup">
+            <div class="action-header">Gestionar Prenda</div>
+            <button class="action-btn colab" id="btn-mover-colab">
+                <span>Mover a Colaboro</span>
+                <i class="ph ph-handshake"></i>
+            </button>
+            <button class="action-btn delete" id="btn-eliminar-prenda">
+                <span>Eliminar Prenda</span>
+                <i class="ph ph-trash"></i>
+            </button>
+            <button onclick="cerrarModales()" class="cancel-btn">Cancelar</button>
+        </div>
+    </div>
+
     <script>
-        // Variables Globales
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token');
         let tokenClient;
         let categoriaActual = 'SUPERIOR';
         let imagenParaGuardar = null;
+        let idPrendaSeleccionada = null;
+        let nombrePrendaSeleccionada = null;
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -165,7 +199,7 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- CLIMA SILENCIOSO ---
+        // --- CLIMA ---
         async function actualizarClima() {
             const iconEl = document.getElementById('w-icon');
             const cityEl = document.getElementById('w-city');
@@ -191,7 +225,190 @@
             }
         }
 
-        // --- FUNCIONES CORE ---
+        // --- DRIVE LOGIC ---
+        function startGoogle() {
+            gapi.load('client', () => {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID, scope: SCOPES,
+                    callback: (r) => { 
+                        if (r.error) return;
+                        accessToken = r.access_token; 
+                        localStorage.setItem('drive_token', accessToken); 
+                        actualizarDriveUI(true); cargarPrendas(); cerrarModales(); 
+                    }
+                });
+                if(accessToken) { actualizarDriveUI(true); cargarPrendas(); }
+            });
+        }
+
+        function manejarDrive() {
+            if (!accessToken) document.getElementById('modal-google').style.display='flex';
+            else document.getElementById('modal-drive-logout').style.display='flex';
+        }
+
+        function loginGoogle() { if (tokenClient) tokenClient.requestAccessToken(); }
+        function logoutGoogle() {
+            localStorage.removeItem('drive_token');
+            accessToken = null;
+            actualizarDriveUI(false);
+            document.getElementById('closet-grid').innerHTML = '';
+            cerrarModales();
+        }
+
+        function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); }
+
+        async function cargarPrendas() {
+            if(!accessToken) return;
+            const grid = document.getElementById('closet-grid');
+            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Cargando...</p>';
+            try {
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)&orderBy=createdTime desc`, {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                const data = await res.json();
+                grid.innerHTML = '';
+                if(!data.files || data.files.length === 0) {
+                    grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.3; margin-top:30px;">Carpeta vacía</p>';
+                    return;
+                }
+                data.files.forEach(f => {
+                    const partes = f.name.split('_');
+                    let textoParaMostrar = (partes.length >= 4) ? partes[2] : categoriaActual;
+                    const card = document.createElement('div');
+                    card.className = 'prenda-card';
+                    card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${textoParaMostrar}</span>`;
+                    
+                    let timer;
+                    const start = () => { timer = setTimeout(() => abrirAcciones(f.id, f.name), 800); };
+                    const cancel = () => clearTimeout(timer);
+                    card.addEventListener('touchstart', start); card.addEventListener('touchend', cancel);
+                    card.addEventListener('mousedown', start); card.addEventListener('mouseup', cancel);
+                    grid.appendChild(card);
+                });
+            } catch(e) { grid.innerHTML = ''; }
+        }
+
+        async function obtenerOCrearCarpeta(n) {
+            const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+            const d = await r.json();
+            if(d.files?.[0]) return d.files[0].id;
+            const res = await fetch('https://www.googleapis.com/drive/v3/files', {
+                method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' })
+            });
+            const f = await res.json(); return f.id;
+        }
+
+        // --- SUBIDA Y FOTOS ---
+        function enviarAStudio(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64 = e.target.result;
+                    sessionStorage.setItem('imagen_para_procesar', base64);
+                    const modal = document.getElementById('modal-prenda');
+                    const iframe = modal.querySelector('iframe');
+                    const receptorListo = (event) => {
+                        if (event.data.type === 'STUDIO_LISTO') {
+                            iframe.contentWindow.postMessage({ type: 'PROCESAR_IMAGEN_DIRECTA', data: base64 }, '*');
+                            window.removeEventListener('message', receptorListo);
+                        }
+                    };
+                    window.addEventListener('message', receptorListo);
+                    modal.style.display = 'flex'; iframe.src = 'photo_studio.html'; 
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        window.addEventListener("message", (event) => {
+            if (event.data.type === "IMAGEN_LISTA") {
+                imagenParaGuardar = event.data.data;
+                document.getElementById('modal-prenda').style.display = 'none';
+                abrirSelectorGuardado();
+            }
+        });
+
+        function abrirSelectorGuardado() {
+            document.getElementById('prenda-desc').value = '';
+            const list = document.getElementById('cat-save-list');
+            list.innerHTML = '';
+            categorias.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'cat-btn-save';
+                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
+                btn.onclick = () => { categoriaActual = cat.n.toUpperCase(); ejecutarSubidaDrive(); };
+                list.appendChild(btn);
+            });
+            document.getElementById('modal-categoria').style.display = 'flex';
+        }
+
+        async function ejecutarSubidaDrive() {
+            if (!accessToken || !imagenParaGuardar) return;
+            const descripcion = document.getElementById('prenda-desc').value.trim();
+            const nombreMostrar = descripcion || categoriaActual;
+            document.getElementById('modal-categoria').style.display = 'none';
+            setProgress(30);
+            try {
+                const response = await fetch(imagenParaGuardar);
+                const blob = await response.blob();
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                const nombreArchivo = `KINU_${categoriaActual}_${nombreMostrar}_${Date.now()}.png`;
+                const metadata = { name: nombreArchivo, parents: [folderId] };
+                const formData = new FormData();
+                formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+                formData.append('file', blob);
+                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: formData
+                });
+                setProgress(100); imagenParaGuardar = null; cargarPrendas();
+            } catch (e) { setProgress(100); }
+        }
+
+        // --- GESTIÓN DE PRENDAS ---
+        function abrirAcciones(id, nombre) {
+            idPrendaSeleccionada = id; nombrePrendaSeleccionada = nombre;
+            document.getElementById('modal-acciones').style.display = 'flex';
+        }
+
+        document.getElementById('btn-eliminar-prenda').onclick = async () => {
+            if(!idPrendaSeleccionada) return;
+            cerrarModales(); setProgress(50);
+            try {
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaSeleccionada}`, {
+                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                cargarPrendas();
+            } catch(e) {}
+            setProgress(100);
+        };
+
+        document.getElementById('btn-mover-colab').onclick = async () => {
+            if(!idPrendaSeleccionada) return;
+            cerrarModales(); setProgress(50);
+            try {
+                const nuevoNombre = nombrePrendaSeleccionada.replace(`KINU_${categoriaActual}`, "KINU_COLABORO");
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaSeleccionada}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: nuevoNombre })
+                });
+                cargarPrendas();
+            } catch(e) {}
+            setProgress(100);
+        };
+
+        // --- UI ---
+        function setProgress(p) {
+            const bar = document.getElementById('inner-bar');
+            const cont = document.getElementById('global-progress');
+            cont.style.display = 'block'; bar.style.width = p + '%';
+            if(p >= 100) setTimeout(() => cont.style.display = 'none', 800);
+        }
+
         function renderCats() {
             const c = document.getElementById('main-cats');
             c.innerHTML = '';
@@ -203,17 +420,12 @@
 
         function cambiarCat(el,n) {
             document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('active'));
-            el.classList.add('active'); 
-            categoriaActual = n.toUpperCase(); 
-            // Aquí llamarías a cargarPrendas() si estuviera Drive activo
+            el.classList.add('active'); categoriaActual = n.toUpperCase(); cargarPrendas();
         }
 
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
 
-        window.onload = () => { 
-            renderCats(); 
-            actualizarClima();
-        };
+        window.onload = () => { renderCats(); startGoogle(); actualizarClima(); };
     </script>
 </body>
 </html>

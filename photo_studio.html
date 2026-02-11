@@ -3,111 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KINU Studio</title>
-    <style>
-        :root { --verde-oliva: #848464; --verde-oscuro: #313628; --arena: #F2EFE9; }
-        body { font-family: sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; overflow: hidden; }
-        #preview-container { width: 90%; height: 50vh; border-radius: 25px; background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; border: 2px dashed rgba(255,255,255,0.2); position: relative; }
-        img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .status-box { margin-top: 30px; text-align: center; padding: 0 20px; }
-        .loader { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--arena); border-radius: 50%; animation: spin 1s linear infinite; margin: 15px auto; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .btn-confirmar { display: none; margin-top: 25px; padding: 18px 50px; background: var(--arena); color: var(--verde-oscuro); border: none; border-radius: 35px; font-weight: 800; text-transform: uppercase; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        .btn-cancelar { margin-top: 20px; color: rgba(255,255,255,0.5); background: none; border: none; cursor: pointer; text-transform: uppercase; font-size: 11px; }
-        #btn-fallback { display: none; margin-top: 10px; color: var(--arena); background: rgba(255,255,255,0.1); border: 1px solid var(--arena); padding: 10px; border-radius: 10px; font-size: 10px; cursor: pointer; }
-    </style>
-</head>
-<body>
-
-    <div id="preview-container">
-        <img id="img-target" src="">
-    </div>
-
-    <div class="status-box">
-        <div class="loader" id="loader"></div>
-        <p id="status-text" style="font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">Conectando con el estudio...</p>
-        <button id="btn-fallback" onclick="usarOriginal()">El servidor no responde. ¿Usar foto original?</button>
-    </div>
-
-    <button id="btn-confirmar" class="btn-confirmar" onclick="confirmar()">Guardar en Closet</button>
-    <button class="btn-cancelar" onclick="cancelar()">Cancelar</button>
-
-    <script>
-        const HF_TOKEN = "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"; 
-        const API_URL = "https://api-inference.huggingface.co/models/briaai/RMBG-1.4";
+    <title>KINU Studio AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
         
-        const imgTarget = document.getElementById('img-target');
-        const statusText = document.getElementById('status-text');
-        const loader = document.getElementById('loader');
-        const btnConfirmar = document.getElementById('btn-confirmar');
-        const btnFallback = document.getElementById('btn-fallback');
+        const SPACE_ID = "COFIXELMUNDO/mi-recortador-objetos"; 
+        let app;
 
-        let intentos = 0;
+        async function conectarIA() {
+            try {
+                app = await client(SPACE_ID);
+                // Avisamos al index que el estudio está listo para recibir la foto
+                window.parent.postMessage({ type: 'STUDIO_LISTO' }, '*');
+                
+                // Si ya hay una imagen en el storage, la procesamos
+                const img = sessionStorage.getItem('imagen_para_procesar');
+                if (img) procesarImagen(img);
+            } catch (e) { 
+                console.error("Error conectando con IA:", e);
+                setTimeout(conectarIA, 3000); 
+            }
+        }
 
-        window.onload = async () => {
-            const rawImg = localStorage.getItem('temp_image');
-            if (!rawImg) { window.location.href = 'index.html'; return; }
-            imgTarget.src = rawImg;
-            llamarAPI(rawImg);
-        };
+        window.onload = conectarIA;
 
-        async function llamarAPI(base64) {
-            intentos++;
+        // Escuchar mensajes directos del index por si el storage falla
+        window.addEventListener("message", (e) => {
+            if (e.data.type === 'PROCESAR_IMAGEN_DIRECTA') {
+                procesarImagen(e.data.data);
+            }
+        });
+
+        async function procesarImagen(base64) {
+            const loading = document.getElementById('loading');
+            const resultDiv = document.getElementById('result');
+            
+            loading.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+
             try {
                 const response = await fetch(base64);
                 const blob = await response.blob();
 
-                statusText.innerText = "Recortando fondo...";
-
-                const res = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { 
-                        "Authorization": `Bearer ${HF_TOKEN}`
-                    },
-                    body: blob
-                });
-
-                if (res.status === 503 || res.status === 429) {
-                    statusText.innerText = "Estudio ocupado, reintentando...";
-                    if(intentos > 3) btnFallback.style.display = "inline-block";
-                    setTimeout(() => llamarAPI(base64), 4000);
-                    return;
+                const result = await app.predict("/predict", [blob]);
+                
+                if (result.data && result.data[0]) {
+                    const urlProcesada = result.data[0].url;
+                    document.getElementById('preview').src = urlProcesada;
+                    
+                    loading.classList.add('hidden');
+                    resultDiv.classList.remove('hidden');
                 }
-
-                if (!res.ok) throw new Error("Error de API");
-
-                const resBlob = await res.blob();
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    localStorage.setItem('final_image', reader.result);
-                    imgTarget.src = reader.result;
-                    loader.style.display = 'none';
-                    statusText.innerText = "¡Recorte completado!";
-                    btnConfirmar.style.display = 'block';
-                    btnFallback.style.display = "none";
-                };
-                reader.readAsDataURL(resBlob);
-
-            } catch (err) {
-                console.error(err);
-                if(intentos > 2) btnFallback.style.display = "inline-block";
-                statusText.innerText = "Buscando conexión...";
-                setTimeout(() => llamarAPI(base64), 5000);
+            } catch (e) {
+                console.error("Error en el proceso:", e);
+                alert("Error al procesar la imagen. Reintentando...");
+                loading.classList.add('hidden');
             }
         }
 
-        function usarOriginal() {
-            const rawImg = localStorage.getItem('temp_image');
-            localStorage.setItem('final_image', rawImg);
-            window.location.href = 'index.html';
+        // FUNCIÓN CLAVE: Devuelve la foto al index.html
+        window.enviarAKinu = function() {
+            const imgElement = document.getElementById('preview');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Convertimos la imagen de URL a Base64 para pasarla de vuelta
+            const tempImg = new Image();
+            tempImg.crossOrigin = "anonymous";
+            tempImg.onload = function() {
+                canvas.width = tempImg.width;
+                canvas.height = tempImg.height;
+                ctx.drawImage(tempImg, 0, 0);
+                const base64Final = canvas.toDataURL("image/png");
+                
+                // Enviamos el mensaje al index.html
+                window.parent.postMessage({ 
+                    type: "IMAGEN_LISTA", 
+                    data: base64Final 
+                }, "*");
+            };
+            tempImg.src = imgElement.src;
         }
 
-        function confirmar() { window.location.href = 'index.html'; }
-        function cancelar() {
-            localStorage.removeItem('temp_image');
-            localStorage.removeItem('final_image');
-            window.location.href = 'index.html';
+        window.cancelarStudio = function() {
+            window.parent.postMessage({ type: "CERRAR_STUDIO" }, "*");
         }
     </script>
+    <style>
+        .image-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        #preview {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="bg-black h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="mb-4 text-center">
+        <h1 class="text-indigo-500 font-black tracking-widest text-xl">KINU STUDIO</h1>
+    </div>
+
+    <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl flex flex-col">
+        
+        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-50">
+            <div class="w-10 h-10 border-2 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+            <p class="text-[10px] uppercase font-bold text-zinc-500">Recortando Prenda...</p>
+        </div>
+
+        <div id="result" class="flex flex-col h-full w-full hidden">
+            <div class="image-container">
+                <img id="preview" class="drop-shadow-[0_20px_50px_rgba(79,70,229,0.3)]">
+            </div>
+
+            <div class="buttons-container p-6 flex flex-col justify-center gap-3">
+                <button onclick="enviarAKinu()" class="w-full py-4 bg-indigo-600 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-500/30 active:scale-95 transition-all text-white">
+                    Aceptar y Clasificar
+                </button>
+                <button onclick="cancelarStudio()" class="w-full py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest active:opacity-50">
+                    Descartar
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <p class="mt-6 text-[10px] text-zinc-600 uppercase font-bold tracking-[3px]">Powered by KINU AI</p>
+
 </body>
 </html>

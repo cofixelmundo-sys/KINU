@@ -16,21 +16,11 @@
     
     <style>
         :root { 
-            --verde-oliva: #848464; 
-            --verde-oscuro: #313628; 
-            --arena-claro: #F2EFE9;
-            --arena-boton: #E5E1D5;
-            --rojo-borrar: #D64545;
+            --verde-oliva: #848464; --verde-oscuro: #313628; --arena-claro: #F2EFE9;
+            --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
-        * { 
-            box-sizing: border-box; 
-            transition: all 0.2s ease; 
-            -webkit-tap-highlight-color: transparent; 
-            user-select: none; 
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-        }
+        * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; user-select: none; }
 
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
@@ -38,16 +28,15 @@
         header { padding: calc(env(safe-area-inset-top) + 15px) 15px 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
         .header-info-box { display: flex; flex-direction: column; align-items: center; min-width: 80px; }
-        .w-icon { font-size: 22px; color: rgba(255, 255, 255, 0.9); }
-        .info-main-text { font-size: 16px; font-weight: 800; color: rgba(255, 255, 255, 0.9); line-height: 1; margin: 4px 0; }
-        .info-sub-text { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.5px; text-align: center; }
+        .info-main-text { font-size: 16px; font-weight: 800; color: white; line-height: 1; margin: 4px 0; }
+        .info-sub-text { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); text-align: center; }
         
         .header-center { display: flex; flex-direction: column; align-items: center; flex: 1; }
         .logo-header { width: 65px; height: auto; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 13px; text-transform: uppercase; }
 
         .drive-btn { background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .drive-btn img { width: 26px; height: auto; filter: grayscale(1) opacity(0.5); margin-bottom: 2px; }
+        .drive-btn img { width: 26px; height: auto; filter: grayscale(1) opacity(0.5); }
         .drive-btn.vinculado img { filter: grayscale(0) opacity(1); }
         
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
@@ -61,53 +50,48 @@
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
-        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
-        .prenda-card span { color: white; font-size: 9px; font-weight: 600; text-transform: uppercase; display: block; text-align: center; opacity: 0.7; }
+        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; }
+        .prenda-card span { color: white; font-size: 9px; font-weight: 600; text-transform: uppercase; opacity: 0.7; }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
-        .nav-icon { color: white; font-size: 22px; opacity: 0.4; padding: 10px; }
+        .nav-icon { color: white; font-size: 22px; opacity: 0.4; cursor: pointer; }
         .nav-icon.active { opacity: 1; }
         
-        /* BOTÓN CÁMARA REPARADO */
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 26px; }
-        .cam-trigger.uploading { animation: pulse 1s infinite; opacity: 0.7; }
-        @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
 
         /* MODALES */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
-        .action-popup { background: var(--arena-claro); border-radius: 35px; width: 85%; max-width: 340px; padding: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
-        .action-header { font-size: 13px; font-weight: 800; color: var(--verde-oliva); text-transform: uppercase; text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px; }
-        .action-btn { width: 100%; padding: 18px; border: none; background: var(--arena-boton); font-weight: 700; border-radius: 20px; margin-bottom: 10px; color: var(--verde-oscuro); display: flex; justify-content: space-between; align-items: center; font-size: 15px; cursor: pointer; }
-        .action-btn.delete { color: var(--rojo-borrar); background: #fcecec; }
-        .cat-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px 0; }
-        .cat-btn-mini { background: var(--arena-boton); border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); }
+        .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 380px; padding: 25px; }
+        #modal-prenda iframe { width: 100%; height: 100dvh; border: none; }
+        
+        .cat-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .cat-btn-mini { background: var(--arena-boton); border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+        .cat-btn-mini i { font-size: 20px; color: var(--verde-oscuro); }
         .cat-btn-mini span { font-size: 8px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; }
-        .cancel-label { width: 100%; background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 13px; padding: 15px; text-transform: uppercase; cursor: pointer; }
+
+        .btn-cerrar { background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 12px; margin-top: 15px; text-transform: uppercase; cursor: pointer; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
     <div class="main-container">
         <header>
             <div class="header-info-box">
-                <i class="ph ph-sun w-icon" id="w-icon"></i>
+                <i class="ph ph-sun" style="font-size: 22px; color: rgba(255,255,255,0.8)"></i>
                 <span class="info-main-text" id="w-temp">--°</span>
                 <span class="info-sub-text" id="w-city">...</span>
             </div>
-
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
                 <div class="brand-text">KINU</div>
             </div>
-
             <div class="header-info-box">
                 <button id="auth-btn" class="drive-btn" onclick="manejarDrive()">
                     <img src="https://i.imgur.com/Go2a4Hs.png">
-                    <span class="info-main-text" id="drive-status-icon" style="font-size: 9px; margin: 0;">OFF</span>
                     <span class="info-sub-text" id="drive-label">SIN VINCULAR</span>
                 </button>
             </div>
@@ -120,37 +104,25 @@
 
         <div class="nav-wrapper">
             <nav>
-                <div class="nav-icon active" id="btn-home" onclick="volverHome()"><i class="ph ph-house-simple"></i></div>
-                <div class="nav-icon" id="btn-archive" onclick="verTodoElCloset()"><i class="ph ph-archive"></i></div>
+                <div class="nav-icon active" onclick="location.reload()"><i class="ph ph-house-simple"></i></div>
+                <div class="nav-icon"><i class="ph ph-archive"></i></div>
             </nav>
-            <label for="cam-input" class="cam-trigger" id="cam-button">
+            <label for="cam-input" class="cam-trigger">
                 <div class="cam-inner"><i class="ph ph-camera"></i></div>
             </label>
-            <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="subirImagen(this)">
+            <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="enviarAStudio(this)">
         </div>
     </div>
 
-    <div id="modal-acciones" class="modal-overlay">
-        <div class="action-popup">
-            <div class="action-header" id="prenda-nombre-header">GESTIONAR</div>
-            <button class="action-btn" style="background:var(--verde-oscuro); color:var(--arena-claro);" onclick="ejecutarMoverPrenda('COLABORO')">
-                <span>Mover a Colaboro</span><i class="ph ph-handshake"></i>
-            </button>
-            <button class="action-btn" onclick="abrirSelectorCategorias()">
-                <span>Cambiar Categoría</span><i class="ph ph-arrows-left-right"></i>
-            </button>
-            <button class="action-btn delete" onclick="borrarPrenda()">
-                <span>Eliminar Prenda</span><i class="ph ph-trash"></i>
-            </button>
-            <button onclick="cerrarModales()" class="cancel-label">CERRAR</button>
-        </div>
+    <div id="modal-studio" class="modal-overlay" style="display: none;">
+        <iframe src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe>
     </div>
 
-    <div id="modal-selector-cat" class="modal-overlay">
-        <div class="action-popup">
-            <div class="action-header">MOVER A...</div>
-            <div id="selector-cat-list" class="cat-grid-mini"></div>
-            <button onclick="cerrarModales()" class="cancel-label">CANCELAR</button>
+    <div id="modal-categoria" class="modal-overlay">
+        <div class="modal-content">
+            <div style="font-weight: 800; text-align: center; text-transform: uppercase; font-size: 13px; color: var(--verde-oliva); margin-bottom: 15px;">Clasificar Prenda</div>
+            <div id="cat-save-list" class="cat-grid-mini"></div>
+            <center><button onclick="cerrarModales()" class="btn-cerrar">Cancelar</button></center>
         </div>
     </div>
 
@@ -158,9 +130,7 @@
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token');
-        let tokenClient, idSeleccionado, nombreSeleccionado;
-        let categoriaActual = 'SUPERIOR';
-        let vistaGlobal = false;
+        let tokenClient, imagenParaGuardar, categoriaActual = 'SUPERIOR';
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -169,132 +139,94 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- SUBIR IMAGEN A DRIVE ---
-        async function subirImagen(input) {
-            if (!input.files || !input.files[0] || !accessToken) return;
-            const file = input.files[0];
-            const btn = document.getElementById('cam-button');
-            btn.classList.add('uploading');
+        // --- LÓGICA DE CONEXIÓN CON STUDIO ---
+        function enviarAStudio(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64 = e.target.result;
+                    sessionStorage.setItem('imagen_para_procesar', base64);
+                    const modal = document.getElementById('modal-studio');
+                    const iframe = modal.querySelector('iframe');
+                    
+                    const receptorListo = (event) => {
+                        if (event.data.type === 'STUDIO_LISTO') {
+                            iframe.contentWindow.postMessage({ type: 'PROCESAR_IMAGEN_DIRECTA', data: base64 }, '*');
+                            window.removeEventListener('message', receptorListo);
+                        }
+                    };
+                    window.addEventListener('message', receptorListo);
+                    modal.style.display = 'flex';
+                    iframe.src = 'photo_studio.html'; 
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
 
+        window.addEventListener("message", (event) => {
+            if (event.data.type === "IMAGEN_LISTA") {
+                imagenParaGuardar = event.data.data;
+                document.getElementById('modal-studio').style.display = 'none';
+                abrirSelectorGuardado();
+            }
+        });
+
+        function abrirSelectorGuardado() {
+            const list = document.getElementById('cat-save-list');
+            list.innerHTML = '';
+            categorias.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'cat-btn-mini';
+                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
+                btn.onclick = () => {
+                    categoriaActual = cat.n.toUpperCase();
+                    cerrarModales();
+                    ejecutarSubidaDrive();
+                };
+                list.appendChild(btn);
+            });
+            document.getElementById('modal-categoria').style.display = 'flex';
+        }
+
+        // --- DRIVE Y CARGA ---
+        async function ejecutarSubidaDrive() {
+            if (!accessToken || !imagenParaGuardar) return;
             try {
+                const response = await fetch(imagenParaGuardar);
+                const blob = await response.blob();
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                const nombreArchivo = `KINU_${categoriaActual}_Prenda_${Date.now()}.jpg`;
-                
+                const nombreArchivo = `KINU_${categoriaActual}_${Date.now()}.png`;
+
                 const metadata = { name: nombreArchivo, parents: [folderId] };
                 const formData = new FormData();
-                formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-                formData.append('file', file);
+                formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+                formData.append('file', blob);
 
                 await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + accessToken },
                     body: formData
                 });
-
-                input.value = ''; 
                 cargarPrendas();
             } catch (e) { alert("Error al subir"); }
-            finally { btn.classList.remove('uploading'); }
-        }
-
-        // --- DRIVE Y CLIMA ---
-        function manejarDrive() {
-            if (!accessToken) tokenClient.requestAccessToken();
-            else if(confirm("¿Cerrar sesión de Drive?")) {
-                accessToken = null; localStorage.removeItem('drive_token');
-                location.reload();
-            }
-        }
-
-        function actualizarDriveUI(v) {
-            const label = document.getElementById('drive-label');
-            const statusIcon = document.getElementById('drive-status-icon');
-            document.getElementById('auth-btn').classList.toggle('vinculado', v);
-            if(v) { label.innerText = "VINCULADO"; statusIcon.innerText = "ON"; statusIcon.style.color = "#A8B684"; }
-            else { label.innerText = "SIN VINCULAR"; statusIcon.innerText = "OFF"; statusIcon.style.color = "white"; }
-        }
-
-        function startGoogle() {
-            gapi.load('client', () => {
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID, scope: SCOPES,
-                    callback: (r) => { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); actualizarDriveUI(true); cargarPrendas(); }
-                });
-                if(accessToken) { actualizarDriveUI(true); cargarPrendas(); }
-            });
         }
 
         async function cargarPrendas() {
             if(!accessToken) return;
             const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; padding-top:20px;">Actualizando...</p>';
+            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Cargando...</p>';
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                const filtro = vistaGlobal ? "name contains 'KINU_'" : `name contains 'KINU_${categoriaActual}'`;
-                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and ${filtro} and trashed = false&fields=files(id,name,thumbnailLink)&orderBy=createdTime desc`, {
+                const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)&orderBy=createdTime desc`, {
                     headers: { 'Authorization': 'Bearer ' + accessToken }
                 });
                 const data = await res.json();
                 grid.innerHTML = '';
-                data.files.forEach(f => {
-                    const card = document.createElement('div');
-                    card.className = 'prenda-card';
-                    const nombreVisible = f.name.split('_')[2] || "Prenda";
-                    card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombreVisible}</span>`;
-                    
-                    let timer;
-                    let startX, startY;
-                    card.addEventListener('touchstart', (e) => {
-                        startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-                        timer = setTimeout(() => {
-                            idSeleccionado = f.id; nombreSeleccionado = f.name;
-                            document.getElementById('prenda-nombre-header').innerText = nombreVisible;
-                            document.getElementById('modal-acciones').style.display = 'flex';
-                        }, 700);
-                    }, {passive: false});
-                    card.addEventListener('touchmove', (e) => {
-                        if(Math.abs(e.touches[0].clientX - startX) > 15 || Math.abs(e.touches[0].clientY - startY) > 15) clearTimeout(timer);
-                    }, {passive: true});
-                    card.addEventListener('touchend', () => clearTimeout(timer));
-                    grid.appendChild(card);
+                data.files?.forEach(f => {
+                    grid.innerHTML += `<div class="prenda-card"><img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${categoriaActual}</span></div>`;
                 });
-            } catch(e) { grid.innerHTML = ''; }
-        }
-
-        async function borrarPrenda() {
-            if(!confirm("¿Eliminar prenda?")) return;
-            cerrarModales();
-            try {
-                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken } });
-                cargarPrendas();
             } catch(e) {}
-        }
-
-        async function ejecutarMoverPrenda(nuevaCat) {
-            cerrarModales();
-            try {
-                const partes = nombreSeleccionado.split('_');
-                partes[1] = nuevaCat;
-                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
-                    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: partes.join('_') })
-                });
-                cargarPrendas();
-            } catch(e) {}
-        }
-
-        function abrirSelectorCategorias() {
-            document.getElementById('modal-acciones').style.display = 'none';
-            const list = document.getElementById('selector-cat-list');
-            list.innerHTML = '';
-            categorias.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.className = 'cat-btn-mini';
-                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
-                btn.onclick = () => ejecutarMoverPrenda(cat.n.toUpperCase());
-                list.appendChild(btn);
-            });
-            document.getElementById('modal-selector-cat').style.display = 'flex';
         }
 
         async function obtenerOCrearCarpeta(n) {
@@ -309,28 +241,39 @@
             const f = await res.json(); return f.id;
         }
 
-        async function actualizarClima() {
-            try {
-                const ipRes = await fetch('https://ipapi.co/json/');
-                const ipData = await ipRes.json();
-                document.getElementById('w-city').innerText = ipData.city || "Montevideo";
-                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${ipData.latitude}&longitude=${ipData.longitude}&current_weather=true`);
-                const wData = await wRes.json();
-                document.getElementById('w-temp').innerText = Math.round(wData.current_weather.temperature) + '°';
-            } catch(e) { document.getElementById('w-city').innerText = "MONTEVIDEO"; }
+        function startGoogle() {
+            gapi.load('client', () => {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID, scope: SCOPES,
+                    callback: (r) => { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); actualizarDriveUI(true); cargarPrendas(); }
+                });
+                if(accessToken) { actualizarDriveUI(true); cargarPrendas(); }
+            });
         }
 
-        function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
-        function verTodoElCloset() { vistaGlobal = true; renderCats(); cargarPrendas(); document.getElementById('btn-archive').classList.add('active'); document.getElementById('btn-home').classList.remove('active'); }
-        function volverHome() { vistaGlobal = false; renderCats(); cargarPrendas(); document.getElementById('btn-home').classList.add('active'); document.getElementById('btn-archive').classList.remove('active'); }
+        function manejarDrive() { if (!accessToken) tokenClient.requestAccessToken(); }
+        function actualizarDriveUI(v) { 
+            document.getElementById('auth-btn').classList.toggle('vinculado', v); 
+            document.getElementById('drive-label').innerText = v ? "CONECTADO" : "SIN VINCULAR";
+        }
         function renderCats() {
             const c = document.getElementById('main-cats'); c.innerHTML = '';
             categorias.forEach(cat => {
-                const act = !vistaGlobal && cat.n.toUpperCase() === categoriaActual;
+                const act = cat.n.toUpperCase() === categoriaActual;
                 c.innerHTML += `<div class="cat-item ${act?'active':''}" onclick="cambiarCat('${cat.n}')"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;
             });
         }
-        function cambiarCat(n) { vistaGlobal = false; categoriaActual = n.toUpperCase(); renderCats(); cargarPrendas(); }
+        function cambiarCat(n) { categoriaActual = n.toUpperCase(); renderCats(); cargarPrendas(); }
+        function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
+
+        async function actualizarClima() {
+            try {
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true');
+                const data = await res.json();
+                document.getElementById('w-temp').innerText = Math.round(data.current_weather.temperature) + '°';
+                document.getElementById('w-city').innerText = "MONTEVIDEO";
+            } catch(e) {}
+        }
 
         window.onload = () => { renderCats(); startGoogle(); actualizarClima(); };
     </script>

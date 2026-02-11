@@ -70,22 +70,18 @@
         .nav-icon { color: white; font-size: 22px; opacity: 0.4; padding: 10px; }
         .nav-icon.active { opacity: 1; }
         
-        /* BOTÓN CÁMARA REPARADO */
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 26px; }
-        .cam-trigger.uploading { animation: pulse 1s infinite; opacity: 0.7; }
-        @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
 
         /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
-        .action-popup { background: var(--arena-claro); border-radius: 35px; width: 85%; max-width: 340px; padding: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+        .action-popup { background: var(--arena-claro); border-radius: 35px; width: 85%; max-width: 340px; padding: 25px; }
         .action-header { font-size: 13px; font-weight: 800; color: var(--verde-oliva); text-transform: uppercase; text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px; }
         .action-btn { width: 100%; padding: 18px; border: none; background: var(--arena-boton); font-weight: 700; border-radius: 20px; margin-bottom: 10px; color: var(--verde-oscuro); display: flex; justify-content: space-between; align-items: center; font-size: 15px; cursor: pointer; }
         .action-btn.delete { color: var(--rojo-borrar); background: #fcecec; }
-        .cat-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px 0; }
+        .cat-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .cat-btn-mini { background: var(--arena-boton); border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .cat-btn-mini span { font-size: 8px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; }
         .cancel-label { width: 100%; background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 13px; padding: 15px; text-transform: uppercase; cursor: pointer; }
     </style>
 </head>
@@ -98,12 +94,10 @@
                 <span class="info-main-text" id="w-temp">--°</span>
                 <span class="info-sub-text" id="w-city">...</span>
             </div>
-
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
                 <div class="brand-text">KINU</div>
             </div>
-
             <div class="header-info-box">
                 <button id="auth-btn" class="drive-btn" onclick="manejarDrive()">
                     <img src="https://i.imgur.com/Go2a4Hs.png">
@@ -123,10 +117,10 @@
                 <div class="nav-icon active" id="btn-home" onclick="volverHome()"><i class="ph ph-house-simple"></i></div>
                 <div class="nav-icon" id="btn-archive" onclick="verTodoElCloset()"><i class="ph ph-archive"></i></div>
             </nav>
-            <label for="cam-input" class="cam-trigger" id="cam-button">
+            <label for="cam-input" class="cam-trigger">
                 <div class="cam-inner"><i class="ph ph-camera"></i></div>
             </label>
-            <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="subirImagen(this)">
+            <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="irAStudio(this)">
         </div>
     </div>
 
@@ -169,59 +163,88 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- SUBIR IMAGEN A DRIVE ---
-        async function subirImagen(input) {
-            if (!input.files || !input.files[0] || !accessToken) return;
-            const file = input.files[0];
-            const btn = document.getElementById('cam-button');
-            btn.classList.add('uploading');
-
-            try {
-                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                const nombreArchivo = `KINU_${categoriaActual}_Prenda_${Date.now()}.jpg`;
-                
-                const metadata = { name: nombreArchivo, parents: [folderId] };
-                const formData = new FormData();
-                formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-                formData.append('file', file);
-
-                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + accessToken },
-                    body: formData
-                });
-
-                input.value = ''; 
-                cargarPrendas();
-            } catch (e) { alert("Error al subir"); }
-            finally { btn.classList.remove('uploading'); }
+        // --- PUENTE CON PHOTO STUDIO ---
+        function irAStudio(input) {
+            if (!input.files || !input.files[0]) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                localStorage.setItem('temp_image', e.target.result);
+                localStorage.setItem('temp_category', categoriaActual);
+                window.location.href = 'photo_studio.html';
+            };
+            reader.readAsDataURL(input.files[0]);
         }
 
-        // --- DRIVE Y CLIMA ---
+        // --- DRIVE UI ---
         function manejarDrive() {
             if (!accessToken) tokenClient.requestAccessToken();
-            else if(confirm("¿Cerrar sesión de Drive?")) {
+            else if(confirm("¿Cerrar sesión?")) {
                 accessToken = null; localStorage.removeItem('drive_token');
                 location.reload();
             }
         }
 
         function actualizarDriveUI(v) {
-            const label = document.getElementById('drive-label');
             const statusIcon = document.getElementById('drive-status-icon');
             document.getElementById('auth-btn').classList.toggle('vinculado', v);
-            if(v) { label.innerText = "VINCULADO"; statusIcon.innerText = "ON"; statusIcon.style.color = "#A8B684"; }
-            else { label.innerText = "SIN VINCULAR"; statusIcon.innerText = "OFF"; statusIcon.style.color = "white"; }
+            document.getElementById('drive-label').innerText = v ? "VINCULADO" : "SIN VINCULAR";
+            statusIcon.innerText = v ? "ON" : "OFF";
+            statusIcon.style.color = v ? "#A8B684" : "white";
         }
 
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID, scope: SCOPES,
-                    callback: (r) => { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); actualizarDriveUI(true); cargarPrendas(); }
+                    callback: (r) => { 
+                        accessToken = r.access_token; 
+                        localStorage.setItem('drive_token', accessToken); 
+                        actualizarDriveUI(true); 
+                        procesarRetornoDeStudio();
+                    }
                 });
-                if(accessToken) { actualizarDriveUI(true); cargarPrendas(); }
+                if(accessToken) { 
+                    actualizarDriveUI(true); 
+                    procesarRetornoDeStudio();
+                }
             });
+        }
+
+        // --- SUBIDA FINAL POST-STUDIO ---
+        async function procesarRetornoDeStudio() {
+            const finalImg = localStorage.getItem('final_image');
+            const cat = localStorage.getItem('temp_category');
+            if (finalImg && accessToken) {
+                // Limpiar storage inmediatamente para evitar bucles
+                localStorage.removeItem('final_image');
+                localStorage.removeItem('temp_image');
+                
+                try {
+                    const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                    const nombreArchivo = `KINU_${cat || 'SUPERIOR'}_Prenda_${Date.now()}.png`;
+                    
+                    // Convertir base64 a Blob
+                    const byteString = atob(finalImg.split(',')[1]);
+                    const ab = new ArrayBuffer(byteString.length);
+                    const ia = new Uint8Array(ab);
+                    for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+                    const blob = new Blob([ab], {type: 'image/png'});
+
+                    const metadata = { name: nombreArchivo, parents: [folderId] };
+                    const formData = new FormData();
+                    formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                    formData.append('file', blob);
+
+                    await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + accessToken },
+                        body: formData
+                    });
+                    cargarPrendas();
+                } catch (e) { console.error("Error al subir prenda procesada"); }
+            } else {
+                cargarPrendas();
+            }
         }
 
         async function cargarPrendas() {

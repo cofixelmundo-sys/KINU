@@ -3,99 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KINU Studio AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script type="module">
-        import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+    <title>KINU Studio</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root { --verde-oliva: #848464; --verde-oscuro: #313628; --arena: #F2EFE9; }
+        body { font-family: sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; overflow: hidden; }
         
-        const SPACE_ID = "COFIXELMUNDO/mi-recortador-objetos"; 
-        let app;
+        #preview-container { width: 90%; height: 50vh; border-radius: 25px; overflow: hidden; background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; position: relative; border: 2px dashed rgba(255,255,255,0.2); }
+        img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        .status-box { margin-top: 30px; text-align: center; padding: 0 20px; }
+        .loader { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.2); border-top-color: #F2EFE9; border-radius: 50%; animation: spin 1s linear infinite; margin: 15px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        async function conectarIA() {
-            try {
-                app = await client(SPACE_ID);
-                window.parent.postMessage({ type: 'STUDIO_LISTO' }, '*');
-                const img = sessionStorage.getItem('imagen_para_procesar');
-                if (img) procesarImagen(img);
-            } catch (e) { setTimeout(conectarIA, 3000); }
-        }
+        .btn-confirmar { display: none; margin-top: 25px; padding: 18px 50px; background: #F2EFE9; color: var(--verde-oscuro); border: none; border-radius: 35px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .btn-cancelar { margin-top: 20px; color: rgba(255,255,255,0.5); background: none; border: none; cursor: pointer; text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
 
-        window.onload = conectarIA;
+    <div id="preview-container">
+        <img id="img-target" src="">
+    </div>
 
-        window.addEventListener("message", (e) => {
-            if (e.data.type === 'PROCESAR_IMAGEN_DIRECTA') procesarImagen(e.data.data);
-        });
+    <div class="status-box" id="status-box">
+        <div class="loader" id="loader"></div>
+        <p id="status-text" style="font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;">Iniciando recorte...</p>
+    </div>
 
-        async function procesarImagen(base64) {
-            document.getElementById('loading').classList.remove('hidden');
-            document.getElementById('result').classList.add('hidden');
+    <button id="btn-confirmar" class="btn-confirmar" onclick="confirmar()">Guardar en Closet</button>
+    <button class="btn-cancelar" onclick="cancelar()">Descartar</button>
+
+    <script>
+        const HF_TOKEN = "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"; 
+        const API_URL = "https://api-inference.huggingface.co/models/briaai/RMBG-1.4";
+        
+        const imgTarget = document.getElementById('img-target');
+        const statusText = document.getElementById('status-text');
+        const loader = document.getElementById('loader');
+        const btnConfirmar = document.getElementById('btn-confirmar');
+
+        window.onload = async () => {
+            const rawImg = localStorage.getItem('temp_image');
+            if (!rawImg) {
+                window.location.href = 'index.html';
+                return;
+            }
+            imgTarget.src = rawImg;
+            procesarConReintentos(rawImg);
+        };
+
+        async function procesarConReintentos(base64, intento = 1) {
             try {
                 const response = await fetch(base64);
                 const blob = await response.blob();
-                const result = await app.predict("/predict", [blob]);
-                if (result.data && result.data[0]) {
-                    document.getElementById('preview').src = result.data[0].url;
-                    document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('result').classList.remove('hidden');
-                }
-            } catch (err) { alert("Error al procesar"); location.reload(); }
-        }
 
-        window.enviarAKinu = function() {
-            const imageData = document.getElementById('preview').src;
-            if (imageData && (imageData.startsWith('http') || imageData.startsWith('data:image'))) {
-                window.parent.postMessage({ type: "IMAGEN_LISTA", data: imageData }, "*");
+                statusText.innerText = intento > 1 ? `Cargando motor (Intento ${intento})...` : "Recortando fondo...";
+                
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { 
+                        "Authorization": `Bearer ${HF_TOKEN}`,
+                        "Content-Type": "application/octet-stream"
+                    },
+                    body: blob
+                });
+
+                // Si el modelo está cargando, Hugging Face devuelve un 503 o un JSON con "estimated_time"
+                if (res.status === 503 || res.status === 429) {
+                    if (intento < 10) {
+                        setTimeout(() => procesarConReintentos(base64, intento + 1), 3000);
+                        return;
+                    }
+                }
+
+                if (!res.ok) throw new Error("Error en el servidor");
+
+                const resultBlob = await res.blob();
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const finalBase64 = reader.result;
+                    localStorage.setItem('final_image', finalBase64);
+                    imgTarget.src = finalBase64;
+                    
+                    loader.style.display = 'none';
+                    statusText.innerText = "¡Recorte finalizado!";
+                    btnConfirmar.style.display = 'block';
+                };
+                reader.readAsDataURL(resultBlob);
+
+            } catch (err) {
+                statusText.innerText = "Error: Inténtalo de nuevo";
+                loader.style.display = 'none';
+                console.error(err);
             }
         }
+
+        function confirmar() {
+            window.location.href = 'index.html';
+        }
+
+        function cancelar() {
+            localStorage.removeItem('temp_image');
+            localStorage.removeItem('final_image');
+            window.location.href = 'index.html';
+        }
     </script>
-    <style>
-        /* Forzamos que el contenedor de la imagen no la deje desbordar */
-        .image-container {
-            height: 65%; /* Ocupa el 65% del espacio disponible */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        #preview {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain; /* Evita que la imagen se estire o tape los botones */
-        }
-        .buttons-container {
-            height: 35%; /* El resto del espacio para botones */
-            background: #09090b; /* Zinc 950 */
-        }
-    </style>
-</head>
-<body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4">
-    
-    <div class="mb-4 text-center">
-        <h1 class="text-indigo-500 font-black tracking-widest text-xl">KINU STUDIO</h1>
-    </div>
-
-    <div class="relative w-full max-w-[320px] aspect-[3/4] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl flex flex-col">
-        
-        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-50">
-            <div class="w-10 h-10 border-2 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-[10px] uppercase font-bold text-zinc-500">Recortando Prenda...</p>
-        </div>
-
-        <div id="result" class="flex flex-col h-full w-full hidden">
-            <div class="image-container">
-                <img id="preview" class="drop-shadow-[0_20px_50px_rgba(79,70,229,0.3)]">
-            </div>
-
-            <div class="buttons-container p-6 flex flex-col justify-center gap-3">
-                <button onclick="enviarAKinu()" class="w-full py-4 bg-indigo-600 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-500/30 text-white active:scale-95 transition-transform">
-                    ACEPTAR Y GUARDAR
-                </button>
-                <button onclick="location.reload()" class="w-full py-2 text-zinc-500 text-[10px] font-bold uppercase tracking-widest hover:text-white">
-                    REPETIR FOTO
-                </button>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>

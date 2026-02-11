@@ -22,17 +22,29 @@
             --arena-boton: #E5E1D5;
             --rojo-borrar: #D64545;
         }
+
+        /* BLOQUEO DE MENÚS NATIVOS Y SELECCIÓN */
         * { 
             box-sizing: border-box; 
             transition: all 0.2s ease; 
             -webkit-tap-highlight-color: transparent; 
             user-select: none; 
             -webkit-user-select: none;
+            -webkit-touch-callout: none; /* Bloquea el menú de "Guardar imagen" en iOS */
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: var(--verde-oliva); 
+            margin: 0; 
+            height: 100dvh; 
+            width: 100%; 
+            overflow: hidden; 
+            position: fixed; 
+        }
+
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
         
-        /* HEADER REESTRUCTURADO */
         header { 
             padding: calc(env(safe-area-inset-top) + 15px) 15px 10px; 
             display: flex; 
@@ -65,8 +77,21 @@
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
-        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; }
+        .prenda-card { 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 20px; 
+            padding: 10px; 
+            border: 1px solid rgba(255,255,255,0.05);
+            -webkit-user-drag: none; /* Evita que la imagen se arrastre */
+        }
+        .prenda-card img { 
+            width: 100%; 
+            height: 140px; 
+            object-fit: cover; 
+            border-radius: 15px; 
+            margin-bottom: 8px; 
+            pointer-events: none; /* Crucial: hace que la imagen no reciba clics, los recibe el card */
+        }
         .prenda-card span { color: white; font-size: 9px; font-weight: 600; text-transform: uppercase; display: block; text-align: center; opacity: 0.7; }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
@@ -94,9 +119,7 @@
         .cancel-label { width: 100%; background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 13px; padding: 15px; text-transform: uppercase; opacity: 0.6; cursor: pointer; }
     </style>
 </head>
-<body>
-
-    <div class="main-container">
+<body oncontextmenu="return false;"> <div class="main-container">
         <header>
             <div class="header-info-box">
                 <i class="ph ph-sun w-icon" id="w-icon"></i>
@@ -175,6 +198,7 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
+        // --- DRIVE Y CLIMA (Misma lógica anterior) ---
         function manejarDrive() {
             if (!accessToken) tokenClient.requestAccessToken();
             else if(confirm("¿Cerrar sesión de Drive?")) {
@@ -188,13 +212,10 @@
             const label = document.getElementById('drive-label');
             const statusIcon = document.getElementById('drive-status-icon');
             if(v) {
-                btn.classList.add('vinculado');
-                label.innerText = "VINCULADO";
-                statusIcon.innerText = "ON";
-                statusIcon.style.color = "#A8B684";
+                btn.classList.add('vinculado'); label.innerText = "VINCULADO";
+                statusIcon.innerText = "ON"; statusIcon.style.color = "#A8B684";
             } else {
-                btn.classList.remove('vinculado');
-                label.innerText = "SIN VINCULAR";
+                btn.classList.remove('vinculado'); label.innerText = "SIN VINCULAR";
                 statusIcon.innerText = "OFF";
             }
         }
@@ -212,6 +233,7 @@
             });
         }
 
+        // --- CARGAR PRENDAS CON BLOQUEO DE MENÚ NATIVO ---
         async function cargarPrendas() {
             if(!accessToken) return;
             const grid = document.getElementById('closet-grid');
@@ -224,6 +246,7 @@
                 });
                 const data = await res.json();
                 grid.innerHTML = '';
+                
                 data.files.forEach(f => {
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
@@ -232,23 +255,36 @@
                     
                     let timer;
                     let startX, startY;
-                    card.ontouchstart = (e) => {
+
+                    // Función para abrir el menú nuestro
+                    const activarMenu = (e) => {
+                        e.preventDefault(); // Bloquea menú nativo
+                        idSeleccionado = f.id; 
+                        nombreSeleccionado = f.name;
+                        document.getElementById('prenda-nombre-header').innerText = nombreVisible;
+                        document.getElementById('modal-acciones').style.display = 'flex';
+                    };
+
+                    card.addEventListener('touchstart', (e) => {
                         startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-                        timer = setTimeout(() => {
-                            idSeleccionado = f.id; nombreSeleccionado = f.name;
-                            document.getElementById('prenda-nombre-header').innerText = nombreVisible;
-                            document.getElementById('modal-acciones').style.display = 'flex';
-                        }, 750);
-                    };
-                    card.ontouchmove = (e) => {
-                        if(Math.abs(e.touches[0].clientX - startX) > 15 || Math.abs(e.touches[0].clientY - startY) > 15) clearTimeout(timer);
-                    };
-                    card.ontouchend = () => clearTimeout(timer);
+                        timer = setTimeout(() => activarMenu(e), 600); // 600ms es el tiempo ideal de long press
+                    }, {passive: false});
+
+                    card.addEventListener('touchmove', (e) => {
+                        if(Math.abs(e.touches[0].clientX - startX) > 15 || Math.abs(e.touches[0].clientY - startY) > 15) {
+                            clearTimeout(timer);
+                        }
+                    }, {passive: true});
+
+                    card.addEventListener('touchend', () => clearTimeout(timer));
+                    card.addEventListener('contextmenu', (e) => e.preventDefault()); // Doble bloqueo
+
                     grid.appendChild(card);
                 });
             } catch(e) { grid.innerHTML = ''; }
         }
 
+        // --- FUNCIONES DE GESTIÓN (Misma lógica anterior) ---
         async function borrarPrenda() {
             if(!confirm("¿Eliminar esta prenda?")) return;
             cerrarModales();
@@ -257,7 +293,7 @@
                     method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken }
                 });
                 cargarPrendas();
-            } catch(e) { alert("Error al borrar"); }
+            } catch(e) {}
         }
 
         async function ejecutarMoverPrenda(nuevaCat) {
@@ -271,7 +307,7 @@
                     body: JSON.stringify({ name: partes.join('_') })
                 });
                 cargarPrendas();
-            } catch(e) { alert("Error al mover"); }
+            } catch(e) {}
         }
 
         function abrirSelectorCategorias() {
@@ -314,7 +350,6 @@
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
         function verTodoElCloset() { vistaGlobal = true; renderCats(); cargarPrendas(); document.getElementById('btn-archive').classList.add('active'); document.getElementById('btn-home').classList.remove('active'); }
         function volverHome() { vistaGlobal = false; renderCats(); cargarPrendas(); document.getElementById('btn-home').classList.add('active'); document.getElementById('btn-archive').classList.remove('active'); }
-        
         function renderCats() {
             const c = document.getElementById('main-cats'); c.innerHTML = '';
             categorias.forEach(cat => {

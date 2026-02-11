@@ -57,7 +57,10 @@
         .cat-circle { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
         .cat-item.active .cat-circle { background: white; }
         .cat-item.active i { color: var(--verde-oscuro); }
-        .cat-circle i { font-size: 24px; color: white; }
+        
+        /* ICONOS DE CATEGORÍA MÁS GRANDES */
+        .cat-circle i { font-size: 28px; color: white; display: flex; align-items: center; justify-content: center; }
+        
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
@@ -199,7 +202,6 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- CLIMA ---
         async function actualizarClima() {
             const iconEl = document.getElementById('w-icon');
             const cityEl = document.getElementById('w-city');
@@ -225,7 +227,6 @@
             }
         }
 
-        // --- DRIVE LOGIC ---
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -302,7 +303,6 @@
             const f = await res.json(); return f.id;
         }
 
-        // --- SUBIDA Y FOTOS ---
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -368,7 +368,6 @@
             } catch (e) { setProgress(100); }
         }
 
-        // --- GESTIÓN DE PRENDAS ---
         function abrirAcciones(id, nombre) {
             idPrendaSeleccionada = id; nombrePrendaSeleccionada = nombre;
             document.getElementById('modal-acciones').style.display = 'flex';
@@ -401,7 +400,6 @@
             setProgress(100);
         };
 
-        // --- UI ---
         function setProgress(p) {
             const bar = document.getElementById('inner-bar');
             const cont = document.getElementById('global-progress');

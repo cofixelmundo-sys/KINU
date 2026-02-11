@@ -57,10 +57,7 @@
         .cat-circle { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
         .cat-item.active .cat-circle { background: white; }
         .cat-item.active i { color: var(--verde-oscuro); }
-        
-        /* ICONOS DE CATEGORÍA MÁS GRANDES */
         .cat-circle i { font-size: 28px; color: white; display: flex; align-items: center; justify-content: center; }
-        
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
@@ -84,8 +81,6 @@
         .cat-btn-save i { font-size: 20px; color: var(--verde-oscuro); }
         .cat-btn-save span { font-size: 8px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; text-align: center; line-height: 1; }
 
-        .desc-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #ddd; margin-bottom: 15px; font-size: 14px; font-family: inherit; }
-
         .action-popup { background: white; border-radius: 30px; width: 85%; max-width: 320px; padding: 10px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: popupIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popupIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .action-header { padding: 15px 10px 10px; color: var(--verde-oscuro); font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; }
@@ -93,8 +88,6 @@
         .action-btn i { font-size: 20px; }
         .action-btn.colab { background: var(--verde-oscuro); color: white; }
         .action-btn.delete { color: var(--rojo-borrar); background: #fff1f1; }
-        .action-btn.logout { color: var(--rojo-borrar); background: #fdf2f2; }
-        .action-btn:active { transform: scale(0.96); }
         .cancel-btn { background: none; border: none; padding: 15px; color: #bbb; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; width: 100%; }
     </style>
 </head>
@@ -144,10 +137,31 @@
 
     <div id="modal-categoria" class="modal-overlay">
         <div class="modal-content">
-            <h2 style="color:var(--verde-oscuro); font-weight:900; font-size:14px; text-transform:uppercase; margin:0 0 15px;">Clasificar Prenda</h2>
-            <input type="text" id="prenda-desc" class="desc-input" placeholder="Ej: Pantalón Levis azul...">
+            <h2 id="cat-modal-title" style="color:var(--verde-oscuro); font-weight:900; font-size:14px; text-transform:uppercase; margin:0 0 15px;">Clasificar Prenda</h2>
+            <div id="desc-container">
+                <input type="text" id="prenda-desc" class="desc-input" placeholder="Ej: Pantalón Levis azul...">
+            </div>
             <div id="cat-save-list" class="cat-grid-save"></div>
             <button onclick="cerrarModales()" style="margin-top:20px; background:none; border:none; color:#bbb; font-size:10px; font-weight:bold; letter-spacing:1px;">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="modal-acciones" class="modal-overlay">
+        <div class="action-popup">
+            <div class="action-header">Gestionar Prenda</div>
+            <button class="action-btn colab" id="btn-mover-colab">
+                <span>Mover a Colaboro</span>
+                <i class="ph ph-handshake"></i>
+            </button>
+            <button class="action-btn" id="btn-cambiar-cat">
+                <span>Cambiar Categoría</span>
+                <i class="ph ph-arrows-left-right"></i>
+            </button>
+            <button class="action-btn delete" id="btn-eliminar-prenda">
+                <span>Eliminar Prenda</span>
+                <i class="ph ph-trash"></i>
+            </button>
+            <button onclick="cerrarModales()" class="cancel-btn">Cancelar</button>
         </div>
     </div>
 
@@ -170,21 +184,6 @@
         </div>
     </div>
 
-    <div id="modal-acciones" class="modal-overlay">
-        <div class="action-popup">
-            <div class="action-header">Gestionar Prenda</div>
-            <button class="action-btn colab" id="btn-mover-colab">
-                <span>Mover a Colaboro</span>
-                <i class="ph ph-handshake"></i>
-            </button>
-            <button class="action-btn delete" id="btn-eliminar-prenda">
-                <span>Eliminar Prenda</span>
-                <i class="ph ph-trash"></i>
-            </button>
-            <button onclick="cerrarModales()" class="cancel-btn">Cancelar</button>
-        </div>
-    </div>
-
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
@@ -194,6 +193,7 @@
         let imagenParaGuardar = null;
         let idPrendaSeleccionada = null;
         let nombrePrendaSeleccionada = null;
+        let modoMover = false;
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -291,18 +291,75 @@
             } catch(e) { grid.innerHTML = ''; }
         }
 
-        async function obtenerOCrearCarpeta(n) {
-            const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
-            const d = await r.json();
-            if(d.files?.[0]) return d.files[0].id;
-            const res = await fetch('https://www.googleapis.com/drive/v3/files', {
-                method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' })
-            });
-            const f = await res.json(); return f.id;
+        function abrirAcciones(id, nombre) {
+            idPrendaSeleccionada = id; nombrePrendaSeleccionada = nombre;
+            document.getElementById('modal-acciones').style.display = 'flex';
         }
 
+        document.getElementById('btn-cambiar-cat').onclick = () => {
+            modoMover = true;
+            cerrarModales();
+            abrirSelectorCategorias("Mover Prenda");
+        };
+
+        function abrirSelectorCategorias(titulo) {
+            document.getElementById('cat-modal-title').innerText = titulo;
+            document.getElementById('desc-container').style.display = modoMover ? 'none' : 'block';
+            const list = document.getElementById('cat-save-list');
+            list.innerHTML = '';
+            categorias.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'cat-btn-save';
+                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
+                btn.onclick = () => { 
+                    if(modoMover) {
+                        ejecutarMoverPrenda(cat.n.toUpperCase());
+                    } else {
+                        categoriaActual = cat.n.toUpperCase(); 
+                        ejecutarSubidaDrive();
+                    }
+                };
+                list.appendChild(btn);
+            });
+            document.getElementById('modal-categoria').style.display = 'flex';
+        }
+
+        async function ejecutarMoverPrenda(nuevaCat) {
+            if(!idPrendaSeleccionada) return;
+            cerrarModales(); setProgress(50);
+            try {
+                // El nombre es: KINU_CATEGORIAOLD_DESCRIPCION_ID.png
+                // Queremos cambiar solo la parte de la categoría
+                const partes = nombrePrendaSeleccionada.split('_');
+                partes[1] = nuevaCat; // Cambiamos la categoría
+                const nuevoNombre = partes.join('_');
+
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaSeleccionada}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: nuevoNombre })
+                });
+                cargarPrendas();
+            } catch(e) {}
+            modoMover = false;
+            setProgress(100);
+        }
+
+        document.getElementById('btn-mover-colab').onclick = () => ejecutarMoverPrenda("COLABORO");
+
+        document.getElementById('btn-eliminar-prenda').onclick = async () => {
+            if(!idPrendaSeleccionada) return;
+            cerrarModales(); setProgress(50);
+            try {
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaSeleccionada}`, {
+                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                cargarPrendas();
+            } catch(e) {}
+            setProgress(100);
+        };
+
+        // --- RESTO DE FUNCIONES (SUBIDA, FOTOS, ETC) ---
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -328,23 +385,10 @@
             if (event.data.type === "IMAGEN_LISTA") {
                 imagenParaGuardar = event.data.data;
                 document.getElementById('modal-prenda').style.display = 'none';
-                abrirSelectorGuardado();
+                modoMover = false;
+                abrirSelectorCategorias("Clasificar Prenda");
             }
         });
-
-        function abrirSelectorGuardado() {
-            document.getElementById('prenda-desc').value = '';
-            const list = document.getElementById('cat-save-list');
-            list.innerHTML = '';
-            categorias.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.className = 'cat-btn-save';
-                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
-                btn.onclick = () => { categoriaActual = cat.n.toUpperCase(); ejecutarSubidaDrive(); };
-                list.appendChild(btn);
-            });
-            document.getElementById('modal-categoria').style.display = 'flex';
-        }
 
         async function ejecutarSubidaDrive() {
             if (!accessToken || !imagenParaGuardar) return;
@@ -368,37 +412,17 @@
             } catch (e) { setProgress(100); }
         }
 
-        function abrirAcciones(id, nombre) {
-            idPrendaSeleccionada = id; nombrePrendaSeleccionada = nombre;
-            document.getElementById('modal-acciones').style.display = 'flex';
+        async function obtenerOCrearCarpeta(n) {
+            const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+            const d = await r.json();
+            if(d.files?.[0]) return d.files[0].id;
+            const res = await fetch('https://www.googleapis.com/drive/v3/files', {
+                method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' })
+            });
+            const f = await res.json(); return f.id;
         }
-
-        document.getElementById('btn-eliminar-prenda').onclick = async () => {
-            if(!idPrendaSeleccionada) return;
-            cerrarModales(); setProgress(50);
-            try {
-                await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaSeleccionada}`, {
-                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken }
-                });
-                cargarPrendas();
-            } catch(e) {}
-            setProgress(100);
-        };
-
-        document.getElementById('btn-mover-colab').onclick = async () => {
-            if(!idPrendaSeleccionada) return;
-            cerrarModales(); setProgress(50);
-            try {
-                const nuevoNombre = nombrePrendaSeleccionada.replace(`KINU_${categoriaActual}`, "KINU_COLABORO");
-                await fetch(`https://www.googleapis.com/drive/v3/files/${idPrendaSeleccionada}`, {
-                    method: 'PATCH',
-                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: nuevoNombre })
-                });
-                cargarPrendas();
-            } catch(e) {}
-            setProgress(100);
-        };
 
         function setProgress(p) {
             const bar = document.getElementById('inner-bar');

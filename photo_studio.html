@@ -4,20 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KINU Studio</title>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         :root { --verde-oliva: #848464; --verde-oscuro: #313628; --arena: #F2EFE9; }
         body { font-family: sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; overflow: hidden; }
-        
-        #preview-container { width: 90%; height: 50vh; border-radius: 25px; overflow: hidden; background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; position: relative; border: 2px dashed rgba(255,255,255,0.2); }
+        #preview-container { width: 90%; height: 50vh; border-radius: 25px; background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; border: 2px dashed rgba(255,255,255,0.2); }
         img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        
-        .status-box { margin-top: 30px; text-align: center; padding: 0 20px; }
-        .loader { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.2); border-top-color: #F2EFE9; border-radius: 50%; animation: spin 1s linear infinite; margin: 15px auto; }
+        .status-box { margin-top: 30px; text-align: center; }
+        .loader { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--arena); border-radius: 50%; animation: spin 1s linear infinite; margin: 15px auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        .btn-confirmar { display: none; margin-top: 25px; padding: 18px 50px; background: #F2EFE9; color: var(--verde-oscuro); border: none; border-radius: 35px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        .btn-cancelar { margin-top: 20px; color: rgba(255,255,255,0.5); background: none; border: none; cursor: pointer; text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+        .btn-confirmar { display: none; margin-top: 25px; padding: 18px 50px; background: var(--arena); color: var(--verde-oscuro); border: none; border-radius: 35px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
+        .btn-cancelar { margin-top: 20px; color: rgba(255,255,255,0.5); background: none; border: none; cursor: pointer; text-transform: uppercase; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -26,13 +22,13 @@
         <img id="img-target" src="">
     </div>
 
-    <div class="status-box" id="status-box">
+    <div class="status-box">
         <div class="loader" id="loader"></div>
-        <p id="status-text" style="font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;">Iniciando recorte...</p>
+        <p id="status-text" style="font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">Procesando imagen...</p>
     </div>
 
     <button id="btn-confirmar" class="btn-confirmar" onclick="confirmar()">Guardar en Closet</button>
-    <button class="btn-cancelar" onclick="cancelar()">Descartar</button>
+    <button class="btn-cancelar" onclick="cancelar()">Cancelar</button>
 
     <script>
         const HF_TOKEN = "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"; 
@@ -45,64 +41,67 @@
 
         window.onload = async () => {
             const rawImg = localStorage.getItem('temp_image');
-            if (!rawImg) {
-                window.location.href = 'index.html';
-                return;
-            }
+            if (!rawImg) { window.location.href = 'index.html'; return; }
             imgTarget.src = rawImg;
-            procesarConReintentos(rawImg);
+            enviarHuggingFace(rawImg);
         };
 
-        async function procesarConReintentos(base64, intento = 1) {
+        async function enviarHuggingFace(base64) {
             try {
-                const response = await fetch(base64);
-                const blob = await response.blob();
+                // 1. Convertir Base64 a ArrayBuffer (formato binario puro)
+                const base64Data = base64.split(',')[1];
+                const binaryString = window.atob(base64Data);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) { bytes[i] = binaryString.charCodeAt(i); }
 
-                statusText.innerText = intento > 1 ? `Cargando motor (Intento ${intento})...` : "Recortando fondo...";
-                
-                const res = await fetch(API_URL, {
+                statusText.innerText = "Recortando fondo...";
+
+                // 2. Llamada a la API
+                const response = await fetch(API_URL, {
                     method: "POST",
                     headers: { 
                         "Authorization": `Bearer ${HF_TOKEN}`,
                         "Content-Type": "application/octet-stream"
                     },
-                    body: blob
+                    body: bytes.buffer
                 });
 
-                // Si el modelo está cargando, Hugging Face devuelve un 503 o un JSON con "estimated_time"
-                if (res.status === 503 || res.status === 429) {
-                    if (intento < 10) {
-                        setTimeout(() => procesarConReintentos(base64, intento + 1), 3000);
-                        return;
-                    }
+                // Si el modelo está arrancando
+                if (response.status === 503) {
+                    statusText.innerText = "Iniciando motor (30s)...";
+                    setTimeout(() => enviarHuggingFace(base64), 5000);
+                    return;
                 }
 
-                if (!res.ok) throw new Error("Error en el servidor");
+                if (!response.ok) {
+                    const errorMsg = await response.text();
+                    console.error("Error HF:", errorMsg);
+                    throw new Error("Fallo del servidor");
+                }
 
-                const resultBlob = await res.blob();
+                const resultBlob = await response.blob();
+                const processedUrl = URL.createObjectURL(resultBlob);
+                
+                // 3. Guardar y mostrar
                 const reader = new FileReader();
                 reader.onloadend = () => {
-                    const finalBase64 = reader.result;
-                    localStorage.setItem('final_image', finalBase64);
-                    imgTarget.src = finalBase64;
-                    
+                    localStorage.setItem('final_image', reader.result);
+                    imgTarget.src = reader.result;
                     loader.style.display = 'none';
-                    statusText.innerText = "¡Recorte finalizado!";
+                    statusText.innerText = "¡Recorte completado!";
                     btnConfirmar.style.display = 'block';
                 };
                 reader.readAsDataURL(resultBlob);
 
             } catch (err) {
-                statusText.innerText = "Error: Inténtalo de nuevo";
-                loader.style.display = 'none';
                 console.error(err);
+                statusText.innerText = "Error de conexión. Reintentando...";
+                setTimeout(() => enviarHuggingFace(base64), 3000);
             }
         }
 
-        function confirmar() {
-            window.location.href = 'index.html';
-        }
-
+        function confirmar() { window.location.href = 'index.html'; }
         function cancelar() {
             localStorage.removeItem('temp_image');
             localStorage.removeItem('final_image');

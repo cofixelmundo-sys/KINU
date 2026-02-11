@@ -37,9 +37,9 @@
         .progress-bar { width: 0%; height: 100%; background: white; box-shadow: 0 0 10px rgba(255,255,255,0.5); transition: width 0.3s ease; }
 
         .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 65px; }
-        .weather-icon { font-size: 24px; color: rgba(255, 255, 255, 0.9); }
-        .temp-text { font-size: 16px; font-weight: 700; color: rgba(255, 255, 255, 0.9); }
-        .city-label { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.5px; text-align: center; max-width: 75px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .weather-icon { font-size: 26px; color: rgba(255, 255, 255, 0.9); }
+        .temp-text { font-size: 18px; font-weight: 800; color: rgba(255, 255, 255, 0.9); }
+        .city-label { font-size: 9px; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); letter-spacing: 0.5px; text-align: center; }
         
         .header-center { display: flex; flex-direction: column; align-items: center; grid-column: 2; }
         .logo-header { width: 75px; height: auto; }
@@ -74,11 +74,22 @@
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
 
+        /* --- TIPOGRAFÍA MUCHO MÁS GRANDE EN POPUPS --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 5000; backdrop-filter: blur(8px); }
-        .modal-content { background: white; width: 92%; max-width: 400px; padding: 25px; border-radius: 35px; text-align: center; max-height: 85vh; display: flex; flex-direction: column; }
-        .action-popup { background: white; border-radius: 30px; width: 85%; max-width: 320px; padding: 10px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .action-btn { width: 100%; padding: 18px; border: none; background: #f8f8f8; font-weight: 700; border-radius: 20px; margin-bottom: 8px; color: var(--verde-oscuro); display: flex; justify-content: space-between; align-items: center; }
+        .modal-content { background: white; width: 92%; max-width: 400px; padding: 35px 25px; border-radius: 35px; text-align: center; }
+        
+        .modal-title { color: var(--verde-oscuro); font-weight: 900; font-size: 22px; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px; }
+        
+        .action-popup { background: white; border-radius: 40px; width: 92%; max-width: 360px; padding: 20px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+        .action-header { padding: 10px 10px 20px; color: var(--verde-oscuro); font-weight: 900; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; border-bottom: 2px solid #f0f0f0; margin-bottom: 15px; }
+        
+        .action-btn { width: 100%; padding: 25px 20px; border: none; background: #f8f8f8; font-weight: 800; border-radius: 25px; margin-bottom: 12px; color: var(--verde-oscuro); display: flex; justify-content: space-between; align-items: center; font-size: 18px; }
+        .action-btn i { font-size: 28px; }
         .action-btn.delete { color: var(--rojo-borrar); background: #fff1f1; }
+
+        .desc-input { width: 100%; padding: 22px; border-radius: 20px; border: 3px solid #f0f0f0; margin-bottom: 25px; font-size: 18px; font-weight: 600; font-family: inherit; }
+
+        .cancel-label { margin-top: 15px; background: none; border: none; color: #aaa; font-weight: 900; font-size: 15px; letter-spacing: 1.5px; width: 100%; padding: 15px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -88,7 +99,7 @@
             <div class="header-left-info" id="weather-box">
                 <i class="ph ph-sun weather-icon" id="w-icon"></i>
                 <span class="temp-text" id="w-temp">--°</span>
-                <span class="city-label" id="w-city">...</span>
+                <span class="city-label" id="w-city">Cargando...</span>
             </div>
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
@@ -123,21 +134,22 @@
 
     <div id="modal-categoria" class="modal-overlay">
         <div class="modal-content">
-            <h2 id="cat-modal-title" style="color:var(--verde-oscuro); font-weight:900; font-size:14px; text-transform:uppercase; margin:0 0 15px;">Clasificar Prenda</h2>
+            <h2 id="cat-modal-title" class="modal-title">Clasificar</h2>
             <div id="desc-container">
-                <input type="text" id="prenda-desc" style="width:100%; padding:15px; border-radius:15px; border:1px solid #ddd; margin-bottom:15px;" placeholder="Ej: Pantalón Levis...">
+                <input type="text" id="prenda-desc" class="desc-input" placeholder="Nombre prenda...">
             </div>
-            <div id="cat-save-list" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;"></div>
-            <button onclick="cerrarModales()" style="margin-top:20px; background:none; border:none; color:#bbb; font-weight:bold;">CANCELAR</button>
+            <div id="cat-save-list" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px;"></div>
+            <button onclick="cerrarModales()" class="cancel-label">CANCELAR</button>
         </div>
     </div>
 
     <div id="modal-acciones" class="modal-overlay">
         <div class="action-popup">
+            <div class="action-header">Gestionar Prenda</div>
             <button class="action-btn" style="background:var(--verde-oscuro); color:white;" id="btn-mover-colab"><span>Mover a Colaboro</span><i class="ph ph-handshake"></i></button>
             <button class="action-btn" id="btn-cambiar-cat"><span>Cambiar Categoría</span><i class="ph ph-arrows-left-right"></i></button>
             <button class="action-btn delete" id="btn-eliminar-prenda"><span>Eliminar Prenda</span><i class="ph ph-trash"></i></button>
-            <button onclick="cerrarModales()" style="width:100%; border:none; background:none; padding:10px; color:#bbb;">Cancelar</button>
+            <button onclick="cerrarModales()" class="cancel-label">CERRAR</button>
         </div>
     </div>
 
@@ -150,6 +162,7 @@
         let vistaGlobal = false;
         let idPrendaSeleccionada = null;
         let nombrePrendaSeleccionada = null;
+        let modoMover = false;
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -158,20 +171,44 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        function verTodoElCloset() {
-            vistaGlobal = true;
-            document.getElementById('btn-archive').classList.add('active');
-            document.getElementById('btn-home').classList.remove('active');
-            renderCats(); cargarPrendas();
+        // --- CLIMA CORREGIDO ---
+        async function actualizarClima() {
+            const iconEl = document.getElementById('w-icon');
+            const cityEl = document.getElementById('w-city');
+            const tempEl = document.getElementById('w-temp');
+            
+            try {
+                // Paso 1: Obtener Ubicación (IP)
+                const ipRes = await fetch('https://ipapi.co/json/');
+                const ipData = await ipRes.json();
+                const lat = ipData.latitude || -34.9011;
+                const lon = ipData.longitude || -56.1645;
+                cityEl.innerText = ipData.city || "Montevideo";
+
+                // Paso 2: Obtener Clima
+                const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const weatherData = await weatherRes.json();
+                const { temperature, weathercode } = weatherData.current_weather;
+                
+                tempEl.innerText = Math.round(temperature) + '°';
+                
+                // Iconos
+                let icon = 'ph-sun';
+                if (weathercode >= 1 && weathercode <= 3) icon = 'ph-cloud-sun';
+                else if (weathercode >= 45 && weathercode <= 48) icon = 'ph-cloud-fog';
+                else if (weathercode >= 51 && weathercode <= 67) icon = 'ph-cloud-rain';
+                else if (weathercode >= 71 && weathercode <= 77) icon = 'ph-snowflake';
+                else if (weathercode >= 80 && weathercode <= 99) icon = 'ph-cloud-lightning';
+                iconEl.className = `ph ${icon} weather-icon`;
+
+            } catch (e) {
+                console.error("Error clima:", e);
+                cityEl.innerText = "Montevideo";
+                tempEl.innerText = "--°";
+            }
         }
 
-        function volverHome() {
-            vistaGlobal = false;
-            document.getElementById('btn-home').classList.add('active');
-            document.getElementById('btn-archive').classList.remove('active');
-            renderCats(); cargarPrendas();
-        }
-
+        // --- DRIVE ---
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -208,7 +245,6 @@
                     const nombre = f.name.split('_')[2] || "Prenda";
                     card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombre}</span>`;
                     
-                    // LOGICA SCROLL-SAFE
                     let timer;
                     let touchStartX = 0, touchStartY = 0;
 
@@ -222,10 +258,8 @@
                         if (e.type === 'touchmove') {
                             const moveX = Math.abs(e.touches[0].clientX - touchStartX);
                             const moveY = Math.abs(e.touches[0].clientY - touchStartY);
-                            if (moveX > 10 || moveY > 10) clearTimeout(timer);
-                        } else {
-                            clearTimeout(timer);
-                        }
+                            if (moveX > 15 || moveY > 15) clearTimeout(timer);
+                        } else { clearTimeout(timer); }
                     };
 
                     card.addEventListener('touchstart', startPress, {passive: true});
@@ -251,6 +285,9 @@
             const f = await res.json(); return f.id;
         }
 
+        function verTodoElCloset() { vistaGlobal = true; renderCats(); cargarPrendas(); document.getElementById('btn-archive').classList.add('active'); document.getElementById('btn-home').classList.remove('active'); }
+        function volverHome() { vistaGlobal = false; renderCats(); cargarPrendas(); document.getElementById('btn-home').classList.add('active'); document.getElementById('btn-archive').classList.remove('active'); }
+
         function renderCats() {
             const c = document.getElementById('main-cats');
             c.innerHTML = '';
@@ -260,23 +297,14 @@
             });
         }
 
-        function cambiarCat(el,n) {
-            vistaGlobal = false;
-            document.getElementById('btn-home').classList.add('active');
-            document.getElementById('btn-archive').classList.remove('active');
-            categoriaActual = n.toUpperCase(); renderCats(); cargarPrendas();
-        }
+        function cambiarCat(el,n) { vistaGlobal = false; categoriaActual = n.toUpperCase(); renderCats(); cargarPrendas(); document.getElementById('btn-home').classList.add('active'); document.getElementById('btn-archive').classList.remove('active'); }
 
-        function abrirAcciones(id, nombre) {
-            idPrendaSeleccionada = id; nombrePrendaSeleccionada = nombre;
-            document.getElementById('modal-acciones').style.display = 'flex';
-        }
-
+        function abrirAcciones(id, nombre) { idPrendaSeleccionada = id; nombrePrendaSeleccionada = nombre; document.getElementById('modal-acciones').style.display = 'flex'; }
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
         function manejarDrive() { if(!accessToken) tokenClient.requestAccessToken(); else document.getElementById('modal-acciones').style.display='flex'; }
         function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); }
 
-        window.onload = () => { renderCats(); startGoogle(); };
+        window.onload = () => { renderCats(); startGoogle(); actualizarClima(); };
     </script>
 </body>
 </html>

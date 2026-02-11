@@ -2,55 +2,195 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KINU Studio</title>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <style>
-        :root { --verde-oliva: #848464; --verde-oscuro: #313628; --arena: #F2EFE9; --arena-boton: #E5E1D5; }
-        body { font-family: -apple-system, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; overflow: hidden; }
-        
-        #preview-container { width: 90%; height: 50vh; border-radius: 25px; background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; border: 2px dashed rgba(255,255,255,0.2); margin-bottom: 20px; }
-        img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        
-        .loader { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--arena); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>KINU - Smart Closet</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/yTIrTq2.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-        /* MODAL DE CATEGORÍAS */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); }
-        .cat-popup { background: var(--arena); border-radius: 30px; width: 85%; max-width: 350px; padding: 25px; color: var(--verde-oscuro); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        .cat-header { font-weight: 800; text-align: center; text-transform: uppercase; font-size: 14px; margin-bottom: 20px; color: var(--verde-oliva); letter-spacing: 1px; }
-        .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .cat-btn { background: var(--arena-boton); border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
-        .cat-btn i { font-size: 20px; color: var(--verde-oscuro); }
-        .cat-btn span { font-size: 8px; font-weight: 700; text-transform: uppercase; }
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    
+    <style>
+        :root { 
+            --verde-oliva: #848464; 
+            --verde-oscuro: #313628; 
+            --arena-claro: #F2EFE9;
+            --arena-boton: #E5E1D5;
+            --rojo-borrar: #D64545;
+        }
+
+        /* BLOQUEO DE MENÚS NATIVOS Y SELECCIÓN */
+        * { 
+            box-sizing: border-box; 
+            transition: all 0.2s ease; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none; 
+            -webkit-user-select: none;
+            -webkit-touch-callout: none; /* Bloquea el menú de "Guardar imagen" en iOS */
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: var(--verde-oliva); 
+            margin: 0; 
+            height: 100dvh; 
+            width: 100%; 
+            overflow: hidden; 
+            position: fixed; 
+        }
+
+        .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
         
-        .btn-cancelar { margin-top: 25px; color: rgba(255,255,255,0.5); background: none; border: none; cursor: pointer; text-transform: uppercase; font-size: 11px; font-weight: 700; }
+        header { 
+            padding: calc(env(safe-area-inset-top) + 15px) 15px 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            width: 100%;
+        }
+
+        .header-info-box { display: flex; flex-direction: column; align-items: center; min-width: 80px; }
+        .w-icon { font-size: 22px; color: rgba(255, 255, 255, 0.9); }
+        .info-main-text { font-size: 16px; font-weight: 800; color: rgba(255, 255, 255, 0.9); line-height: 1; margin: 4px 0; }
+        .info-sub-text { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.5px; text-align: center; }
+        
+        .header-center { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .logo-header { width: 65px; height: auto; }
+        .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 13px; text-transform: uppercase; }
+
+        .drive-btn { background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .drive-btn img { width: 26px; height: auto; filter: grayscale(1) opacity(0.5); margin-bottom: 2px; }
+        .drive-btn.vinculado img { filter: grayscale(0) opacity(1); }
+        
+        .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
+        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 20px; scrollbar-width: none; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; opacity: 0.5; }
+        .cat-item.active { opacity: 1; }
+        .cat-circle { width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
+        .cat-item.active .cat-circle { background: white; }
+        .cat-circle i { font-size: 26px; color: white; }
+        .cat-item.active i { color: var(--verde-oscuro); }
+        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
+
+        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
+        .prenda-card { 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 20px; 
+            padding: 10px; 
+            border: 1px solid rgba(255,255,255,0.05);
+            -webkit-user-drag: none; /* Evita que la imagen se arrastre */
+        }
+        .prenda-card img { 
+            width: 100%; 
+            height: 140px; 
+            object-fit: cover; 
+            border-radius: 15px; 
+            margin-bottom: 8px; 
+            pointer-events: none; /* Crucial: hace que la imagen no reciba clics, los recibe el card */
+        }
+        .prenda-card span { color: white; font-size: 9px; font-weight: 600; text-transform: uppercase; display: block; text-align: center; opacity: 0.7; }
+
+        .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
+        nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
+        .nav-icon { color: white; font-size: 22px; opacity: 0.4; padding: 10px; }
+        .nav-icon.active { opacity: 1; }
+        
+        .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
+        .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .cam-inner i { color: var(--verde-oscuro); font-size: 26px; }
+
+        /* MODALES COLOR ARENA */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
+        .action-popup { background: var(--arena-claro); border-radius: 35px; width: 85%; max-width: 340px; padding: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.5); }
+        .action-header { font-size: 13px; font-weight: 800; color: var(--verde-oliva); text-transform: uppercase; text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px; letter-spacing: 1px; }
+        
+        .action-btn { width: 100%; padding: 18px; border: none; background: var(--arena-boton); font-weight: 700; border-radius: 20px; margin-bottom: 10px; color: var(--verde-oscuro); display: flex; justify-content: space-between; align-items: center; font-size: 15px; cursor: pointer; }
+        .action-btn i { font-size: 22px; opacity: 0.7; }
+        .action-btn.delete { color: var(--rojo-borrar); background: #fcecec; }
+        
+        .cat-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px 0; }
+        .cat-btn-mini { background: var(--arena-boton); border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+        .cat-btn-mini span { font-size: 8px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; }
+
+        .cancel-label { width: 100%; background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 13px; padding: 15px; text-transform: uppercase; opacity: 0.6; cursor: pointer; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;"> <div class="main-container">
+        <header>
+            <div class="header-info-box">
+                <i class="ph ph-sun w-icon" id="w-icon"></i>
+                <span class="info-main-text" id="w-temp">--°</span>
+                <span class="info-sub-text" id="w-city">...</span>
+            </div>
 
-    <div id="preview-container">
-        <img id="img-target" src="">
+            <div class="header-center">
+                <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
+                <div class="brand-text">KINU</div>
+            </div>
+
+            <div class="header-info-box">
+                <button id="auth-btn" class="drive-btn" onclick="manejarDrive()">
+                    <img src="https://i.imgur.com/Go2a4Hs.png">
+                    <span class="info-main-text" id="drive-status-icon" style="font-size: 9px; margin: 0;">OFF</span>
+                    <span class="info-sub-text" id="drive-label">SIN VINCULAR</span>
+                </button>
+            </div>
+        </header>
+        
+        <div class="content">
+            <div class="filter-scroll" id="main-cats"></div>
+            <div class="closet-grid" id="closet-grid"></div>
+        </div>
+
+        <div class="nav-wrapper">
+            <nav>
+                <div class="nav-icon active" id="btn-home" onclick="volverHome()"><i class="ph ph-house-simple"></i></div>
+                <div class="nav-icon" id="btn-archive" onclick="verTodoElCloset()"><i class="ph ph-archive"></i></div>
+            </nav>
+            <div class="cam-trigger">
+                <div class="cam-inner"><i class="ph ph-camera"></i></div>
+            </div>
+        </div>
     </div>
 
-    <div id="status-area" style="text-align: center;">
-        <div class="loader" id="loader"></div>
-        <p id="status-text" style="text-transform: uppercase; font-size: 12px; letter-spacing: 1px;">Recortando prenda...</p>
+    <div id="modal-acciones" class="modal-overlay">
+        <div class="action-popup">
+            <div class="action-header" id="prenda-nombre-header">GESTIONAR</div>
+            <button class="action-btn" style="background:var(--verde-oscuro); color:var(--arena-claro);" onclick="ejecutarMoverPrenda('COLABORO')">
+                <span>Mover a Colaboro</span><i class="ph ph-handshake"></i>
+            </button>
+            <button class="action-btn" onclick="abrirSelectorCategorias()">
+                <span>Cambiar Categoría</span><i class="ph ph-arrows-left-right"></i>
+            </button>
+            <button class="action-btn delete" onclick="borrarPrenda()">
+                <span>Eliminar Prenda</span><i class="ph ph-trash"></i>
+            </button>
+            <button onclick="cerrarModales()" class="cancel-label">CERRAR</button>
+        </div>
     </div>
 
-    <button class="btn-cancelar" onclick="cancelar()">Cancelar y salir</button>
-
-    <div id="modal-cat" class="modal-overlay">
-        <div class="cat-popup">
-            <div class="cat-header">¿DÓNDE GUARDAMOS ESTO?</div>
-            <div id="cat-list" class="cat-grid"></div>
+    <div id="modal-selector-cat" class="modal-overlay">
+        <div class="action-popup">
+            <div class="action-header">MOVER A...</div>
+            <div id="selector-cat-list" class="cat-grid-mini"></div>
+            <button onclick="cerrarModales()" class="cancel-label">CANCELAR</button>
         </div>
     </div>
 
     <script>
-        const HF_TOKEN = "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";
-        const API_URL = "https://api-inference.huggingface.co/models/briaai/RMBG-1.4";
-        
+        const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+        let accessToken = localStorage.getItem('drive_token');
+        let tokenClient;
+        let categoriaActual = 'SUPERIOR';
+        let vistaGlobal = false;
+        let idSeleccionado = null;
+        let nombreSeleccionado = null;
+
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
             {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
@@ -58,69 +198,168 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        window.onload = async () => {
-            const rawImg = localStorage.getItem('temp_image');
-            if (!rawImg) { window.location.href = 'index.html'; return; }
-            document.getElementById('img-target').src = rawImg;
-            procesarImagen(rawImg);
-        };
-
-        async function procesarImagen(base64) {
-            try {
-                const response = await fetch(base64);
-                const blob = await response.blob();
-
-                const res = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${HF_TOKEN}` },
-                    body: blob
-                });
-
-                if (res.status === 503) {
-                    setTimeout(() => procesarImagen(base64), 3000);
-                    return;
-                }
-
-                const resultBlob = await res.blob();
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    localStorage.setItem('final_image', reader.result);
-                    document.getElementById('img-target').src = reader.result;
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('status-text').innerText = "Recorte listo";
-                    abrirSeleccionCategoria();
-                };
-                reader.readAsDataURL(resultBlob);
-
-            } catch (err) {
-                document.getElementById('status-text').innerText = "Error de conexión. Reintentando...";
-                setTimeout(() => procesarImagen(base64), 3000);
+        // --- DRIVE Y CLIMA (Misma lógica anterior) ---
+        function manejarDrive() {
+            if (!accessToken) tokenClient.requestAccessToken();
+            else if(confirm("¿Cerrar sesión de Drive?")) {
+                accessToken = null; localStorage.removeItem('drive_token');
+                actualizarDriveUI(false); location.reload();
             }
         }
 
-        function abrirSeleccionCategoria() {
-            const list = document.getElementById('cat-list');
+        function actualizarDriveUI(v) {
+            const btn = document.getElementById('auth-btn');
+            const label = document.getElementById('drive-label');
+            const statusIcon = document.getElementById('drive-status-icon');
+            if(v) {
+                btn.classList.add('vinculado'); label.innerText = "VINCULADO";
+                statusIcon.innerText = "ON"; statusIcon.style.color = "#A8B684";
+            } else {
+                btn.classList.remove('vinculado'); label.innerText = "SIN VINCULAR";
+                statusIcon.innerText = "OFF";
+            }
+        }
+
+        function startGoogle() {
+            gapi.load('client', () => {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID, scope: SCOPES,
+                    callback: (r) => { 
+                        accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); 
+                        actualizarDriveUI(true); cargarPrendas();
+                    }
+                });
+                if(accessToken) { actualizarDriveUI(true); cargarPrendas(); }
+            });
+        }
+
+        // --- CARGAR PRENDAS CON BLOQUEO DE MENÚ NATIVO ---
+        async function cargarPrendas() {
+            if(!accessToken) return;
+            const grid = document.getElementById('closet-grid');
+            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; padding-top:20px;">Cargando...</p>';
+            try {
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                const filtro = vistaGlobal ? "name contains 'KINU_'" : `name contains 'KINU_${categoriaActual}'`;
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and ${filtro} and trashed = false&fields=files(id,name,thumbnailLink)&orderBy=createdTime desc`, {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                const data = await res.json();
+                grid.innerHTML = '';
+                
+                data.files.forEach(f => {
+                    const card = document.createElement('div');
+                    card.className = 'prenda-card';
+                    const nombreVisible = f.name.split('_')[2] || "Prenda";
+                    card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombreVisible}</span>`;
+                    
+                    let timer;
+                    let startX, startY;
+
+                    // Función para abrir el menú nuestro
+                    const activarMenu = (e) => {
+                        e.preventDefault(); // Bloquea menú nativo
+                        idSeleccionado = f.id; 
+                        nombreSeleccionado = f.name;
+                        document.getElementById('prenda-nombre-header').innerText = nombreVisible;
+                        document.getElementById('modal-acciones').style.display = 'flex';
+                    };
+
+                    card.addEventListener('touchstart', (e) => {
+                        startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+                        timer = setTimeout(() => activarMenu(e), 600); // 600ms es el tiempo ideal de long press
+                    }, {passive: false});
+
+                    card.addEventListener('touchmove', (e) => {
+                        if(Math.abs(e.touches[0].clientX - startX) > 15 || Math.abs(e.touches[0].clientY - startY) > 15) {
+                            clearTimeout(timer);
+                        }
+                    }, {passive: true});
+
+                    card.addEventListener('touchend', () => clearTimeout(timer));
+                    card.addEventListener('contextmenu', (e) => e.preventDefault()); // Doble bloqueo
+
+                    grid.appendChild(card);
+                });
+            } catch(e) { grid.innerHTML = ''; }
+        }
+
+        // --- FUNCIONES DE GESTIÓN (Misma lógica anterior) ---
+        async function borrarPrenda() {
+            if(!confirm("¿Eliminar esta prenda?")) return;
+            cerrarModales();
+            try {
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
+                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                cargarPrendas();
+            } catch(e) {}
+        }
+
+        async function ejecutarMoverPrenda(nuevaCat) {
+            cerrarModales();
+            try {
+                const partes = nombreSeleccionado.split('_');
+                partes[1] = nuevaCat;
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: partes.join('_') })
+                });
+                cargarPrendas();
+            } catch(e) {}
+        }
+
+        function abrirSelectorCategorias() {
+            document.getElementById('modal-acciones').style.display = 'none';
+            const list = document.getElementById('selector-cat-list');
             list.innerHTML = '';
             categorias.forEach(cat => {
                 const btn = document.createElement('button');
-                btn.className = 'cat-btn';
+                btn.className = 'cat-btn-mini';
                 btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
-                btn.onclick = () => guardarYSalir(cat.n.toUpperCase());
+                btn.onclick = () => ejecutarMoverPrenda(cat.n.toUpperCase());
                 list.appendChild(btn);
             });
-            document.getElementById('modal-cat').style.display = 'flex';
+            document.getElementById('modal-selector-cat').style.display = 'flex';
         }
 
-        function guardarYSalir(cat) {
-            localStorage.setItem('temp_category', cat);
-            window.location.href = 'index.html';
+        async function obtenerOCrearCarpeta(n) {
+            const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+            const d = await r.json();
+            if(d.files?.[0]) return d.files[0].id;
+            const res = await fetch('https://www.googleapis.com/drive/v3/files', {
+                method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' })
+            });
+            const f = await res.json(); return f.id;
         }
 
-        function cancelar() {
-            localStorage.removeItem('temp_image');
-            localStorage.removeItem('final_image');
-            window.location.href = 'index.html';
+        async function actualizarClima() {
+            try {
+                const ipRes = await fetch('https://ipapi.co/json/');
+                const ipData = await ipRes.json();
+                document.getElementById('w-city').innerText = ipData.city || "Montevideo";
+                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${ipData.latitude}&longitude=${ipData.longitude}&current_weather=true`);
+                const wData = await wRes.json();
+                document.getElementById('w-temp').innerText = Math.round(wData.current_weather.temperature) + '°';
+            } catch(e) { document.getElementById('w-city').innerText = "MONTEVIDEO"; }
         }
+
+        function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+        function verTodoElCloset() { vistaGlobal = true; renderCats(); cargarPrendas(); document.getElementById('btn-archive').classList.add('active'); document.getElementById('btn-home').classList.remove('active'); }
+        function volverHome() { vistaGlobal = false; renderCats(); cargarPrendas(); document.getElementById('btn-home').classList.add('active'); document.getElementById('btn-archive').classList.remove('active'); }
+        function renderCats() {
+            const c = document.getElementById('main-cats'); c.innerHTML = '';
+            categorias.forEach(cat => {
+                const act = !vistaGlobal && cat.n.toUpperCase() === categoriaActual;
+                c.innerHTML += `<div class="cat-item ${act?'active':''}" onclick="cambiarCat('${cat.n}')"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;
+            });
+        }
+        function cambiarCat(n) { vistaGlobal = false; categoriaActual = n.toUpperCase(); renderCats(); cargarPrendas(); }
+
+        window.onload = () => { renderCats(); startGoogle(); actualizarClima(); };
     </script>
 </body>
 </html>

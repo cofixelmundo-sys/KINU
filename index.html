@@ -23,35 +23,19 @@
             --rojo-borrar: #D64545;
         }
 
-        /* BLOQUEO DE MENÚS NATIVOS Y SELECCIÓN */
         * { 
             box-sizing: border-box; 
             transition: all 0.2s ease; 
             -webkit-tap-highlight-color: transparent; 
             user-select: none; 
             -webkit-user-select: none;
-            -webkit-touch-callout: none; /* Bloquea el menú de "Guardar imagen" en iOS */
+            -webkit-touch-callout: none;
         }
 
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: var(--verde-oliva); 
-            margin: 0; 
-            height: 100dvh; 
-            width: 100%; 
-            overflow: hidden; 
-            position: fixed; 
-        }
-
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
         
-        header { 
-            padding: calc(env(safe-area-inset-top) + 15px) 15px 10px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            width: 100%;
-        }
+        header { padding: calc(env(safe-area-inset-top) + 15px) 15px 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
         .header-info-box { display: flex; flex-direction: column; align-items: center; min-width: 80px; }
         .w-icon { font-size: 22px; color: rgba(255, 255, 255, 0.9); }
@@ -77,21 +61,8 @@
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
-        .prenda-card { 
-            background: rgba(255,255,255,0.1); 
-            border-radius: 20px; 
-            padding: 10px; 
-            border: 1px solid rgba(255,255,255,0.05);
-            -webkit-user-drag: none; /* Evita que la imagen se arrastre */
-        }
-        .prenda-card img { 
-            width: 100%; 
-            height: 140px; 
-            object-fit: cover; 
-            border-radius: 15px; 
-            margin-bottom: 8px; 
-            pointer-events: none; /* Crucial: hace que la imagen no reciba clics, los recibe el card */
-        }
+        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
+        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
         .prenda-card span { color: white; font-size: 9px; font-weight: 600; text-transform: uppercase; display: block; text-align: center; opacity: 0.7; }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
@@ -99,27 +70,28 @@
         .nav-icon { color: white; font-size: 22px; opacity: 0.4; padding: 10px; }
         .nav-icon.active { opacity: 1; }
         
-        .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
+        /* BOTÓN CÁMARA REPARADO */
+        .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 26px; }
+        .cam-trigger.uploading { animation: pulse 1s infinite; opacity: 0.7; }
+        @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
 
-        /* MODALES COLOR ARENA */
+        /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
-        .action-popup { background: var(--arena-claro); border-radius: 35px; width: 85%; max-width: 340px; padding: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.5); }
-        .action-header { font-size: 13px; font-weight: 800; color: var(--verde-oliva); text-transform: uppercase; text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px; letter-spacing: 1px; }
-        
+        .action-popup { background: var(--arena-claro); border-radius: 35px; width: 85%; max-width: 340px; padding: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+        .action-header { font-size: 13px; font-weight: 800; color: var(--verde-oliva); text-transform: uppercase; text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px; }
         .action-btn { width: 100%; padding: 18px; border: none; background: var(--arena-boton); font-weight: 700; border-radius: 20px; margin-bottom: 10px; color: var(--verde-oscuro); display: flex; justify-content: space-between; align-items: center; font-size: 15px; cursor: pointer; }
-        .action-btn i { font-size: 22px; opacity: 0.7; }
         .action-btn.delete { color: var(--rojo-borrar); background: #fcecec; }
-        
         .cat-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px 0; }
-        .cat-btn-mini { background: var(--arena-boton); border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+        .cat-btn-mini { background: var(--arena-boton); border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .cat-btn-mini span { font-size: 8px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; }
-
-        .cancel-label { width: 100%; background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 13px; padding: 15px; text-transform: uppercase; opacity: 0.6; cursor: pointer; }
+        .cancel-label { width: 100%; background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 13px; padding: 15px; text-transform: uppercase; cursor: pointer; }
     </style>
 </head>
-<body oncontextmenu="return false;"> <div class="main-container">
+<body oncontextmenu="return false;">
+
+    <div class="main-container">
         <header>
             <div class="header-info-box">
                 <i class="ph ph-sun w-icon" id="w-icon"></i>
@@ -151,9 +123,10 @@
                 <div class="nav-icon active" id="btn-home" onclick="volverHome()"><i class="ph ph-house-simple"></i></div>
                 <div class="nav-icon" id="btn-archive" onclick="verTodoElCloset()"><i class="ph ph-archive"></i></div>
             </nav>
-            <div class="cam-trigger">
+            <label for="cam-input" class="cam-trigger" id="cam-button">
                 <div class="cam-inner"><i class="ph ph-camera"></i></div>
-            </div>
+            </label>
+            <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="subirImagen(this)">
         </div>
     </div>
 
@@ -185,11 +158,9 @@
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token');
-        let tokenClient;
+        let tokenClient, idSeleccionado, nombreSeleccionado;
         let categoriaActual = 'SUPERIOR';
         let vistaGlobal = false;
-        let idSeleccionado = null;
-        let nombreSeleccionado = null;
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -198,46 +169,65 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- DRIVE Y CLIMA (Misma lógica anterior) ---
+        // --- SUBIR IMAGEN A DRIVE ---
+        async function subirImagen(input) {
+            if (!input.files || !input.files[0] || !accessToken) return;
+            const file = input.files[0];
+            const btn = document.getElementById('cam-button');
+            btn.classList.add('uploading');
+
+            try {
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                const nombreArchivo = `KINU_${categoriaActual}_Prenda_${Date.now()}.jpg`;
+                
+                const metadata = { name: nombreArchivo, parents: [folderId] };
+                const formData = new FormData();
+                formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                formData.append('file', file);
+
+                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + accessToken },
+                    body: formData
+                });
+
+                input.value = ''; 
+                cargarPrendas();
+            } catch (e) { alert("Error al subir"); }
+            finally { btn.classList.remove('uploading'); }
+        }
+
+        // --- DRIVE Y CLIMA ---
         function manejarDrive() {
             if (!accessToken) tokenClient.requestAccessToken();
             else if(confirm("¿Cerrar sesión de Drive?")) {
                 accessToken = null; localStorage.removeItem('drive_token');
-                actualizarDriveUI(false); location.reload();
+                location.reload();
             }
         }
 
         function actualizarDriveUI(v) {
-            const btn = document.getElementById('auth-btn');
             const label = document.getElementById('drive-label');
             const statusIcon = document.getElementById('drive-status-icon');
-            if(v) {
-                btn.classList.add('vinculado'); label.innerText = "VINCULADO";
-                statusIcon.innerText = "ON"; statusIcon.style.color = "#A8B684";
-            } else {
-                btn.classList.remove('vinculado'); label.innerText = "SIN VINCULAR";
-                statusIcon.innerText = "OFF";
-            }
+            document.getElementById('auth-btn').classList.toggle('vinculado', v);
+            if(v) { label.innerText = "VINCULADO"; statusIcon.innerText = "ON"; statusIcon.style.color = "#A8B684"; }
+            else { label.innerText = "SIN VINCULAR"; statusIcon.innerText = "OFF"; statusIcon.style.color = "white"; }
         }
 
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID, scope: SCOPES,
-                    callback: (r) => { 
-                        accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); 
-                        actualizarDriveUI(true); cargarPrendas();
-                    }
+                    callback: (r) => { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); actualizarDriveUI(true); cargarPrendas(); }
                 });
                 if(accessToken) { actualizarDriveUI(true); cargarPrendas(); }
             });
         }
 
-        // --- CARGAR PRENDAS CON BLOQUEO DE MENÚ NATIVO ---
         async function cargarPrendas() {
             if(!accessToken) return;
             const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; padding-top:20px;">Cargando...</p>';
+            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; padding-top:20px;">Actualizando...</p>';
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
                 const filtro = vistaGlobal ? "name contains 'KINU_'" : `name contains 'KINU_${categoriaActual}'`;
@@ -246,7 +236,6 @@
                 });
                 const data = await res.json();
                 grid.innerHTML = '';
-                
                 data.files.forEach(f => {
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
@@ -255,43 +244,28 @@
                     
                     let timer;
                     let startX, startY;
-
-                    // Función para abrir el menú nuestro
-                    const activarMenu = (e) => {
-                        e.preventDefault(); // Bloquea menú nativo
-                        idSeleccionado = f.id; 
-                        nombreSeleccionado = f.name;
-                        document.getElementById('prenda-nombre-header').innerText = nombreVisible;
-                        document.getElementById('modal-acciones').style.display = 'flex';
-                    };
-
                     card.addEventListener('touchstart', (e) => {
                         startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-                        timer = setTimeout(() => activarMenu(e), 600); // 600ms es el tiempo ideal de long press
+                        timer = setTimeout(() => {
+                            idSeleccionado = f.id; nombreSeleccionado = f.name;
+                            document.getElementById('prenda-nombre-header').innerText = nombreVisible;
+                            document.getElementById('modal-acciones').style.display = 'flex';
+                        }, 700);
                     }, {passive: false});
-
                     card.addEventListener('touchmove', (e) => {
-                        if(Math.abs(e.touches[0].clientX - startX) > 15 || Math.abs(e.touches[0].clientY - startY) > 15) {
-                            clearTimeout(timer);
-                        }
+                        if(Math.abs(e.touches[0].clientX - startX) > 15 || Math.abs(e.touches[0].clientY - startY) > 15) clearTimeout(timer);
                     }, {passive: true});
-
                     card.addEventListener('touchend', () => clearTimeout(timer));
-                    card.addEventListener('contextmenu', (e) => e.preventDefault()); // Doble bloqueo
-
                     grid.appendChild(card);
                 });
             } catch(e) { grid.innerHTML = ''; }
         }
 
-        // --- FUNCIONES DE GESTIÓN (Misma lógica anterior) ---
         async function borrarPrenda() {
-            if(!confirm("¿Eliminar esta prenda?")) return;
+            if(!confirm("¿Eliminar prenda?")) return;
             cerrarModales();
             try {
-                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
-                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken }
-                });
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken } });
                 cargarPrendas();
             } catch(e) {}
         }
@@ -302,8 +276,7 @@
                 const partes = nombreSeleccionado.split('_');
                 partes[1] = nuevaCat;
                 await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
-                    method: 'PATCH',
-                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: partes.join('_') })
                 });
                 cargarPrendas();

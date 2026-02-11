@@ -33,21 +33,18 @@
         
         header { padding: calc(env(safe-area-inset-top) + 15px) 25px 10px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; }
 
-        .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.1); display: none; overflow: hidden; z-index: 100; }
-        .progress-bar { width: 0%; height: 100%; background: white; box-shadow: 0 0 10px rgba(255,255,255,0.5); transition: width 0.3s ease; }
-
         .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 65px; }
-        .weather-icon { font-size: 26px; color: rgba(255, 255, 255, 0.9); }
-        .temp-text { font-size: 18px; font-weight: 800; color: rgba(255, 255, 255, 0.9); }
-        .city-label { font-size: 9px; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); letter-spacing: 0.5px; text-align: center; }
+        .weather-icon { font-size: 28px; color: rgba(255, 255, 255, 0.9); }
+        .temp-text { font-size: 20px; font-weight: 800; color: rgba(255, 255, 255, 0.9); }
+        .city-label { font-size: 9px; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); letter-spacing: 0.5px; }
         
         .header-center { display: flex; flex-direction: column; align-items: center; grid-column: 2; }
         .logo-header { width: 75px; height: auto; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
 
-        .drive-status-btn { grid-column: 3; justify-self: end; background: none; border: none; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .drive-status-btn img { width: 32px; height: auto; filter: grayscale(1) opacity(0.8); transition: 0.3s; }
-        .drive-status-btn.vinculado img { filter: grayscale(0) opacity(1); transform: scale(1.05); }
+        .drive-status-btn { grid-column: 3; justify-self: end; background: none; border: none; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 50%; }
+        .drive-status-btn img { width: 32px; height: auto; filter: grayscale(1) opacity(0.5); transition: 0.3s; }
+        .drive-status-btn.vinculado img { filter: grayscale(0) opacity(1); transform: scale(1.1); }
         
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
@@ -66,7 +63,7 @@
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; z-index: 10; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
-        .nav-icon { color: white; font-size: 22px; opacity: 0.5; cursor: pointer; padding: 10px; }
+        .nav-icon { color: white; font-size: 22px; opacity: 0.5; cursor: pointer; padding: 10px; z-index: 20; }
         .nav-icon.active { opacity: 1; transform: scale(1.1); }
         
         .cam-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 30; }
@@ -74,22 +71,20 @@
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
 
-        /* --- TIPOGRAFÍA MUCHO MÁS GRANDE EN POPUPS --- */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 5000; backdrop-filter: blur(8px); }
+        /* --- TIPOGRAFÍA Y DISEÑO DE POPUPS --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); }
         .modal-content { background: white; width: 92%; max-width: 400px; padding: 35px 25px; border-radius: 35px; text-align: center; }
         
         .modal-title { color: var(--verde-oscuro); font-weight: 900; font-size: 22px; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px; }
         
-        .action-popup { background: white; border-radius: 40px; width: 92%; max-width: 360px; padding: 20px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
-        .action-header { padding: 10px 10px 20px; color: var(--verde-oscuro); font-weight: 900; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; border-bottom: 2px solid #f0f0f0; margin-bottom: 15px; }
+        .action-popup { background: white; border-radius: 40px; width: 92%; max-width: 360px; padding: 25px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+        .action-header { padding-bottom: 20px; color: var(--verde-oscuro); font-weight: 900; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; border-bottom: 2px solid #f0f0f0; margin-bottom: 20px; text-align: center; }
         
-        .action-btn { width: 100%; padding: 25px 20px; border: none; background: #f8f8f8; font-weight: 800; border-radius: 25px; margin-bottom: 12px; color: var(--verde-oscuro); display: flex; justify-content: space-between; align-items: center; font-size: 18px; }
+        .action-btn { width: 100%; padding: 25px 20px; border: none; background: #f8f8f8; font-weight: 800; border-radius: 25px; margin-bottom: 15px; color: var(--verde-oscuro); display: flex; justify-content: space-between; align-items: center; font-size: 18px; }
         .action-btn i { font-size: 28px; }
         .action-btn.delete { color: var(--rojo-borrar); background: #fff1f1; }
 
-        .desc-input { width: 100%; padding: 22px; border-radius: 20px; border: 3px solid #f0f0f0; margin-bottom: 25px; font-size: 18px; font-weight: 600; font-family: inherit; }
-
-        .cancel-label { margin-top: 15px; background: none; border: none; color: #aaa; font-weight: 900; font-size: 15px; letter-spacing: 1.5px; width: 100%; padding: 15px; text-transform: uppercase; }
+        .cancel-label { margin-top: 15px; background: none; border: none; color: #aaa; font-weight: 900; font-size: 16px; letter-spacing: 1.5px; width: 100%; padding: 15px; text-transform: uppercase; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -99,18 +94,15 @@
             <div class="header-left-info" id="weather-box">
                 <i class="ph ph-sun weather-icon" id="w-icon"></i>
                 <span class="temp-text" id="w-temp">--°</span>
-                <span class="city-label" id="w-city">Cargando...</span>
+                <span class="city-label" id="w-city">...</span>
             </div>
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
                 <div class="brand-text">KINU</div>
             </div>
-            <div id="auth-btn" class="drive-status-btn" onclick="manejarDrive()">
+            <button id="auth-btn" class="drive-status-btn" onclick="manejarDrive()">
                 <img src="https://i.imgur.com/Go2a4Hs.png" alt="Drive">
-            </div>
-            <div class="progress-container" id="global-progress">
-                <div class="progress-bar" id="inner-bar"></div>
-            </div>
+            </button>
         </header>
         
         <div class="content">
@@ -127,28 +119,23 @@
                 <label for="cam-input" class="cam-trigger">
                     <div class="cam-inner"><i class="ph ph-camera"></i></div>
                 </label>
-                <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="enviarAStudio(this)">
+                <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none">
             </div>
-        </div>
-    </div>
-
-    <div id="modal-categoria" class="modal-overlay">
-        <div class="modal-content">
-            <h2 id="cat-modal-title" class="modal-title">Clasificar</h2>
-            <div id="desc-container">
-                <input type="text" id="prenda-desc" class="desc-input" placeholder="Nombre prenda...">
-            </div>
-            <div id="cat-save-list" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px;"></div>
-            <button onclick="cerrarModales()" class="cancel-label">CANCELAR</button>
         </div>
     </div>
 
     <div id="modal-acciones" class="modal-overlay">
         <div class="action-popup">
-            <div class="action-header">Gestionar Prenda</div>
-            <button class="action-btn" style="background:var(--verde-oscuro); color:white;" id="btn-mover-colab"><span>Mover a Colaboro</span><i class="ph ph-handshake"></i></button>
-            <button class="action-btn" id="btn-cambiar-cat"><span>Cambiar Categoría</span><i class="ph ph-arrows-left-right"></i></button>
-            <button class="action-btn delete" id="btn-eliminar-prenda"><span>Eliminar Prenda</span><i class="ph ph-trash"></i></button>
+            <div class="action-header" id="prenda-nombre-header">GESTIONAR PRENDA</div>
+            <button class="action-btn" style="background:var(--verde-oscuro); color:white;" onclick="ejecutarMoverPrenda('COLABORO')">
+                <span>Mover a Colaboro</span><i class="ph ph-handshake"></i>
+            </button>
+            <button class="action-btn" onclick="abrirCambiadorCat()">
+                <span>Cambiar Categoría</span><i class="ph ph-arrows-left-right"></i>
+            </button>
+            <button class="action-btn delete" onclick="borrarPrenda()">
+                <span>Eliminar Prenda</span><i class="ph ph-trash"></i>
+            </button>
             <button onclick="cerrarModales()" class="cancel-label">CERRAR</button>
         </div>
     </div>
@@ -162,7 +149,6 @@
         let vistaGlobal = false;
         let idPrendaSeleccionada = null;
         let nombrePrendaSeleccionada = null;
-        let modoMover = false;
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -171,44 +157,21 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- CLIMA CORREGIDO ---
-        async function actualizarClima() {
-            const iconEl = document.getElementById('w-icon');
-            const cityEl = document.getElementById('w-city');
-            const tempEl = document.getElementById('w-temp');
-            
-            try {
-                // Paso 1: Obtener Ubicación (IP)
-                const ipRes = await fetch('https://ipapi.co/json/');
-                const ipData = await ipRes.json();
-                const lat = ipData.latitude || -34.9011;
-                const lon = ipData.longitude || -56.1645;
-                cityEl.innerText = ipData.city || "Montevideo";
-
-                // Paso 2: Obtener Clima
-                const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-                const weatherData = await weatherRes.json();
-                const { temperature, weathercode } = weatherData.current_weather;
-                
-                tempEl.innerText = Math.round(temperature) + '°';
-                
-                // Iconos
-                let icon = 'ph-sun';
-                if (weathercode >= 1 && weathercode <= 3) icon = 'ph-cloud-sun';
-                else if (weathercode >= 45 && weathercode <= 48) icon = 'ph-cloud-fog';
-                else if (weathercode >= 51 && weathercode <= 67) icon = 'ph-cloud-rain';
-                else if (weathercode >= 71 && weathercode <= 77) icon = 'ph-snowflake';
-                else if (weathercode >= 80 && weathercode <= 99) icon = 'ph-cloud-lightning';
-                iconEl.className = `ph ${icon} weather-icon`;
-
-            } catch (e) {
-                console.error("Error clima:", e);
-                cityEl.innerText = "Montevideo";
-                tempEl.innerText = "--°";
+        // --- LÓGICA DE DRIVE CORREGIDA ---
+        function manejarDrive() {
+            if (!accessToken) {
+                tokenClient.requestAccessToken();
+            } else {
+                // Si ya está vinculado, opcionalmente puedes mostrar un mensaje o desvincular
+                if(confirm("¿Deseas cerrar la sesión de Google Drive?")) {
+                    accessToken = null;
+                    localStorage.removeItem('drive_token');
+                    actualizarDriveUI(false);
+                    location.reload();
+                }
             }
         }
 
-        // --- DRIVE ---
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -216,17 +179,43 @@
                     callback: (r) => { 
                         accessToken = r.access_token; 
                         localStorage.setItem('drive_token', accessToken); 
-                        actualizarDriveUI(true); cargarPrendas(); cerrarModales(); 
+                        actualizarDriveUI(true); 
+                        cargarPrendas();
                     }
                 });
                 if(accessToken) { actualizarDriveUI(true); cargarPrendas(); }
             });
         }
 
+        function actualizarDriveUI(v) { 
+            const btn = document.getElementById('auth-btn');
+            if(v) btn.classList.add('vinculado');
+            else btn.classList.remove('vinculado');
+        }
+
+        // --- CLIMA ---
+        async function actualizarClima() {
+            try {
+                const ipRes = await fetch('https://ipapi.co/json/');
+                const ipData = await ipRes.json();
+                const lat = ipData.latitude || -34.9011;
+                const lon = ipData.longitude || -56.1645;
+                document.getElementById('w-city').innerText = ipData.city || "Montevideo";
+
+                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const wData = await wRes.json();
+                document.getElementById('w-temp').innerText = Math.round(wData.current_weather.temperature) + '°';
+            } catch (e) { 
+                document.getElementById('w-city').innerText = "Montevideo";
+            }
+        }
+
+        // --- CARGAR PRENDAS CON SCROLL-SAFE ---
         async function cargarPrendas() {
             if(!accessToken) return;
             const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5;">Cargando...</p>';
+            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:18px;">Cargando armario...</p>';
+            
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
                 const filtro = vistaGlobal ? "name contains 'KINU_'" : `name contains 'KINU_${categoriaActual}'`;
@@ -235,10 +224,12 @@
                 });
                 const data = await res.json();
                 grid.innerHTML = '';
+                
                 if(!data.files?.length) {
-                    grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.3; margin-top:30px;">Sin prendas</p>';
+                    grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.3; margin-top:50px; font-size:18px;">No hay prendas aquí</p>';
                     return;
                 }
+
                 data.files.forEach(f => {
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
@@ -248,26 +239,19 @@
                     let timer;
                     let touchStartX = 0, touchStartY = 0;
 
-                    const startPress = (e) => {
-                        touchStartX = e.touches ? e.touches[0].clientX : e.clientX;
-                        touchStartY = e.touches ? e.touches[0].clientY : e.clientY;
-                        timer = setTimeout(() => abrirAcciones(f.id, f.name), 750);
-                    };
+                    card.addEventListener('touchstart', (e) => {
+                        touchStartX = e.touches[0].clientX;
+                        touchStartY = e.touches[0].clientY;
+                        timer = setTimeout(() => abrirAcciones(f.id, nombre, f.name), 800);
+                    }, {passive: true});
 
-                    const cancelPress = (e) => {
-                        if (e.type === 'touchmove') {
-                            const moveX = Math.abs(e.touches[0].clientX - touchStartX);
-                            const moveY = Math.abs(e.touches[0].clientY - touchStartY);
-                            if (moveX > 15 || moveY > 15) clearTimeout(timer);
-                        } else { clearTimeout(timer); }
-                    };
+                    card.addEventListener('touchmove', (e) => {
+                        const moveX = Math.abs(e.touches[0].clientX - touchStartX);
+                        const moveY = Math.abs(e.touches[0].clientY - touchStartY);
+                        if (moveX > 15 || moveY > 15) clearTimeout(timer);
+                    }, {passive: true});
 
-                    card.addEventListener('touchstart', startPress, {passive: true});
-                    card.addEventListener('touchmove', cancelPress, {passive: true});
-                    card.addEventListener('touchend', cancelPress);
-                    card.addEventListener('mousedown', startPress);
-                    card.addEventListener('mouseup', cancelPress);
-
+                    card.addEventListener('touchend', () => clearTimeout(timer));
                     grid.appendChild(card);
                 });
             } catch(e) { grid.innerHTML = ''; }
@@ -285,26 +269,51 @@
             const f = await res.json(); return f.id;
         }
 
-        function verTodoElCloset() { vistaGlobal = true; renderCats(); cargarPrendas(); document.getElementById('btn-archive').classList.add('active'); document.getElementById('btn-home').classList.remove('active'); }
-        function volverHome() { vistaGlobal = false; renderCats(); cargarPrendas(); document.getElementById('btn-home').classList.add('active'); document.getElementById('btn-archive').classList.remove('active'); }
+        function abrirAcciones(id, nombreCorto, nombreCompleto) {
+            idPrendaSeleccionada = id;
+            nombrePrendaSeleccionada = nombreCompleto;
+            document.getElementById('prenda-nombre-header').innerText = nombreCorto;
+            document.getElementById('modal-acciones').style.display = 'flex';
+        }
+
+        function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+
+        function verTodoElCloset() {
+            vistaGlobal = true;
+            document.getElementById('btn-archive').classList.add('active');
+            document.getElementById('btn-home').classList.remove('active');
+            renderCats(); cargarPrendas();
+        }
+
+        function volverHome() {
+            vistaGlobal = false;
+            document.getElementById('btn-home').classList.add('active');
+            document.getElementById('btn-archive').classList.remove('active');
+            renderCats(); cargarPrendas();
+        }
 
         function renderCats() {
             const c = document.getElementById('main-cats');
             c.innerHTML = '';
             categorias.forEach(cat => {
                 const act = !vistaGlobal && cat.n.toUpperCase() === categoriaActual;
-                c.innerHTML += `<div class="cat-item ${act?'active':''}" onclick="cambiarCat(this,'${cat.n}')"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;
+                c.innerHTML += `<div class="cat-item ${act?'active':''}" onclick="cambiarCat('${cat.n}')"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;
             });
         }
 
-        function cambiarCat(el,n) { vistaGlobal = false; categoriaActual = n.toUpperCase(); renderCats(); cargarPrendas(); document.getElementById('btn-home').classList.add('active'); document.getElementById('btn-archive').classList.remove('active'); }
+        function cambiarCat(n) {
+            vistaGlobal = false;
+            categoriaActual = n.toUpperCase();
+            document.getElementById('btn-home').classList.add('active');
+            document.getElementById('btn-archive').classList.remove('active');
+            renderCats(); cargarPrendas();
+        }
 
-        function abrirAcciones(id, nombre) { idPrendaSeleccionada = id; nombrePrendaSeleccionada = nombre; document.getElementById('modal-acciones').style.display = 'flex'; }
-        function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
-        function manejarDrive() { if(!accessToken) tokenClient.requestAccessToken(); else document.getElementById('modal-acciones').style.display='flex'; }
-        function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); }
-
-        window.onload = () => { renderCats(); startGoogle(); actualizarClima(); };
+        window.onload = () => { 
+            renderCats(); 
+            startGoogle(); 
+            actualizarClima(); 
+        };
     </script>
 </body>
 </html>

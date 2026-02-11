@@ -19,7 +19,7 @@
             --verde-oliva: #848464; 
             --verde-oscuro: #313628; 
             --blanco: #FFFFFF; 
-            --google-blue: #4285F4; --rojo-borrar: #E63946;
+            --rojo-borrar: #E63946;
         }
         * { 
             box-sizing: border-box; 
@@ -33,76 +33,81 @@
         
         header { padding: calc(env(safe-area-inset-top) + 15px) 25px 10px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; }
 
-        .header-left-info { grid-column: 1; justify-self: start; display: flex; flex-direction: column; align-items: center; min-width: 65px; }
-        .weather-icon { font-size: 28px; color: rgba(255, 255, 255, 0.9); }
-        .temp-text { font-size: 20px; font-weight: 800; color: rgba(255, 255, 255, 0.9); }
-        .city-label { font-size: 9px; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); letter-spacing: 0.5px; }
+        /* Clima y Drive Info */
+        .header-info-box { display: flex; flex-direction: column; align-items: center; min-width: 70px; }
+        .w-icon { font-size: 24px; color: rgba(255, 255, 255, 0.9); }
+        .info-main-text { font-size: 18px; font-weight: 800; color: rgba(255, 255, 255, 0.9); line-height: 1; margin: 4px 0; }
+        .info-sub-text { font-size: 9px; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); letter-spacing: 0.5px; text-align: center; }
         
-        .header-center { display: flex; flex-direction: column; align-items: center; grid-column: 2; }
-        .logo-header { width: 75px; height: auto; }
-        .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 16px; text-transform: uppercase; }
+        .header-center { display: flex; flex-direction: column; align-items: center; }
+        .logo-header { width: 70px; height: auto; }
+        .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
 
-        .drive-status-btn { grid-column: 3; justify-self: end; background: none; border: none; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 50%; }
-        .drive-status-btn img { width: 32px; height: auto; filter: grayscale(1) opacity(0.5); transition: 0.3s; }
-        .drive-status-btn.vinculado img { filter: grayscale(0) opacity(1); transform: scale(1.1); }
+        .drive-btn { background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .drive-btn img { width: 28px; height: auto; filter: grayscale(1) opacity(0.5); margin-bottom: 2px; }
+        .drive-btn.vinculado img { filter: grayscale(0) opacity(1); }
         
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 25px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 72px; opacity: 0.6; cursor: pointer; }
+        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 20px; scrollbar-width: none; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; opacity: 0.5; }
         .cat-item.active { opacity: 1; }
-        .cat-circle { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
+        .cat-circle { width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
         .cat-item.active .cat-circle { background: white; }
+        .cat-circle i { font-size: 26px; color: white; }
         .cat-item.active i { color: var(--verde-oscuro); }
-        .cat-circle i { font-size: 28px; color: white; }
-        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; text-align: center; }
+        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1); position: relative; }
-        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
-        .prenda-card span { color: white; font-size: 10px; font-weight: 600; text-transform: uppercase; display: block; opacity: 0.7; pointer-events: none; }
+        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; }
+        .prenda-card span { color: white; font-size: 10px; font-weight: 600; text-transform: uppercase; display: block; text-align: center; opacity: 0.8; }
 
-        .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; z-index: 10; }
+        .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
-        .nav-icon { color: white; font-size: 22px; opacity: 0.5; cursor: pointer; padding: 10px; z-index: 20; }
-        .nav-icon.active { opacity: 1; transform: scale(1.1); }
+        .nav-icon { color: white; font-size: 22px; opacity: 0.4; padding: 10px; }
+        .nav-icon.active { opacity: 1; }
         
-        .cam-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 30; }
-        .cam-trigger { width: 68px; height: 68px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .cam-inner i { color: var(--verde-oscuro); font-size: 28px; }
+        .cam-inner i { color: var(--verde-oscuro); font-size: 26px; }
 
-        /* --- TIPOGRAFÍA Y DISEÑO DE POPUPS --- */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); }
-        .modal-content { background: white; width: 92%; max-width: 400px; padding: 35px 25px; border-radius: 35px; text-align: center; }
+        /* MODALES */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
+        .action-popup { background: white; border-radius: 35px; width: 85%; max-width: 340px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .action-header { font-size: 14px; font-weight: 900; color: #ccc; text-transform: uppercase; text-align: center; margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; }
         
-        .modal-title { color: var(--verde-oscuro); font-weight: 900; font-size: 22px; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px; }
-        
-        .action-popup { background: white; border-radius: 40px; width: 92%; max-width: 360px; padding: 25px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
-        .action-header { padding-bottom: 20px; color: var(--verde-oscuro); font-weight: 900; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; border-bottom: 2px solid #f0f0f0; margin-bottom: 20px; text-align: center; }
-        
-        .action-btn { width: 100%; padding: 25px 20px; border: none; background: #f8f8f8; font-weight: 800; border-radius: 25px; margin-bottom: 15px; color: var(--verde-oscuro); display: flex; justify-content: space-between; align-items: center; font-size: 18px; }
-        .action-btn i { font-size: 28px; }
+        .action-btn { width: 100%; padding: 18px; border: none; background: #f8f8f8; font-weight: 700; border-radius: 20px; margin-bottom: 10px; color: var(--verde-oscuro); display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
         .action-btn.delete { color: var(--rojo-borrar); background: #fff1f1; }
+        
+        .cat-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px 0; }
+        .cat-btn-mini { background: #f4f4f4; border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .cat-btn-mini span { font-size: 9px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; }
 
-        .cancel-label { margin-top: 15px; background: none; border: none; color: #aaa; font-weight: 900; font-size: 16px; letter-spacing: 1.5px; width: 100%; padding: 15px; text-transform: uppercase; cursor: pointer; }
+        .cancel-label { width: 100%; background: none; border: none; color: #aaa; font-weight: 900; font-size: 14px; padding: 15px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <div class="main-container">
         <header>
-            <div class="header-left-info" id="weather-box">
-                <i class="ph ph-sun weather-icon" id="w-icon"></i>
-                <span class="temp-text" id="w-temp">--°</span>
-                <span class="city-label" id="w-city">...</span>
+            <div class="header-info-box">
+                <i class="ph ph-sun w-icon" id="w-icon"></i>
+                <span class="info-main-text" id="w-temp">--°</span>
+                <span class="info-sub-text" id="w-city">...</span>
             </div>
+
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
                 <div class="brand-text">KINU</div>
             </div>
-            <button id="auth-btn" class="drive-status-btn" onclick="manejarDrive()">
-                <img src="https://i.imgur.com/Go2a4Hs.png" alt="Drive">
-            </button>
+
+            <div class="header-info-box">
+                <button id="auth-btn" class="drive-btn" onclick="manejarDrive()">
+                    <img src="https://i.imgur.com/Go2a4Hs.png">
+                    <span class="info-main-text" id="drive-status-icon" style="font-size: 10px; margin: 0;">OFF</span>
+                    <span class="info-sub-text" id="drive-label">SIN VINCULAR</span>
+                </button>
+            </div>
         </header>
         
         <div class="content">
@@ -115,28 +120,33 @@
                 <div class="nav-icon active" id="btn-home" onclick="volverHome()"><i class="ph ph-house-simple"></i></div>
                 <div class="nav-icon" id="btn-archive" onclick="verTodoElCloset()"><i class="ph ph-archive"></i></div>
             </nav>
-            <div class="cam-container">
-                <label for="cam-input" class="cam-trigger">
-                    <div class="cam-inner"><i class="ph ph-camera"></i></div>
-                </label>
-                <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none">
+            <div class="cam-trigger">
+                <div class="cam-inner"><i class="ph ph-camera"></i></div>
             </div>
         </div>
     </div>
 
     <div id="modal-acciones" class="modal-overlay">
         <div class="action-popup">
-            <div class="action-header" id="prenda-nombre-header">GESTIONAR PRENDA</div>
+            <div class="action-header" id="prenda-nombre-header">GESTIONAR</div>
             <button class="action-btn" style="background:var(--verde-oscuro); color:white;" onclick="ejecutarMoverPrenda('COLABORO')">
                 <span>Mover a Colaboro</span><i class="ph ph-handshake"></i>
             </button>
-            <button class="action-btn" onclick="abrirCambiadorCat()">
+            <button class="action-btn" onclick="abrirSelectorCategorias()">
                 <span>Cambiar Categoría</span><i class="ph ph-arrows-left-right"></i>
             </button>
             <button class="action-btn delete" onclick="borrarPrenda()">
                 <span>Eliminar Prenda</span><i class="ph ph-trash"></i>
             </button>
             <button onclick="cerrarModales()" class="cancel-label">CERRAR</button>
+        </div>
+    </div>
+
+    <div id="modal-selector-cat" class="modal-overlay">
+        <div class="action-popup">
+            <div class="action-header">MOVER A...</div>
+            <div id="selector-cat-list" class="cat-grid-mini"></div>
+            <button onclick="cerrarModales()" class="cancel-label">CANCELAR</button>
         </div>
     </div>
 
@@ -147,8 +157,8 @@
         let tokenClient;
         let categoriaActual = 'SUPERIOR';
         let vistaGlobal = false;
-        let idPrendaSeleccionada = null;
-        let nombrePrendaSeleccionada = null;
+        let idSeleccionado = null;
+        let nombreSeleccionado = null;
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -157,18 +167,28 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- LÓGICA DE DRIVE CORREGIDA ---
         function manejarDrive() {
-            if (!accessToken) {
-                tokenClient.requestAccessToken();
+            if (!accessToken) tokenClient.requestAccessToken();
+            else if(confirm("¿Cerrar sesión de Drive?")) {
+                accessToken = null; localStorage.removeItem('drive_token');
+                actualizarDriveUI(false); location.reload();
+            }
+        }
+
+        function actualizarDriveUI(v) {
+            const btn = document.getElementById('auth-btn');
+            const label = document.getElementById('drive-label');
+            const statusIcon = document.getElementById('drive-status-icon');
+            if(v) {
+                btn.classList.add('vinculado');
+                label.innerText = "VINCULADO";
+                statusIcon.innerText = "ON";
+                statusIcon.style.color = "#4CAF50";
             } else {
-                // Si ya está vinculado, opcionalmente puedes mostrar un mensaje o desvincular
-                if(confirm("¿Deseas cerrar la sesión de Google Drive?")) {
-                    accessToken = null;
-                    localStorage.removeItem('drive_token');
-                    actualizarDriveUI(false);
-                    location.reload();
-                }
+                btn.classList.remove('vinculado');
+                label.innerText = "SIN VINCULAR";
+                statusIcon.innerText = "OFF";
+                statusIcon.style.color = "rgba(255,255,255,0.5)";
             }
         }
 
@@ -177,45 +197,18 @@
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID, scope: SCOPES,
                     callback: (r) => { 
-                        accessToken = r.access_token; 
-                        localStorage.setItem('drive_token', accessToken); 
-                        actualizarDriveUI(true); 
-                        cargarPrendas();
+                        accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); 
+                        actualizarDriveUI(true); cargarPrendas();
                     }
                 });
                 if(accessToken) { actualizarDriveUI(true); cargarPrendas(); }
             });
         }
 
-        function actualizarDriveUI(v) { 
-            const btn = document.getElementById('auth-btn');
-            if(v) btn.classList.add('vinculado');
-            else btn.classList.remove('vinculado');
-        }
-
-        // --- CLIMA ---
-        async function actualizarClima() {
-            try {
-                const ipRes = await fetch('https://ipapi.co/json/');
-                const ipData = await ipRes.json();
-                const lat = ipData.latitude || -34.9011;
-                const lon = ipData.longitude || -56.1645;
-                document.getElementById('w-city').innerText = ipData.city || "Montevideo";
-
-                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-                const wData = await wRes.json();
-                document.getElementById('w-temp').innerText = Math.round(wData.current_weather.temperature) + '°';
-            } catch (e) { 
-                document.getElementById('w-city').innerText = "Montevideo";
-            }
-        }
-
-        // --- CARGAR PRENDAS CON SCROLL-SAFE ---
         async function cargarPrendas() {
             if(!accessToken) return;
             const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:18px;">Cargando armario...</p>';
-            
+            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; padding-top:20px;">Cargando...</p>';
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
                 const filtro = vistaGlobal ? "name contains 'KINU_'" : `name contains 'KINU_${categoriaActual}'`;
@@ -224,37 +217,68 @@
                 });
                 const data = await res.json();
                 grid.innerHTML = '';
-                
-                if(!data.files?.length) {
-                    grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.3; margin-top:50px; font-size:18px;">No hay prendas aquí</p>';
-                    return;
-                }
-
                 data.files.forEach(f => {
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
-                    const nombre = f.name.split('_')[2] || "Prenda";
-                    card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombre}</span>`;
+                    const nombreVisible = f.name.split('_')[2] || "Prenda";
+                    card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombreVisible}</span>`;
                     
                     let timer;
-                    let touchStartX = 0, touchStartY = 0;
-
-                    card.addEventListener('touchstart', (e) => {
-                        touchStartX = e.touches[0].clientX;
-                        touchStartY = e.touches[0].clientY;
-                        timer = setTimeout(() => abrirAcciones(f.id, nombre, f.name), 800);
-                    }, {passive: true});
-
-                    card.addEventListener('touchmove', (e) => {
-                        const moveX = Math.abs(e.touches[0].clientX - touchStartX);
-                        const moveY = Math.abs(e.touches[0].clientY - touchStartY);
-                        if (moveX > 15 || moveY > 15) clearTimeout(timer);
-                    }, {passive: true});
-
-                    card.addEventListener('touchend', () => clearTimeout(timer));
+                    let startX, startY;
+                    card.ontouchstart = (e) => {
+                        startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+                        timer = setTimeout(() => {
+                            idSeleccionado = f.id; nombreSeleccionado = f.name;
+                            document.getElementById('prenda-nombre-header').innerText = nombreVisible;
+                            document.getElementById('modal-acciones').style.display = 'flex';
+                        }, 700);
+                    };
+                    card.ontouchmove = (e) => {
+                        if(Math.abs(e.touches[0].clientX - startX) > 10 || Math.abs(e.touches[0].clientY - startY) > 10) clearTimeout(timer);
+                    };
+                    card.ontouchend = () => clearTimeout(timer);
                     grid.appendChild(card);
                 });
             } catch(e) { grid.innerHTML = ''; }
+        }
+
+        async function borrarPrenda() {
+            if(!confirm("¿Eliminar para siempre?")) return;
+            cerrarModales();
+            try {
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
+                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                cargarPrendas();
+            } catch(e) {}
+        }
+
+        async function ejecutarMoverPrenda(nuevaCat) {
+            cerrarModales();
+            try {
+                const partes = nombreSeleccionado.split('_');
+                partes[1] = nuevaCat;
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: partes.join('_') })
+                });
+                cargarPrendas();
+            } catch(e) {}
+        }
+
+        function abrirSelectorCategorias() {
+            document.getElementById('modal-acciones').style.display = 'none';
+            const list = document.getElementById('selector-cat-list');
+            list.innerHTML = '';
+            categorias.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'cat-btn-mini';
+                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
+                btn.onclick = () => ejecutarMoverPrenda(cat.n.toUpperCase());
+                list.appendChild(btn);
+            });
+            document.getElementById('modal-selector-cat').style.display = 'flex';
         }
 
         async function obtenerOCrearCarpeta(n) {
@@ -269,51 +293,32 @@
             const f = await res.json(); return f.id;
         }
 
-        function abrirAcciones(id, nombreCorto, nombreCompleto) {
-            idPrendaSeleccionada = id;
-            nombrePrendaSeleccionada = nombreCompleto;
-            document.getElementById('prenda-nombre-header').innerText = nombreCorto;
-            document.getElementById('modal-acciones').style.display = 'flex';
+        async function actualizarClima() {
+            try {
+                const ipRes = await fetch('https://ipapi.co/json/');
+                const ipData = await ipRes.json();
+                const lat = ipData.latitude || -34.9011;
+                const lon = ipData.longitude || -56.1645;
+                document.getElementById('w-city').innerText = ipData.city || "Montevideo";
+                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const wData = await wRes.json();
+                document.getElementById('w-temp').innerText = Math.round(wData.current_weather.temperature) + '°';
+            } catch(e) { document.getElementById('w-city').innerText = "Montevideo"; }
         }
 
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
-
-        function verTodoElCloset() {
-            vistaGlobal = true;
-            document.getElementById('btn-archive').classList.add('active');
-            document.getElementById('btn-home').classList.remove('active');
-            renderCats(); cargarPrendas();
-        }
-
-        function volverHome() {
-            vistaGlobal = false;
-            document.getElementById('btn-home').classList.add('active');
-            document.getElementById('btn-archive').classList.remove('active');
-            renderCats(); cargarPrendas();
-        }
-
+        function verTodoElCloset() { vistaGlobal = true; renderCats(); cargarPrendas(); document.getElementById('btn-archive').classList.add('active'); document.getElementById('btn-home').classList.remove('active'); }
+        function volverHome() { vistaGlobal = false; renderCats(); cargarPrendas(); document.getElementById('btn-home').classList.add('active'); document.getElementById('btn-archive').classList.remove('active'); }
         function renderCats() {
-            const c = document.getElementById('main-cats');
-            c.innerHTML = '';
+            const c = document.getElementById('main-cats'); c.innerHTML = '';
             categorias.forEach(cat => {
                 const act = !vistaGlobal && cat.n.toUpperCase() === categoriaActual;
                 c.innerHTML += `<div class="cat-item ${act?'active':''}" onclick="cambiarCat('${cat.n}')"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;
             });
         }
+        function cambiarCat(n) { vistaGlobal = false; categoriaActual = n.toUpperCase(); renderCats(); cargarPrendas(); }
 
-        function cambiarCat(n) {
-            vistaGlobal = false;
-            categoriaActual = n.toUpperCase();
-            document.getElementById('btn-home').classList.add('active');
-            document.getElementById('btn-archive').classList.remove('active');
-            renderCats(); cargarPrendas();
-        }
-
-        window.onload = () => { 
-            renderCats(); 
-            startGoogle(); 
-            actualizarClima(); 
-        };
+        window.onload = () => { renderCats(); startGoogle(); actualizarClima(); };
     </script>
 </body>
 </html>

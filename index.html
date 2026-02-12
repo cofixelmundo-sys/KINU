@@ -20,7 +20,13 @@
             --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
-        * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; user-select: none; }
+        * { 
+            box-sizing: border-box; 
+            transition: all 0.2s ease; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none; 
+            -webkit-user-select: none;
+        }
 
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
@@ -50,8 +56,26 @@
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); text-align: center; position: relative; }
-        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
+        
+        /* TARJETA CON BLOQUEO DE MENÚ NATIVO */
+        .prenda-card { 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 20px; 
+            padding: 10px; 
+            border: 1px solid rgba(255,255,255,0.05); 
+            text-align: center; 
+            position: relative;
+            -webkit-touch-callout: none; /* Bloquea menú 'Guardar Imagen' en iOS */
+            touch-action: manipulation;
+        }
+        .prenda-card img { 
+            width: 100%; 
+            height: 140px; 
+            object-fit: cover; 
+            border-radius: 15px; 
+            margin-bottom: 8px; 
+            pointer-events: none; /* Evita que el navegador detecte la imagen al tocar */
+        }
         .prenda-card span { color: white; font-size: 9px; font-weight: 600; text-transform: uppercase; opacity: 0.7; }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
@@ -226,7 +250,6 @@
         async function moverPrendaCategoria(nuevaCat) {
             cerrarModales();
             try {
-                // El nombre en Drive es KINU_CATEGORIA_TIMESTAMP
                 const partes = nombreSeleccionado.split('_');
                 partes[1] = nuevaCat;
                 const nuevoNombre = partes.join('_');
@@ -292,7 +315,7 @@
                     card.className = 'prenda-card';
                     card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${categoriaActual}</span>`;
                     
-                    // EVENTOS LONG PRESS
+                    // --- EVENTOS LONG PRESS CON BLOQUEO NATIVO ---
                     let timer;
                     card.addEventListener('touchstart', (e) => {
                         timer = setTimeout(() => {
@@ -300,10 +323,12 @@
                             nombreSeleccionado = f.name;
                             document.getElementById('prenda-nombre-header').innerText = categoriaActual;
                             document.getElementById('modal-acciones').style.display = 'flex';
+                            if (navigator.vibrate) navigator.vibrate(50); // Feedback táctil
                         }, 700);
                     });
                     card.addEventListener('touchend', () => clearTimeout(timer));
                     card.addEventListener('touchmove', () => clearTimeout(timer));
+                    card.addEventListener('contextmenu', (e) => e.preventDefault()); // Bloquea menú secundario
 
                     grid.appendChild(card);
                 });

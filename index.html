@@ -57,7 +57,6 @@
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
         
-        /* TARJETA CON BLOQUEO DE MENÚ NATIVO */
         .prenda-card { 
             background: rgba(255,255,255,0.1); 
             border-radius: 20px; 
@@ -65,7 +64,7 @@
             border: 1px solid rgba(255,255,255,0.05); 
             text-align: center; 
             position: relative;
-            -webkit-touch-callout: none; /* Bloquea menú 'Guardar Imagen' en iOS */
+            -webkit-touch-callout: none;
             touch-action: manipulation;
         }
         .prenda-card img { 
@@ -74,7 +73,7 @@
             object-fit: cover; 
             border-radius: 15px; 
             margin-bottom: 8px; 
-            pointer-events: none; /* Evita que el navegador detecte la imagen al tocar */
+            pointer-events: none;
         }
         .prenda-card span { color: white; font-size: 9px; font-weight: 600; text-transform: uppercase; opacity: 0.7; }
 
@@ -99,6 +98,14 @@
         .btn-cerrar { background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 12px; margin-top: 15px; text-transform: uppercase; cursor: pointer; }
         
         .action-btn { width: 100%; padding: 18px; border: none; background: var(--arena-boton); color: var(--verde-oscuro); font-weight: 700; border-radius: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+
+        /* MODAL CONFIRMACIÓN ESTILO KINU */
+        .confirm-box { text-align: center; }
+        .confirm-title { font-weight: 800; text-transform: uppercase; font-size: 14px; color: var(--verde-oscuro); margin-bottom: 10px; letter-spacing: 1px; }
+        .confirm-text { font-size: 11px; color: var(--verde-oliva); margin-bottom: 25px; text-transform: uppercase; font-weight: 600; opacity: 0.8; }
+        .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-confirm-delete { background: var(--rojo-borrar); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 800; text-transform: uppercase; font-size: 10px; cursor: pointer; }
+        .btn-confirm-cancel { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 800; text-transform: uppercase; font-size: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -139,7 +146,7 @@
         </div>
     </div>
 
-    <div id="modal-studio" class="modal-overlay" style="display: none;">
+    <div id="modal-studio" class="modal-overlay">
         <iframe src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe>
     </div>
 
@@ -154,16 +161,22 @@
     <div id="modal-acciones" class="modal-overlay">
         <div class="modal-content" style="max-width: 340px;">
             <div id="prenda-nombre-header" style="font-size: 13px; font-weight: 800; color: var(--verde-oliva); text-transform: uppercase; text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px;">GESTIONAR</div>
-            
-            <button class="action-btn" onclick="abrirSelectorMover()">
-                <span>Mover Categoría</span><i class="ph ph-arrows-left-right"></i>
-            </button>
-            
-            <button class="action-btn" style="background: #fcecec; color: var(--rojo-borrar);" onclick="borrarPrenda()">
-                <span>Eliminar Prenda</span><i class="ph ph-trash"></i>
-            </button>
-            
+            <button class="action-btn" onclick="abrirSelectorMover()"><span>Mover Categoría</span><i class="ph ph-arrows-left-right"></i></button>
+            <button class="action-btn" style="background: #fcecec; color: var(--rojo-borrar);" onclick="mostrarConfirmarBorrado()"><span>Eliminar Prenda</span><i class="ph ph-trash"></i></button>
             <center><button onclick="cerrarModales()" class="btn-cerrar">CERRAR</button></center>
+        </div>
+    </div>
+
+    <div id="modal-confirmar" class="modal-overlay">
+        <div class="modal-content" style="max-width: 300px;">
+            <div class="confirm-box">
+                <div class="confirm-title">¿ELIMINAR PRENDA?</div>
+                <div class="confirm-text">Esta acción no se puede deshacer.</div>
+                <div class="confirm-actions">
+                    <button class="btn-confirm-cancel" onclick="cerrarModales()">NO, VOLVER</button>
+                    <button class="btn-confirm-delete" onclick="borrarPrenda()">SÍ, BORRAR</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -181,7 +194,6 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- ESTUDIO AI ---
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -190,7 +202,6 @@
                     sessionStorage.setItem('imagen_para_procesar', base64);
                     const modal = document.getElementById('modal-studio');
                     const iframe = modal.querySelector('iframe');
-                    
                     const receptorListo = (event) => {
                         if (event.data.type === 'STUDIO_LISTO') {
                             iframe.contentWindow.postMessage({ type: 'PROCESAR_IMAGEN_DIRECTA', data: base64 }, '*');
@@ -214,7 +225,6 @@
             if (event.data.type === "CERRAR_STUDIO") cerrarModales();
         });
 
-        // --- SELECTORES ---
         function abrirSelectorGuardado() {
             const list = document.getElementById('cat-save-list');
             list.innerHTML = '';
@@ -222,11 +232,7 @@
                 const btn = document.createElement('button');
                 btn.className = 'cat-btn-mini';
                 btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
-                btn.onclick = () => {
-                    categoriaActual = cat.n.toUpperCase();
-                    cerrarModales();
-                    ejecutarSubidaDrive();
-                };
+                btn.onclick = () => { categoriaActual = cat.n.toUpperCase(); cerrarModales(); ejecutarSubidaDrive(); };
                 list.appendChild(btn);
             });
             document.getElementById('modal-categoria').style.display = 'flex';
@@ -246,25 +252,27 @@
             document.getElementById('modal-categoria').style.display = 'flex';
         }
 
-        // --- GESTIÓN (MOVER / ELIMINAR) ---
+        function mostrarConfirmarBorrado() {
+            document.getElementById('modal-acciones').style.display = 'none';
+            document.getElementById('modal-confirmar').style.display = 'flex';
+        }
+
         async function moverPrendaCategoria(nuevaCat) {
             cerrarModales();
             try {
                 const partes = nombreSeleccionado.split('_');
                 partes[1] = nuevaCat;
                 const nuevoNombre = partes.join('_');
-
                 await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
                     method: 'PATCH',
                     headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: nuevoNombre })
                 });
                 cargarPrendas();
-            } catch (e) { alert("Error al mover"); }
+            } catch (e) {}
         }
 
         async function borrarPrenda() {
-            if(!confirm("¿Eliminar prenda?")) return;
             cerrarModales();
             try {
                 await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
@@ -275,24 +283,18 @@
             } catch(e) {}
         }
 
-        // --- DRIVE CORE ---
         async function ejecutarSubidaDrive() {
             if (!accessToken || !imagenParaGuardar) return;
             try {
                 const response = await fetch(imagenParaGuardar);
                 const blob = await response.blob();
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                const nombreArchivo = `KINU_${categoriaActual}_${Date.now()}.png`;
-
-                const metadata = { name: nombreArchivo, parents: [folderId] };
+                const metadata = { name: `KINU_${categoriaActual}_${Date.now()}.png`, parents: [folderId] };
                 const formData = new FormData();
                 formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
                 formData.append('file', blob);
-
                 await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + accessToken },
-                    body: formData
+                    method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: formData
                 });
                 cargarPrendas();
             } catch (e) {}
@@ -301,7 +303,7 @@
         async function cargarPrendas() {
             if(!accessToken) return;
             const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Cargando...</p>';
+            grid.innerHTML = '<p style=\"grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;\">Cargando...</p>';
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
                 const q = `'${folderId}' in parents and name contains 'KINU_${categoriaActual}' and trashed = false`;
@@ -313,29 +315,24 @@
                 data.files?.forEach(f => {
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
-                    card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${categoriaActual}</span>`;
-                    
-                    // --- EVENTOS LONG PRESS CON BLOQUEO NATIVO ---
+                    card.innerHTML = `<img src=\"${f.thumbnailLink.replace('=s220','=s500')}\"><span>${categoriaActual}</span>`;
                     let timer;
                     card.addEventListener('touchstart', (e) => {
                         timer = setTimeout(() => {
-                            idSeleccionado = f.id;
-                            nombreSeleccionado = f.name;
+                            idSeleccionado = f.id; nombreSeleccionado = f.name;
                             document.getElementById('prenda-nombre-header').innerText = categoriaActual;
                             document.getElementById('modal-acciones').style.display = 'flex';
-                            if (navigator.vibrate) navigator.vibrate(50); // Feedback táctil
+                            if (navigator.vibrate) navigator.vibrate(50);
                         }, 700);
                     });
                     card.addEventListener('touchend', () => clearTimeout(timer));
                     card.addEventListener('touchmove', () => clearTimeout(timer));
-                    card.addEventListener('contextmenu', (e) => e.preventDefault()); // Bloquea menú secundario
-
+                    card.addEventListener('contextmenu', (e) => e.preventDefault());
                     grid.appendChild(card);
                 });
             } catch(e) {}
         }
 
-        // --- AUXILIARES ---
         async function obtenerOCrearCarpeta(n) {
             const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
             const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
@@ -359,23 +356,15 @@
         }
 
         function manejarDrive() { if (!accessToken) tokenClient.requestAccessToken(); }
-        function actualizarDriveUI(v) { 
-            document.getElementById('auth-btn').classList.toggle('vinculado', v); 
-            document.getElementById('drive-label').innerText = v ? "CONECTADO" : "SIN VINCULAR";
-        }
+        function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); document.getElementById('drive-label').innerText = v ? "CONECTADO" : "SIN VINCULAR"; }
         function renderCats() {
             const c = document.getElementById('main-cats'); c.innerHTML = '';
             categorias.forEach(cat => {
                 const act = cat.n.toUpperCase() === categoriaActual;
-                c.innerHTML += `<div class="cat-item ${act?'active':''}" onclick="cambiarCat(this,'${cat.n}')"><div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span></div>`;
+                c.innerHTML += `<div class=\"cat-item ${act?'active':''}\" onclick=\"cambiarCat(this,'${cat.n}')\"><div class=\"cat-circle\"><i class=\"ph ${cat.i}\"></i></div><span class=\"cat-label\">${cat.n}</span></div>`;
             });
         }
-        function cambiarCat(el,n) {
-            document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('active'));
-            el.classList.add('active'); 
-            categoriaActual = n.toUpperCase(); 
-            cargarPrendas();
-        }
+        function cambiarCat(el,n) { document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); categoriaActual = n.toUpperCase(); cargarPrendas(); }
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
 
         async function actualizarClima() {

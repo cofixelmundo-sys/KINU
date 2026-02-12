@@ -86,9 +86,19 @@
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 26px; }
 
-        /* MODALES */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); }
-        .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 380px; padding: 25px; }
+        /* MODALES - TRANSPARENCIA CORREGIDA (Menos oscura) */
+        .modal-overlay { 
+            position: fixed; inset: 0; 
+            background: rgba(0,0,0,0.4); /* Antes 0.8, ahora 0.4 para mayor claridad */
+            display: none; align-items: center; justify-content: center; 
+            z-index: 9999; backdrop-filter: blur(4px); 
+        }
+        .modal-content { 
+            background: var(--arena-claro); 
+            border-radius: 35px; width: 90%; 
+            max-width: 380px; padding: 25px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
         
         .cat-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
         .cat-btn-mini { background: var(--arena-boton); border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
@@ -99,7 +109,7 @@
         
         .action-btn { width: 100%; padding: 18px; border: none; background: var(--arena-boton); color: var(--verde-oscuro); font-weight: 700; border-radius: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
 
-        /* MODAL CONFIRMACIÓN ESTILO KINU */
+        /* MODAL CONFIRMACIÓN */
         .confirm-box { text-align: center; }
         .confirm-title { font-weight: 800; text-transform: uppercase; font-size: 14px; color: var(--verde-oscuro); margin-bottom: 10px; letter-spacing: 1px; }
         .confirm-text { font-size: 11px; color: var(--verde-oliva); margin-bottom: 25px; text-transform: uppercase; font-weight: 600; opacity: 0.8; }

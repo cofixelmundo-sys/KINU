@@ -1,3 +1,7 @@
+    <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>KINU - Smart Closet</title>
     
@@ -16,14 +20,14 @@
             --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
-        /* Bloqueo total de menús nativos del navegador */
+        /* BLOQUEO DE MENÚS CONTEXTUALES NATIVOS */
         * { 
             box-sizing: border-box; 
             transition: all 0.2s ease; 
             -webkit-tap-highlight-color: transparent; 
             user-select: none; 
             -webkit-user-select: none;
-            -webkit-touch-callout: none; /* Evita menú de copiar/pegar en iOS */
+            -webkit-touch-callout: none; /* Bloquea menú "Guardar imagen" en iOS */
         }
 
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
@@ -45,7 +49,7 @@
         
         /* CATEGORÍAS */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 5px 5px 20px; scrollbar-width: none; width: 100%; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; opacity: 0.5; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; opacity: 0.4; }
         .cat-item.active { opacity: 1; }
         .cat-circle { width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
         .cat-item.active .cat-circle { background: white; }
@@ -53,7 +57,7 @@
         .cat-item.active i { color: var(--verde-oscuro); }
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
 
-        /* SLIDER INICIO */
+        /* SLIDER AUTO-SCROLL */
         .onboarding-container { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
         .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 10px 20px 30px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; scroll-behavior: smooth; }
         .slider-wrapper::-webkit-scrollbar { display: none; }
@@ -62,12 +66,13 @@
         .step-card h3 { color: var(--verde-oscuro); font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; }
         .step-card p { color: var(--verde-oliva); font-size: 11px; font-weight: 600; text-transform: uppercase; line-height: 1.6; margin: 0; opacity: 0.8; }
 
-        /* GRID PRENDAS */
+        /* GRID */
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
         .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); text-align: center; position: relative; }
         .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
         .prenda-card span { color: white; font-size: 9px; font-weight: 600; text-transform: uppercase; opacity: 0.7; }
 
+        /* NAVEGACIÓN */
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.4; cursor: pointer; }
@@ -85,10 +90,6 @@
         .cat-btn-mini i { font-size: 20px; color: var(--verde-oscuro); }
         .cat-btn-mini span { font-size: 8px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; }
         .btn-cerrar { background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 12px; margin-top: 15px; text-transform: uppercase; }
-        
-        .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .btn-del { background: var(--rojo-borrar); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 800; font-size: 10px; }
-        .btn-can { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 800; font-size: 10px; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -129,28 +130,22 @@
     </div>
 
     <div id="modal-studio" class="modal-overlay"><iframe src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe></div>
-    
+
     <div id="modal-acciones" class="modal-overlay">
         <div class="modal-content" style="max-width: 340px;">
-            <div id="prenda-nombre-header" style="font-size: 13px; font-weight: 800; color: var(--verde-oliva); text-transform: uppercase; text-align: center; margin-bottom: 20px;">GESTIONAR</div>
-            <button class="action-btn" style="background: #fcecec; color: var(--rojo-borrar);" onclick="mostrarConfirmar()"><span>Eliminar Prenda</span><i class="ph ph-trash"></i></button>
+            <div id="prenda-nombre-header" style="font-size: 13px; font-weight: 800; color: var(--verde-oliva); text-transform: uppercase; text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px;">GESTIONAR</div>
+            <button class="action-btn" onclick="abrirSelectorMover()"><span>Mover Categoría</span><i class="ph ph-arrows-left-right"></i></button>
+            <button class="action-btn" style="background: #fcecec; color: var(--rojo-borrar);" onclick="mostrarConfirmarBorrado()"><span>Eliminar Prenda</span><i class="ph ph-trash"></i></button>
             <center><button onclick="cerrarModales()" class="btn-cerrar">CERRAR</button></center>
         </div>
     </div>
 
-    <div id="modal-confirmar" class="modal-overlay">
-        <div class="modal-content" style="max-width: 300px; text-align: center;">
-            <div style="font-weight: 800; font-size: 14px; color: var(--verde-oscuro); margin-bottom: 10px;">¿ELIMINAR ESTA PRENDA?</div>
-            <div style="font-size: 10px; color: var(--verde-oliva); font-weight: 600;">Esta acción es permanente.</div>
-            <div class="confirm-actions">
-                <button class="btn-can" onclick="cerrarModales()">CANCELAR</button>
-                <button class="btn-del" onclick="ejecutarBorrado()">ELIMINAR</button>
-            </div>
-        </div>
-    </div>
-
     <div id="modal-categoria" class="modal-overlay">
-        <div class="modal-content"><div id="cat-save-list" class="cat-grid-mini"></div><center><button onclick="cerrarModales()" class="btn-cerrar">Cancelar</button></center></div>
+        <div class="modal-content">
+            <div id="cat-title-modal" style="font-weight: 800; text-align: center; text-transform: uppercase; font-size: 13px; color: var(--verde-oliva); margin-bottom: 15px;">Seleccionar</div>
+            <div id="cat-save-list" class="cat-grid-mini"></div>
+            <center><button onclick="cerrarModales()" class="btn-cerrar">Cancelar</button></center>
+        </div>
     </div>
 
     <script>
@@ -158,7 +153,7 @@
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token');
         let tokenClient, imagenParaGuardar, categoriaActual = '';
-        let intervalSlider, idSeleccionado, timerPulsacion;
+        let intervalSlider, idSeleccionado, timerPulsacion, modoMover = false;
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -222,16 +217,13 @@
                 
                 if(!data.files || data.files.length === 0) { grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Vacío</p>'; return; }
 
-                let files = data.files;
-                if(todo) files.sort((a,b) => (a.name.split('_')[1]||"").localeCompare(b.name.split('_')[1]||""));
-
-                files.forEach(f => {
+                data.files.forEach(f => {
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
                     const catLabel = f.name.split('_')[1] || "---";
                     card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${catLabel}</span>`;
                     
-                    // --- LÓGICA DE PULSACIÓN LARGA ---
+                    // LÓGICA DE PULSACIÓN LARGA REINSTAURADA
                     card.ontouchstart = () => {
                         timerPulsacion = setTimeout(() => {
                             idSeleccionado = f.id;
@@ -248,19 +240,41 @@
             } catch(e) {}
         }
 
-        function mostrarConfirmar() { document.getElementById('modal-acciones').style.display = 'none'; document.getElementById('modal-confirmar').style.display = 'flex'; }
+        // GESTIÓN DE PRENDAS
+        function mostrarConfirmarBorrado() {
+            if(confirm("¿Eliminar prenda definitivamente?")) ejecutarBorrado();
+        }
 
         async function ejecutarBorrado() {
-            if(!idSeleccionado) return;
             cerrarModales();
             try {
-                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
-                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken }
-                });
-                cargarPrendas(categoriaActual === ''); 
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken } });
+                cargarPrendas(categoriaActual === '');
             } catch(e) {}
         }
 
+        function abrirSelectorMover() {
+            modoMover = true;
+            document.getElementById('modal-acciones').style.display = 'none';
+            document.getElementById('cat-title-modal').innerText = "Mover a:";
+            abrirSelectorCategorias();
+        }
+
+        async function moverCategoria(nuevaCat) {
+            cerrarModales();
+            try {
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}?fields=name`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+                const data = await res.json();
+                const nuevoNombre = data.name.replace(/KINU_.*?_/, `KINU_${nuevaCat.toUpperCase()}_`);
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
+                    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: nuevoNombre })
+                });
+                cargarPrendas(categoriaActual === '');
+            } catch(e) {}
+        }
+
+        // CARGAS Y NAVEGACIÓN
         async function cargarTodoElCloset() {
             document.getElementById('btn-home').classList.remove('active');
             document.getElementById('btn-archivador').classList.add('active');
@@ -284,6 +298,23 @@
             });
         }
 
+        function abrirSelectorCategorias() {
+            const list = document.getElementById('cat-save-list');
+            list.innerHTML = '';
+            categorias.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'cat-btn-mini';
+                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
+                btn.onclick = () => {
+                    if(modoMover) moverCategoria(cat.n);
+                    else { categoriaActual = cat.n.toUpperCase(); cerrarModales(); ejecutarSubidaDrive(); }
+                };
+                list.appendChild(btn);
+            });
+            document.getElementById('modal-categoria').style.display = 'flex';
+        }
+
+        // STUDIO Y DRIVE
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -301,23 +332,12 @@
             if (event.data.type === "IMAGEN_LISTA") {
                 imagenParaGuardar = event.data.data;
                 document.getElementById('modal-studio').style.display = 'none';
-                abrirSelectorGuardado();
+                modoMover = false;
+                document.getElementById('cat-title-modal').innerText = "Clasificar Prenda";
+                abrirSelectorCategorias();
             }
             if (event.data.type === "CERRAR_STUDIO") cerrarModales();
         });
-
-        function abrirSelectorGuardado() {
-            const list = document.getElementById('cat-save-list');
-            list.innerHTML = '';
-            categorias.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.className = 'cat-btn-mini';
-                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
-                btn.onclick = () => { categoriaActual = cat.n.toUpperCase(); cerrarModales(); ejecutarSubidaDrive(); };
-                list.appendChild(btn);
-            });
-            document.getElementById('modal-categoria').style.display = 'flex';
-        }
 
         async function ejecutarSubidaDrive() {
             if (!accessToken || !imagenParaGuardar) return;
@@ -351,7 +371,7 @@
         }
         function manejarDrive() { if (!accessToken) tokenClient.requestAccessToken(); }
         function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); document.getElementById('drive-label').innerText = v ? "CONECTADO" : "SIN VINCULAR"; }
-        function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
+        function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); modoMover = false; }
         async function actualizarClima() { try { const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true'); const data = await res.json(); document.getElementById('w-temp').innerText = Math.round(data.current_weather.temperature) + '°'; document.getElementById('w-city').innerText = "MONTEVIDEO"; } catch(e) {} }
 
         window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); actualizarClima(); };

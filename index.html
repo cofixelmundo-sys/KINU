@@ -47,38 +47,25 @@
         
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         
-        /* CARRUSEL AUTO-SCROLL */
+        /* SLIDER AUTO-SCROLL */
         .onboarding-container { display: flex; flex-direction: column; align-items: center; padding-top: 20px; }
         .welcome-title { color: white; font-weight: 800; font-size: 18px; letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase; }
         .slider-wrapper { 
-            width: 100%; 
-            overflow-x: auto; 
-            display: flex; 
-            gap: 20px; 
-            padding: 10px 20px 40px; 
-            scroll-snap-type: x mandatory; 
-            scrollbar-width: none; 
-            scroll-behavior: smooth; /* Para que el movimiento automático sea fluido */
+            width: 100%; display: flex; gap: 20px; padding: 10px 20px 40px; 
+            overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; scroll-behavior: smooth; 
         }
         .slider-wrapper::-webkit-scrollbar { display: none; }
-        
         .step-card { 
-            min-width: 80%; 
-            background: var(--arena-claro); 
-            border-radius: 30px; 
-            padding: 40px 25px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            text-align: center; 
-            scroll-snap-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            min-width: 85%; background: var(--arena-claro); border-radius: 30px; padding: 40px 25px; 
+            display: flex; flex-direction: column; align-items: center; text-align: center; 
+            scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
         .step-card i { font-size: 50px; color: var(--verde-oliva); margin-bottom: 20px; }
-        .step-card h3 { color: var(--verde-oscuro); font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; }
+        .step-card h3 { color: var(--verde-oscuro); font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; }
         .step-card p { color: var(--verde-oliva); font-size: 11px; font-weight: 600; text-transform: uppercase; line-height: 1.6; margin: 0; opacity: 0.8; }
 
-        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 20px; scrollbar-width: none; }
+        /* CATEGORÍAS EN EL ARCHIVADOR */
+        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 5px 5px 20px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; opacity: 0.5; }
         .cat-item.active { opacity: 1; }
         .cat-circle { width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
@@ -96,19 +83,17 @@
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.4; cursor: pointer; }
         .nav-icon.active { opacity: 1; }
-        
-        .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; }
+        .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; z-index: 100; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 26px; }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
-        .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 380px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 380px; padding: 25px; }
         .cat-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .cat-btn-mini { background: var(--arena-boton); border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+        .cat-btn-mini { background: var(--arena-boton); border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .cat-btn-mini i { font-size: 20px; color: var(--verde-oscuro); }
         .cat-btn-mini span { font-size: 8px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; }
-        .btn-cerrar { background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 12px; margin-top: 15px; text-transform: uppercase; cursor: pointer; }
-        .action-btn { width: 100%; padding: 18px; border: none; background: var(--arena-boton); color: var(--verde-oscuro); font-weight: 700; border-radius: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .btn-cerrar { background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 12px; margin-top: 15px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -148,14 +133,13 @@
 
     <div id="modal-studio" class="modal-overlay"><iframe src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe></div>
     <div id="modal-categoria" class="modal-overlay"><div class="modal-content"><div style="font-weight: 800; text-align: center; text-transform: uppercase; font-size: 13px; color: var(--verde-oliva); margin-bottom: 15px;">Clasificar Prenda</div><div id="cat-save-list" class="cat-grid-mini"></div><center><button onclick="cerrarModales()" class="btn-cerrar">Cancelar</button></center></div></div>
-    <div id="modal-acciones" class="modal-overlay"><div class="modal-content" style="max-width: 340px;"><div id="prenda-nombre-header" style="font-size: 13px; font-weight: 800; color: var(--verde-oliva); text-transform: uppercase; text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px;">GESTIONAR</div><button class="action-btn" onclick="abrirSelectorMover()"><span>Mover Categoría</span><i class="ph ph-arrows-left-right"></i></button><button class="action-btn" style="background: #fcecec; color: var(--rojo-borrar);" onclick="mostrarConfirmarBorrado()"><span>Eliminar Prenda</span><i class="ph ph-trash"></i></button><center><button onclick="cerrarModales()" class="btn-cerrar">CERRAR</button></center></div></div>
 
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token');
         let tokenClient, imagenParaGuardar, categoriaActual = '';
-        let intervalSlider; // Para controlar el tiempo del slider
+        let intervalSlider;
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -164,32 +148,19 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- INICIO CON AUTO-SLIDER ---
+        // --- VISTA INICIO (SLIDER) ---
         function mostrarInicio() {
-            clearInterval(intervalSlider); // Resetear si ya existe
+            clearInterval(intervalSlider);
             document.getElementById('btn-archivador').classList.remove('active');
             document.getElementById('btn-home').classList.add('active');
-            
             const content = document.getElementById('main-content');
             content.innerHTML = `
                 <div class="onboarding-container">
                     <div class="welcome-title">Bienvenido a KINU</div>
                     <div class="slider-wrapper" id="slider-home">
-                        <div class="step-card">
-                            <i class="ph ph-camera-plus"></i>
-                            <h3>1. Digitaliza</h3>
-                            <p>Toma una foto a tu prenda. Nuestra IA eliminará el fondo automáticamente para un closet limpio.</p>
-                        </div>
-                        <div class="step-card">
-                            <i class="ph ph-tag"></i>
-                            <h3>2. Clasifica</h3>
-                            <p>Guarda tus prendas en categorías. KINU las organiza en tu Google Drive personal.</p>
-                        </div>
-                        <div class="step-card">
-                            <i class="ph ph-sparkle"></i>
-                            <h3>3. Disfruta</h3>
-                            <p>Visualiza todo tu closet desde cualquier lugar y planifica tus mejores looks.</p>
-                        </div>
+                        <div class="step-card"><i class="ph ph-camera-plus"></i><h3>1. Digitaliza</h3><p>Toma una foto a tu prenda. Nuestra IA eliminará el fondo automáticamente.</p></div>
+                        <div class="step-card"><i class="ph ph-tag"></i><h3>2. Clasifica</h3><p>Guarda tus prendas en categorías organizadas en tu Google Drive.</p></div>
+                        <div class="step-card"><i class="ph ph-sparkle"></i><h3>3. Disfruta</h3><p>Visualiza todo tu closet desde cualquier lugar y planifica tus looks.</p></div>
                     </div>
                     <div id="dots-container" style="display:flex; gap:8px; margin-top:15px;">
                         <div class="dot" style="width:8px; height:8px; border-radius:50%; background:white; opacity:1;"></div>
@@ -198,35 +169,33 @@
                     </div>
                 </div>
             `;
-
             iniciarAutoSlider();
         }
 
         function iniciarAutoSlider() {
             const slider = document.getElementById('slider-home');
             const dots = document.querySelectorAll('.dot');
-            let currentIdx = 0;
-
+            let idx = 0;
             intervalSlider = setInterval(() => {
-                currentIdx++;
-                if (currentIdx > 2) currentIdx = 0; // Vuelve al inicio
-
-                const cardWidth = slider.querySelector('.step-card').clientWidth + 20; // Ancho + gap
-                slider.scrollTo({ left: cardWidth * currentIdx, behavior: 'smooth' });
-
-                // Actualizar puntitos (indicadores)
-                dots.forEach((dot, i) => dot.style.opacity = i === currentIdx ? "1" : "0.3");
-            }, 3000); // 3 segundos
+                idx = (idx + 1) % 3;
+                const cardWidth = slider.querySelector('.step-card').clientWidth + 20;
+                slider.scrollTo({ left: cardWidth * idx, behavior: 'smooth' });
+                dots.forEach((dot, i) => dot.style.opacity = i === idx ? "1" : "0.3");
+            }, 3000);
         }
 
-        // --- CLOSET ---
+        // --- VISTA ARCHIVADOR (CATEGORÍAS + CLOSET) ---
         async function cargarTodoElCloset() {
             clearInterval(intervalSlider);
             document.getElementById('btn-home').classList.remove('active');
             document.getElementById('btn-archivador').classList.add('active');
+            categoriaActual = ''; // Reset para mostrar todo al entrar
             
             const content = document.getElementById('main-content');
-            content.innerHTML = `<div class="filter-scroll" id="main-cats"></div><div class="closet-grid" id="closet-grid"></div>`;
+            content.innerHTML = `
+                <div class="filter-scroll" id="main-cats"></div>
+                <div class="closet-grid" id="closet-grid"></div>
+            `;
             renderCats();
             cargarPrendas(true); 
         }
@@ -243,8 +212,12 @@
                 const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)&pageSize=100`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
                 const data = await res.json();
                 grid.innerHTML = '';
-                if(!data.files || data.files.length === 0) { grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Vacío</p>'; return; }
                 
+                if(!data.files || data.files.length === 0) {
+                    grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Vacío</p>';
+                    return;
+                }
+
                 let files = data.files;
                 if(todo) files.sort((a,b) => (a.name.split('_')[1]||"").localeCompare(b.name.split('_')[1]||""));
 
@@ -258,18 +231,25 @@
             } catch(e) {}
         }
 
-        // --- UTILIDADES ---
         function renderCats() {
-            const c = document.getElementById('main-cats'); if(!c) return;
+            const container = document.getElementById('main-cats');
+            if(!container) return;
+            container.innerHTML = '';
             categorias.forEach(cat => {
                 const div = document.createElement('div');
                 div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
-                div.onclick = () => { categoriaActual = cat.n.toUpperCase(); document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('active')); div.classList.add('active'); cargarPrendas(false); };
+                div.onclick = () => {
+                    categoriaActual = cat.n.toUpperCase();
+                    document.querySelectorAll('.cat-item').forEach(i => i.classList.remove('active'));
+                    div.classList.add('active');
+                    cargarPrendas(false);
+                };
                 div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
-                c.appendChild(div);
+                container.appendChild(div);
             });
         }
 
+        // --- DRIVE Y ESTUDIO ---
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -281,6 +261,43 @@
                 };
                 reader.readAsDataURL(input.files[0]);
             }
+        }
+
+        window.addEventListener("message", (event) => {
+            if (event.data.type === "IMAGEN_LISTA") {
+                imagenParaGuardar = event.data.data;
+                document.getElementById('modal-studio').style.display = 'none';
+                abrirSelectorGuardado();
+            }
+            if (event.data.type === "CERRAR_STUDIO") cerrarModales();
+        });
+
+        function abrirSelectorGuardado() {
+            const list = document.getElementById('cat-save-list');
+            list.innerHTML = '';
+            categorias.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'cat-btn-mini';
+                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
+                btn.onclick = () => { categoriaActual = cat.n.toUpperCase(); cerrarModales(); ejecutarSubidaDrive(); };
+                list.appendChild(btn);
+            });
+            document.getElementById('modal-categoria').style.display = 'flex';
+        }
+
+        async function ejecutarSubidaDrive() {
+            if (!accessToken || !imagenParaGuardar) return;
+            try {
+                const response = await fetch(imagenParaGuardar);
+                const blob = await response.blob();
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                const metadata = { name: `KINU_${categoriaActual}_${Date.now()}.png`, parents: [folderId] };
+                const formData = new FormData();
+                formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+                formData.append('file', blob);
+                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: formData });
+                cargarTodoElCloset();
+            } catch (e) {}
         }
 
         async function obtenerOCrearCarpeta(n) {

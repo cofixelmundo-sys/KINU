@@ -20,23 +20,23 @@
             --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
+        /* Bloqueo total de menús nativos del navegador */
         * { 
             box-sizing: border-box; 
             transition: all 0.2s ease; 
             -webkit-tap-highlight-color: transparent; 
             user-select: none; 
             -webkit-user-select: none;
+            -webkit-touch-callout: none; /* Evita menú de copiar/pegar en iOS */
         }
 
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
         
         header { padding: calc(env(safe-area-inset-top) + 15px) 15px 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; }
-
         .header-info-box { display: flex; flex-direction: column; align-items: center; min-width: 80px; }
         .info-main-text { font-size: 16px; font-weight: 800; color: white; line-height: 1; margin: 4px 0; }
         .info-sub-text { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); text-align: center; }
-        
         .header-center { display: flex; flex-direction: column; align-items: center; flex: 1; }
         .logo-header { width: 65px; height: auto; }
         .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 13px; text-transform: uppercase; }
@@ -57,18 +57,11 @@
         .cat-item.active i { color: var(--verde-oscuro); }
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
 
-        /* SLIDER AUTO-SCROLL */
+        /* SLIDER INICIO */
         .onboarding-container { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
-        .slider-wrapper { 
-            width: 100%; display: flex; gap: 20px; padding: 10px 20px 30px; 
-            overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; scroll-behavior: smooth; 
-        }
+        .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 10px 20px 30px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; scroll-behavior: smooth; }
         .slider-wrapper::-webkit-scrollbar { display: none; }
-        .step-card { 
-            min-width: 85%; background: var(--arena-claro); border-radius: 30px; padding: 40px 25px; 
-            display: flex; flex-direction: column; align-items: center; text-align: center; 
-            scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
+        .step-card { min-width: 85%; background: var(--arena-claro); border-radius: 30px; padding: 40px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
         .step-card i { font-size: 50px; color: var(--verde-oliva); margin-bottom: 20px; }
         .step-card h3 { color: var(--verde-oscuro); font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; }
         .step-card p { color: var(--verde-oliva); font-size: 11px; font-weight: 600; text-transform: uppercase; line-height: 1.6; margin: 0; opacity: 0.8; }
@@ -87,16 +80,22 @@
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 26px; }
 
+        /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
         .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 380px; padding: 25px; }
+        .action-btn { width: 100%; padding: 18px; border: none; background: var(--arena-boton); color: var(--verde-oscuro); font-weight: 700; border-radius: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .cat-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
         .cat-btn-mini { background: var(--arena-boton); border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .cat-btn-mini i { font-size: 20px; color: var(--verde-oscuro); }
         .cat-btn-mini span { font-size: 8px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; }
         .btn-cerrar { background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 12px; margin-top: 15px; text-transform: uppercase; }
+        
+        .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn-del { background: var(--rojo-borrar); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 800; font-size: 10px; }
+        .btn-can { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 800; font-size: 10px; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     <div class="main-container">
         <header>
@@ -119,8 +118,7 @@
         
         <div class="filter-scroll" id="main-cats"></div>
 
-        <div class="content" id="main-content">
-            </div>
+        <div class="content" id="main-content"></div>
 
         <div class="nav-wrapper">
             <nav>
@@ -135,14 +133,36 @@
     </div>
 
     <div id="modal-studio" class="modal-overlay"><iframe src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe></div>
-    <div id="modal-categoria" class="modal-overlay"><div class="modal-content"><div style="font-weight: 800; text-align: center; text-transform: uppercase; font-size: 13px; color: var(--verde-oliva); margin-bottom: 15px;">Clasificar Prenda</div><div id="cat-save-list" class="cat-grid-mini"></div><center><button onclick="cerrarModales()" class="btn-cerrar">Cancelar</button></center></div></div>
+    
+    <div id="modal-acciones" class="modal-overlay">
+        <div class="modal-content" style="max-width: 340px;">
+            <div id="prenda-nombre-header" style="font-size: 13px; font-weight: 800; color: var(--verde-oliva); text-transform: uppercase; text-align: center; margin-bottom: 20px;">GESTIONAR</div>
+            <button class="action-btn" style="background: #fcecec; color: var(--rojo-borrar);" onclick="mostrarConfirmar()"><span>Eliminar Prenda</span><i class="ph ph-trash"></i></button>
+            <center><button onclick="cerrarModales()" class="btn-cerrar">CERRAR</button></center>
+        </div>
+    </div>
+
+    <div id="modal-confirmar" class="modal-overlay">
+        <div class="modal-content" style="max-width: 300px; text-align: center;">
+            <div style="font-weight: 800; font-size: 14px; color: var(--verde-oscuro); margin-bottom: 10px;">¿ELIMINAR ESTA PRENDA?</div>
+            <div style="font-size: 10px; color: var(--verde-oliva); font-weight: 600;">Esta acción es permanente.</div>
+            <div class="confirm-actions">
+                <button class="btn-can" onclick="cerrarModales()">CANCELAR</button>
+                <button class="btn-del" onclick="ejecutarBorrado()">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-categoria" class="modal-overlay">
+        <div class="modal-content"><div id="cat-save-list" class="cat-grid-mini"></div><center><button onclick="cerrarModales()" class="btn-cerrar">Cancelar</button></center></div>
+    </div>
 
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token');
         let tokenClient, imagenParaGuardar, categoriaActual = '';
-        let intervalSlider;
+        let intervalSlider, idSeleccionado, timerPulsacion;
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -151,16 +171,11 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- INICIO CON SLIDER ---
         function mostrarInicio() {
             clearInterval(intervalSlider);
             document.getElementById('btn-archivador').classList.remove('active');
             document.getElementById('btn-home').classList.add('active');
-            
-            // Limpiamos selección de categorías visualmente
-            categoriaActual = '';
-            renderCats();
-
+            categoriaActual = ''; renderCats();
             const content = document.getElementById('main-content');
             content.innerHTML = `
                 <div class="onboarding-container">
@@ -193,14 +208,11 @@
             }, 3000);
         }
 
-        // --- CARGAR PRENDAS POR CATEGORÍA ---
         async function cargarPrendas(todo = false) {
-            clearInterval(intervalSlider); // Si carga prendas, para el slider
+            clearInterval(intervalSlider);
             if(!accessToken) return;
-            
             const content = document.getElementById('main-content');
             content.innerHTML = `<div class="closet-grid" id="closet-grid"></div>`;
-            
             const grid = document.getElementById('closet-grid');
             grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Cargando...</p>';
             
@@ -212,10 +224,7 @@
                 const data = await res.json();
                 grid.innerHTML = '';
                 
-                if(!data.files || data.files.length === 0) {
-                    grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Vacío</p>';
-                    return;
-                }
+                if(!data.files || data.files.length === 0) { grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Vacío</p>'; return; }
 
                 let files = data.files;
                 if(todo) files.sort((a,b) => (a.name.split('_')[1]||"").localeCompare(b.name.split('_')[1]||""));
@@ -223,19 +232,43 @@
                 files.forEach(f => {
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
-                    const cat = f.name.split('_')[1] || "---";
-                    card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${cat}</span>`;
+                    const catLabel = f.name.split('_')[1] || "---";
+                    card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${catLabel}</span>`;
+                    
+                    // --- LÓGICA DE PULSACIÓN LARGA ---
+                    card.ontouchstart = () => {
+                        timerPulsacion = setTimeout(() => {
+                            idSeleccionado = f.id;
+                            document.getElementById('prenda-nombre-header').innerText = catLabel;
+                            document.getElementById('modal-acciones').style.display = 'flex';
+                            if(navigator.vibrate) navigator.vibrate(60);
+                        }, 800);
+                    };
+                    card.ontouchend = () => clearTimeout(timerPulsacion);
+                    card.ontouchmove = () => clearTimeout(timerPulsacion);
+                    
                     grid.appendChild(card);
                 });
+            } catch(e) {}
+        }
+
+        function mostrarConfirmar() { document.getElementById('modal-acciones').style.display = 'none'; document.getElementById('modal-confirmar').style.display = 'flex'; }
+
+        async function ejecutarBorrado() {
+            if(!idSeleccionado) return;
+            cerrarModales();
+            try {
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
+                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                cargarPrendas(categoriaActual === ''); 
             } catch(e) {}
         }
 
         async function cargarTodoElCloset() {
             document.getElementById('btn-home').classList.remove('active');
             document.getElementById('btn-archivador').classList.add('active');
-            categoriaActual = '';
-            renderCats();
-            cargarPrendas(true);
+            categoriaActual = ''; renderCats(); cargarPrendas(true);
         }
 
         function renderCats() {
@@ -248,15 +281,13 @@
                     document.getElementById('btn-home').classList.remove('active');
                     document.getElementById('btn-archivador').classList.remove('active');
                     categoriaActual = cat.n.toUpperCase();
-                    renderCats();
-                    cargarPrendas(false);
+                    renderCats(); cargarPrendas(false);
                 };
                 div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
                 container.appendChild(div);
             });
         }
 
-        // --- OTROS ---
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -268,6 +299,43 @@
                 };
                 reader.readAsDataURL(input.files[0]);
             }
+        }
+
+        window.addEventListener("message", (event) => {
+            if (event.data.type === "IMAGEN_LISTA") {
+                imagenParaGuardar = event.data.data;
+                document.getElementById('modal-studio').style.display = 'none';
+                abrirSelectorGuardado();
+            }
+            if (event.data.type === "CERRAR_STUDIO") cerrarModales();
+        });
+
+        function abrirSelectorGuardado() {
+            const list = document.getElementById('cat-save-list');
+            list.innerHTML = '';
+            categorias.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'cat-btn-mini';
+                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
+                btn.onclick = () => { categoriaActual = cat.n.toUpperCase(); cerrarModales(); ejecutarSubidaDrive(); };
+                list.appendChild(btn);
+            });
+            document.getElementById('modal-categoria').style.display = 'flex';
+        }
+
+        async function ejecutarSubidaDrive() {
+            if (!accessToken || !imagenParaGuardar) return;
+            try {
+                const response = await fetch(imagenParaGuardar);
+                const blob = await response.blob();
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                const metadata = { name: `KINU_${categoriaActual}_${Date.now()}.png`, parents: [folderId] };
+                const formData = new FormData();
+                formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+                formData.append('file', blob);
+                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: formData });
+                cargarTodoElCloset();
+            } catch (e) {}
         }
 
         async function obtenerOCrearCarpeta(n) {

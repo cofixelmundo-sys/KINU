@@ -47,27 +47,36 @@
         
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         
-        /* CARRUSEL DE APRENDIZAJE */
+        /* CARRUSEL AUTO-SCROLL */
         .onboarding-container { display: flex; flex-direction: column; align-items: center; padding-top: 20px; }
         .welcome-title { color: white; font-weight: 800; font-size: 18px; letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase; }
-        .slider-wrapper { width: 100%; overflow-x: auto; display: flex; gap: 20px; padding: 10px 20px 40px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+        .slider-wrapper { 
+            width: 100%; 
+            overflow-x: auto; 
+            display: flex; 
+            gap: 20px; 
+            padding: 10px 20px 40px; 
+            scroll-snap-type: x mandatory; 
+            scrollbar-width: none; 
+            scroll-behavior: smooth; /* Para que el movimiento automático sea fluido */
+        }
         .slider-wrapper::-webkit-scrollbar { display: none; }
         
         .step-card { 
             min-width: 80%; 
             background: var(--arena-claro); 
             border-radius: 30px; 
-            padding: 30px 20px; 
+            padding: 40px 25px; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             text-align: center; 
             scroll-snap-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
-        .step-card i { font-size: 45px; color: var(--verde-oliva); margin-bottom: 20px; }
-        .step-card h3 { color: var(--verde-oscuro); font-size: 14px; font-weight: 800; text-transform: uppercase; margin: 0 0 10px; letter-spacing: 1px; }
-        .step-card p { color: var(--verde-oliva); font-size: 11px; font-weight: 600; text-transform: uppercase; line-height: 1.5; margin: 0; opacity: 0.8; }
+        .step-card i { font-size: 50px; color: var(--verde-oliva); margin-bottom: 20px; }
+        .step-card h3 { color: var(--verde-oscuro); font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; }
+        .step-card p { color: var(--verde-oliva); font-size: 11px; font-weight: 600; text-transform: uppercase; line-height: 1.6; margin: 0; opacity: 0.8; }
 
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 10px 5px 20px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; opacity: 0.5; }
@@ -79,15 +88,7 @@
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 6px; text-transform: uppercase; }
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
-        
-        .prenda-card { 
-            background: rgba(255,255,255,0.1); 
-            border-radius: 20px; 
-            padding: 10px; 
-            border: 1px solid rgba(255,255,255,0.05); 
-            text-align: center; 
-            position: relative;
-        }
+        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); text-align: center; position: relative; }
         .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
         .prenda-card span { color: white; font-size: 9px; font-weight: 600; text-transform: uppercase; opacity: 0.7; }
 
@@ -108,13 +109,6 @@
         .cat-btn-mini span { font-size: 8px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; }
         .btn-cerrar { background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 12px; margin-top: 15px; text-transform: uppercase; cursor: pointer; }
         .action-btn { width: 100%; padding: 18px; border: none; background: var(--arena-boton); color: var(--verde-oscuro); font-weight: 700; border-radius: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        
-        .confirm-box { text-align: center; }
-        .confirm-title { font-weight: 800; text-transform: uppercase; font-size: 14px; color: var(--verde-oscuro); margin-bottom: 10px; letter-spacing: 1px; }
-        .confirm-text { font-size: 11px; color: var(--verde-oliva); margin-bottom: 25px; text-transform: uppercase; font-weight: 600; opacity: 0.8; }
-        .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-confirm-delete { background: var(--rojo-borrar); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 800; text-transform: uppercase; font-size: 10px; cursor: pointer; }
-        .btn-confirm-cancel { background: var(--verde-oscuro); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 800; text-transform: uppercase; font-size: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -138,8 +132,7 @@
             </div>
         </header>
         
-        <div class="content" id="main-content">
-            </div>
+        <div class="content" id="main-content"></div>
 
         <div class="nav-wrapper">
             <nav>
@@ -153,43 +146,16 @@
         </div>
     </div>
 
-    <div id="modal-studio" class="modal-overlay">
-        <iframe src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe>
-    </div>
-    <div id="modal-categoria" class="modal-overlay">
-        <div class="modal-content">
-            <div style="font-weight: 800; text-align: center; text-transform: uppercase; font-size: 13px; color: var(--verde-oliva); margin-bottom: 15px;">Clasificar Prenda</div>
-            <div id="cat-save-list" class="cat-grid-mini"></div>
-            <center><button onclick="cerrarModales()" class="btn-cerrar">Cancelar</button></center>
-        </div>
-    </div>
-    <div id="modal-acciones" class="modal-overlay">
-        <div class="modal-content" style="max-width: 340px;">
-            <div id="prenda-nombre-header" style="font-size: 13px; font-weight: 800; color: var(--verde-oliva); text-transform: uppercase; text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px;">GESTIONAR</div>
-            <button class="action-btn" onclick="abrirSelectorMover()"><span>Mover Categoría</span><i class="ph ph-arrows-left-right"></i></button>
-            <button class="action-btn" style="background: #fcecec; color: var(--rojo-borrar);" onclick="mostrarConfirmarBorrado()"><span>Eliminar Prenda</span><i class="ph ph-trash"></i></button>
-            <center><button onclick="cerrarModales()" class="btn-cerrar">CERRAR</button></center>
-        </div>
-    </div>
-    <div id="modal-confirmar" class="modal-overlay">
-        <div class="modal-content" style="max-width: 300px;">
-            <div class="confirm-box">
-                <div class="confirm-title">¿ELIMINAR PRENDA?</div>
-                <div class="confirm-text">Esta acción no se puede deshacer.</div>
-                <div class="confirm-actions">
-                    <button class="btn-confirm-cancel" onclick="cerrarModales()">NO, VOLVER</button>
-                    <button class="btn-confirm-delete" onclick="borrarPrenda()">SÍ, BORRAR</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="modal-studio" class="modal-overlay"><iframe src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe></div>
+    <div id="modal-categoria" class="modal-overlay"><div class="modal-content"><div style="font-weight: 800; text-align: center; text-transform: uppercase; font-size: 13px; color: var(--verde-oliva); margin-bottom: 15px;">Clasificar Prenda</div><div id="cat-save-list" class="cat-grid-mini"></div><center><button onclick="cerrarModales()" class="btn-cerrar">Cancelar</button></center></div></div>
+    <div id="modal-acciones" class="modal-overlay"><div class="modal-content" style="max-width: 340px;"><div id="prenda-nombre-header" style="font-size: 13px; font-weight: 800; color: var(--verde-oliva); text-transform: uppercase; text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px;">GESTIONAR</div><button class="action-btn" onclick="abrirSelectorMover()"><span>Mover Categoría</span><i class="ph ph-arrows-left-right"></i></button><button class="action-btn" style="background: #fcecec; color: var(--rojo-borrar);" onclick="mostrarConfirmarBorrado()"><span>Eliminar Prenda</span><i class="ph ph-trash"></i></button><center><button onclick="cerrarModales()" class="btn-cerrar">CERRAR</button></center></div></div>
 
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token');
         let tokenClient, imagenParaGuardar, categoriaActual = '';
-        let idSeleccionado, nombreSeleccionado;
+        let intervalSlider; // Para controlar el tiempo del slider
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -198,17 +164,17 @@
             {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
         ];
 
-        // --- NAVEGACIÓN INICIO (SLIDER) ---
+        // --- INICIO CON AUTO-SLIDER ---
         function mostrarInicio() {
+            clearInterval(intervalSlider); // Resetear si ya existe
             document.getElementById('btn-archivador').classList.remove('active');
             document.getElementById('btn-home').classList.add('active');
-            categoriaActual = ''; // Limpiar categoria activa
             
             const content = document.getElementById('main-content');
             content.innerHTML = `
                 <div class="onboarding-container">
                     <div class="welcome-title">Bienvenido a KINU</div>
-                    <div class="slider-wrapper">
+                    <div class="slider-wrapper" id="slider-home">
                         <div class="step-card">
                             <i class="ph ph-camera-plus"></i>
                             <h3>1. Digitaliza</h3>
@@ -225,21 +191,42 @@
                             <p>Visualiza todo tu closet desde cualquier lugar y planifica tus mejores looks.</p>
                         </div>
                     </div>
-                    <p style="color: white; font-size: 9px; opacity: 0.5; font-weight: 700; text-transform: uppercase;">Desliza para aprender <i class="ph ph-arrow-right"></i></p>
+                    <div id="dots-container" style="display:flex; gap:8px; margin-top:15px;">
+                        <div class="dot" style="width:8px; height:8px; border-radius:50%; background:white; opacity:1;"></div>
+                        <div class="dot" style="width:8px; height:8px; border-radius:50%; background:white; opacity:0.3;"></div>
+                        <div class="dot" style="width:8px; height:8px; border-radius:50%; background:white; opacity:0.3;"></div>
+                    </div>
                 </div>
             `;
+
+            iniciarAutoSlider();
         }
 
-        // --- CARGA DE CLOSET ---
+        function iniciarAutoSlider() {
+            const slider = document.getElementById('slider-home');
+            const dots = document.querySelectorAll('.dot');
+            let currentIdx = 0;
+
+            intervalSlider = setInterval(() => {
+                currentIdx++;
+                if (currentIdx > 2) currentIdx = 0; // Vuelve al inicio
+
+                const cardWidth = slider.querySelector('.step-card').clientWidth + 20; // Ancho + gap
+                slider.scrollTo({ left: cardWidth * currentIdx, behavior: 'smooth' });
+
+                // Actualizar puntitos (indicadores)
+                dots.forEach((dot, i) => dot.style.opacity = i === currentIdx ? "1" : "0.3");
+            }, 3000); // 3 segundos
+        }
+
+        // --- CLOSET ---
         async function cargarTodoElCloset() {
+            clearInterval(intervalSlider);
             document.getElementById('btn-home').classList.remove('active');
             document.getElementById('btn-archivador').classList.add('active');
             
             const content = document.getElementById('main-content');
-            content.innerHTML = `
-                <div class="filter-scroll" id="main-cats"></div>
-                <div class="closet-grid" id="closet-grid"></div>
-            `;
+            content.innerHTML = `<div class="filter-scroll" id="main-cats"></div><div class="closet-grid" id="closet-grid"></div>`;
             renderCats();
             cargarPrendas(true); 
         }
@@ -251,125 +238,49 @@
             grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Cargando...</p>';
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                const filtroNombre = todo ? "KINU_" : `KINU_${categoriaActual}`;
-                const q = `'${folderId}' in parents and name contains '${filtroNombre}' and trashed = false`;
-                
-                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)&pageSize=100`, {
-                    headers: { 'Authorization': 'Bearer ' + accessToken }
-                });
+                const filtro = todo ? "KINU_" : `KINU_${categoriaActual}`;
+                const q = `'${folderId}' in parents and name contains '${filtro}' and trashed = false`;
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)&pageSize=100`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
                 const data = await res.json();
                 grid.innerHTML = '';
+                if(!data.files || data.files.length === 0) { grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">Vacío</p>'; return; }
                 
-                if(!data.files || data.files.length === 0) {
-                    grid.innerHTML = '<p style="grid-column:1/-1; color:white; text-align:center; opacity:0.5; font-size:12px;">No hay prendas aquí</p>';
-                    return;
-                }
+                let files = data.files;
+                if(todo) files.sort((a,b) => (a.name.split('_')[1]||"").localeCompare(b.name.split('_')[1]||""));
 
-                let listaFinal = data.files;
-                if (todo) {
-                    listaFinal.sort((a, b) => (a.name.split('_')[1] || "").localeCompare(b.name.split('_')[1] || ""));
-                }
-
-                listaFinal.forEach(f => {
+                files.forEach(f => {
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
-                    const catLabel = f.name.split('_')[1] || "---";
-                    card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${catLabel}</span>`;
-                    
-                    let timer;
-                    card.addEventListener('touchstart', () => {
-                        timer = setTimeout(() => {
-                            idSeleccionado = f.id; nombreSeleccionado = f.name;
-                            document.getElementById('prenda-nombre-header').innerText = catLabel;
-                            document.getElementById('modal-acciones').style.display = 'flex';
-                            if (navigator.vibrate) navigator.vibrate(50);
-                        }, 700);
-                    });
-                    card.addEventListener('touchend', () => clearTimeout(timer));
-                    card.addEventListener('touchmove', () => clearTimeout(timer));
+                    const cat = f.name.split('_')[1] || "---";
+                    card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${cat}</span>`;
                     grid.appendChild(card);
                 });
             } catch(e) {}
         }
 
-        // --- RESTO DE FUNCIONES (STUDIO, DRIVE, ETC) ---
+        // --- UTILIDADES ---
+        function renderCats() {
+            const c = document.getElementById('main-cats'); if(!c) return;
+            categorias.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
+                div.onclick = () => { categoriaActual = cat.n.toUpperCase(); document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('active')); div.classList.add('active'); cargarPrendas(false); };
+                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
+                c.appendChild(div);
+            });
+        }
+
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const base64 = e.target.result;
-                    sessionStorage.setItem('imagen_para_procesar', base64);
+                    sessionStorage.setItem('imagen_para_procesar', e.target.result);
                     const modal = document.getElementById('modal-studio');
-                    const iframe = modal.querySelector('iframe');
-                    const receptorListo = (event) => {
-                        if (event.data.type === 'STUDIO_LISTO') {
-                            iframe.contentWindow.postMessage({ type: 'PROCESAR_IMAGEN_DIRECTA', data: base64 }, '*');
-                            window.removeEventListener('message', receptorListo);
-                        }
-                    };
-                    window.addEventListener('message', receptorListo);
                     modal.style.display = 'flex';
-                    iframe.src = 'photo_studio.html'; 
+                    modal.querySelector('iframe').src = 'photo_studio.html';
                 };
                 reader.readAsDataURL(input.files[0]);
             }
-        }
-
-        window.addEventListener("message", (event) => {
-            if (event.data.type === "IMAGEN_LISTA") {
-                imagenParaGuardar = event.data.data;
-                document.getElementById('modal-studio').style.display = 'none';
-                abrirSelectorGuardado();
-            }
-            if (event.data.type === "CERRAR_STUDIO") cerrarModales();
-        });
-
-        function abrirSelectorGuardado() {
-            const list = document.getElementById('cat-save-list');
-            list.innerHTML = '';
-            categorias.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.className = 'cat-btn-mini';
-                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
-                btn.onclick = () => { categoriaActual = cat.n.toUpperCase(); cerrarModales(); ejecutarSubidaDrive(); };
-                list.appendChild(btn);
-            });
-            document.getElementById('modal-categoria').style.display = 'flex';
-        }
-
-        async function ejecutarSubidaDrive() {
-            if (!accessToken || !imagenParaGuardar) return;
-            try {
-                const response = await fetch(imagenParaGuardar);
-                const blob = await response.blob();
-                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                const metadata = { name: `KINU_${categoriaActual}_${Date.now()}.png`, parents: [folderId] };
-                const formData = new FormData();
-                formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
-                formData.append('file', blob);
-                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                    method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: formData
-                });
-                cargarTodoElCloset(); // Al subir, vamos al archivador para ver la prenda
-            } catch (e) {}
-        }
-
-        function renderCats() {
-            const c = document.getElementById('main-cats'); if(!c) return;
-            c.innerHTML = '';
-            categorias.forEach(cat => {
-                const act = cat.n.toUpperCase() === categoriaActual;
-                const div = document.createElement('div');
-                div.className = `cat-item ${act?'active':''}`;
-                div.onclick = () => {
-                    document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('active'));
-                    div.classList.add('active');
-                    categoriaActual = cat.n.toUpperCase();
-                    cargarPrendas(false);
-                };
-                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
-                c.appendChild(div);
-            });
         }
 
         async function obtenerOCrearCarpeta(n) {
@@ -377,35 +288,20 @@
             const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
             const d = await r.json();
             if(d.files?.[0]) return d.files[0].id;
-            const res = await fetch('https://www.googleapis.com/drive/v3/files', {
-                method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' })
-            });
+            const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) });
             const f = await res.json(); return f.id;
         }
 
         function startGoogle() {
             gapi.load('client', () => {
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID, scope: SCOPES,
-                    callback: (r) => { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); actualizarDriveUI(true); }
-                });
+                tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: (r) => { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); actualizarDriveUI(true); } });
                 if(accessToken) actualizarDriveUI(true);
             });
         }
-
         function manejarDrive() { if (!accessToken) tokenClient.requestAccessToken(); }
         function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); document.getElementById('drive-label').innerText = v ? "CONECTADO" : "SIN VINCULAR"; }
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
-
-        async function actualizarClima() {
-            try {
-                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true');
-                const data = await res.json();
-                document.getElementById('w-temp').innerText = Math.round(data.current_weather.temperature) + '°';
-                document.getElementById('w-city').innerText = "MONTEVIDEO";
-            } catch(e) {}
-        }
+        async function actualizarClima() { try { const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true'); const data = await res.json(); document.getElementById('w-temp').innerText = Math.round(data.current_weather.temperature) + '°'; document.getElementById('w-city').innerText = "MONTEVIDEO"; } catch(e) {} }
 
         window.onload = () => { mostrarInicio(); startGoogle(); actualizarClima(); };
     </script>

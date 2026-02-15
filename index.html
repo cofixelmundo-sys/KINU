@@ -62,9 +62,11 @@
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
+        
+        /* AJUSTE DE TAMAÑO VERTICAL PARA EVITAR EFECTO APAISADO */
         .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; text-align: center; }
-        .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
-        .prenda-card span { color: white; font-size: 9px; font-weight: 800; text-transform: uppercase; opacity: 0.8; letter-spacing: 0.5px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .prenda-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 15px; margin-bottom: 10px; pointer-events: none; }
+        .prenda-card span { color: white; font-size: 10px; font-weight: 700; text-transform: uppercase; opacity: 0.9; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
@@ -232,7 +234,7 @@
             });
         }
 
-        // CORRECCIÓN: AHORA TRAE EL NOMBRE TAL CUAL ESTÁ EN DRIVE
+        // CARGAR PRENDAS: LIMPIA EL NOMBRE PARA MOSTRAR SOLO EL NOMBRE PERSONALIZADO
         async function cargarPrendas(todo = false) {
             clearInterval(intervalSlider);
             const grid = document.getElementById('main-content');
@@ -249,8 +251,15 @@
                 const card = document.createElement('div');
                 card.className = 'prenda-card';
                 
-                // Quitamos la extensión .png del nombre para mostrarlo limpio
-                const nombreLimpio = f.name.replace('.png', '');
+                // LÓGICA DE LIMPIEZA: KINU_CATEGORIA_Nombre Real.png -> Nombre Real
+                let nombreLimpio = f.name.replace(/\.[^/.]+$/, ""); // Quita extensiones (.png, .jpg)
+                if(nombreLimpio.startsWith('KINU_')) {
+                    const partes = nombreLimpio.split('_');
+                    if(partes.length >= 3) {
+                        // Si tiene el formato KINU_CAT_Nombre, unimos todo lo que viene después de la cat
+                        nombreLimpio = partes.slice(2).join(' ');
+                    }
+                }
 
                 card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombreLimpio}</span>`;
                 
@@ -291,15 +300,12 @@
         }
 
         async function moverPrenda(nuevaCat) {
-            // Mantenemos el nombre original si ya tenía uno personalizado, o actualizamos el prefijo
             let nuevoNom = prendaSeleccionada.name;
             if(nuevoNom.startsWith('KINU_')) {
                 const partes = nuevoNom.split('_');
-                // reemplazamos solo la categoría, mantenemos el resto (ID o nombre personalizado)
                 partes[1] = nuevaCat;
                 nuevoNom = partes.join('_');
             }
-
             await fetch(`https://www.googleapis.com/drive/v3/files/${prendaSeleccionada.id}`, { 
                 method: 'PATCH', 
                 headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, 
@@ -311,7 +317,6 @@
         async function ejecutarSubidaDrive() {
             const blob = await (await fetch(imagenParaGuardar)).blob();
             const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-            // Nombre inicial por defecto: KINU_CATEGORIA_TIMESTAMP
             const metadata = { name: `KINU_${categoriaActual}_${Date.now()}.png`, parents: [folderId] };
             const formData = new FormData();
             formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));

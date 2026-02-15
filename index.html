@@ -32,13 +32,20 @@
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
         
-        header { padding: calc(env(safe-area-inset-top) + 15px) 15px 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        /* HEADER CON LOGO MÁS GRANDE */
+        header { padding: calc(env(safe-area-inset-top) + 10px) 15px 15px; display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .header-info-box { display: flex; flex-direction: column; align-items: center; min-width: 80px; }
         .info-main-text { font-size: 16px; font-weight: 800; color: white; line-height: 1; margin: 4px 0; }
         .info-sub-text { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); text-align: center; font-weight: 700; letter-spacing: 0.5px; }
         .header-center { display: flex; flex-direction: column; align-items: center; flex: 1; }
-        .logo-header { width: 65px; height: auto; }
-        .brand-text { color: white; letter-spacing: 5px; font-weight: 800; font-size: 13px; text-transform: uppercase; }
+        
+        .logo-header { 
+            width: 110px; /* Tamaño aumentado (antes 65px) */
+            height: auto; 
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+            margin-bottom: 2px;
+        }
+        .brand-text { color: white; letter-spacing: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
 
         .drive-btn { background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         .drive-btn img { width: 26px; height: auto; filter: grayscale(1) opacity(0.5); }
@@ -189,7 +196,6 @@
         let accessToken = localStorage.getItem('drive_token'), tokenClient, imagenParaGuardar, categoriaActual = '';
         let intervalSlider, idSeleccionado, timerPulsacion, modoMover = false, prendaActualObj = null;
 
-        // "Colaboro" movido al final de la lista
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
             {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},

@@ -74,16 +74,15 @@
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-        /* MODALES - AJUSTE DE TRANSPARENCIA */
         .modal-overlay { 
             position: fixed; 
             inset: 0; 
-            background: rgba(0,0,0,0.5); /* Antes 0.8, ahora 0.5 para más transparencia */
+            background: rgba(0,0,0,0.5); 
             display: none; 
             align-items: center; 
             justify-content: center; 
             z-index: 9999; 
-            backdrop-filter: blur(4px); /* Menos desenfoque para ver más el fondo */
+            backdrop-filter: blur(4px); 
         }
         .modal-content { 
             background: var(--arena-claro); 
@@ -97,7 +96,6 @@
         
         .btn-accion { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 800; text-transform: uppercase; font-size: 11px; margin-bottom: 10px; cursor: pointer; }
 
-        /* BOTONES DE CATEGORÍA GRANDES */
         .cat-grid-save { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
         .cat-btn-large { 
             background: var(--arena-boton); 
@@ -190,10 +188,11 @@
         let accessToken = localStorage.getItem('drive_token'), tokenClient, imagenParaGuardar, categoriaActual = '', intervalSlider;
         let prendaSeleccionada = null, modoMover = false;
 
+        // CATEGORÍA DEPORTE AGREGADA ENTRE ACCESORIOS Y VINTAGE
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
             {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
-            {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Colaboro', i: 'ph-handshake'}
+            {n: 'Accesorios', i: 'ph-watch'}, {n: 'Deporte', i: 'ph-sneaker-move'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
         async function actualizarClima() {

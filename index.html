@@ -20,7 +20,6 @@
             --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
-        /* BLOQUEO DE ACCIONES NATIVAS */
         * { 
             box-sizing: border-box; 
             transition: all 0.3s ease; 
@@ -65,7 +64,7 @@
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
         .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; text-align: center; }
         .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
-        .prenda-card span { color: white; font-size: 9px; font-weight: 600; text-transform: uppercase; opacity: 0.7; }
+        .prenda-card span { color: white; font-size: 9px; font-weight: 800; text-transform: uppercase; opacity: 0.8; letter-spacing: 0.5px; }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
@@ -75,22 +74,13 @@
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
         .modal-overlay { 
-            position: fixed; 
-            inset: 0; 
-            background: rgba(0,0,0,0.5); 
-            display: none; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 9999; 
-            backdrop-filter: blur(4px); 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
+            display: none; align-items: center; justify-content: center; 
+            z-index: 9999; backdrop-filter: blur(4px); 
         }
         .modal-content { 
-            background: var(--arena-claro); 
-            border-radius: 30px; 
-            width: 90%; 
-            max-width: 360px; 
-            padding: 25px; 
-            text-align: center;
+            background: var(--arena-claro); border-radius: 30px; 
+            width: 90%; max-width: 360px; padding: 25px; text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
         
@@ -98,15 +88,9 @@
 
         .cat-grid-save { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
         .cat-btn-large { 
-            background: var(--arena-boton); 
-            border: none; 
-            padding: 18px 10px; 
-            border-radius: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 8px;
-            cursor: pointer;
+            background: var(--arena-boton); border: none; padding: 18px 10px; 
+            border-radius: 20px; display: flex; flex-direction: column; 
+            align-items: center; gap: 8px; cursor: pointer;
         }
         .cat-btn-large i { font-size: 32px; color: var(--verde-oscuro); }
         .cat-btn-large span { font-size: 9px; font-weight: 800; text-transform: uppercase; color: var(--verde-oscuro); }
@@ -188,7 +172,6 @@
         let accessToken = localStorage.getItem('drive_token'), tokenClient, imagenParaGuardar, categoriaActual = '', intervalSlider;
         let prendaSeleccionada = null, modoMover = false;
 
-        // CATEGORÍA DEPORTE AGREGADA ENTRE ACCESORIOS Y VINTAGE
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
             {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
@@ -249,22 +232,37 @@
             });
         }
 
+        // CARGAR PRENDAS CON NOMBRES ÚNICOS
         async function cargarPrendas(todo = false) {
             clearInterval(intervalSlider);
             const grid = document.getElementById('main-content');
             grid.innerHTML = '<div class="closet-grid" id="closet-grid"></div>';
             const container = document.getElementById('closet-grid');
             if(!accessToken) return;
+
             const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
             const q = `'${folderId}' in parents and name contains '${todo ? "KINU_" : "KINU_"+categoriaActual+"_"}' and trashed = false`;
             const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
             const data = await res.json();
+            
             data.files?.forEach(f => {
                 const card = document.createElement('div');
                 card.className = 'prenda-card';
-                card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${f.name.split('_')[1]}</span>`;
+                
+                // Lógica de nombre: KINU_CATEGORIA_TIMESTAMP.png -> CATEGORIA #XXXX
+                const partes = f.name.split('_');
+                const timestamp = partes[2] ? partes[2].replace('.png','') : "";
+                const idCorto = timestamp ? timestamp.substring(timestamp.length - 4) : "00";
+                const nombreMostrar = `${partes[1]} #${idCorto}`;
+
+                card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombreMostrar}</span>`;
+                
                 let t;
-                card.ontouchstart = () => t = setTimeout(() => { prendaSeleccionada = f; document.getElementById('prenda-nombre-modal').innerText = f.name.split('_')[1]; document.getElementById('modal-prenda').style.display = 'flex'; }, 600);
+                card.ontouchstart = () => t = setTimeout(() => { 
+                    prendaSeleccionada = f; 
+                    document.getElementById('prenda-nombre-modal').innerText = nombreMostrar; 
+                    document.getElementById('modal-prenda').style.display = 'flex'; 
+                }, 600);
                 card.ontouchend = () => clearTimeout(t);
                 container.appendChild(card);
             });
@@ -297,7 +295,11 @@
 
         async function moverPrenda(n) {
             const nuevoNom = `KINU_${n}_${Date.now()}.png`;
-            await fetch(`https://www.googleapis.com/drive/v3/files/${prendaSeleccionada.id}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: nuevoNom }) });
+            await fetch(`https://www.googleapis.com/drive/v3/files/${prendaSeleccionada.id}`, { 
+                method: 'PATCH', 
+                headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ name: nuevoNom }) 
+            });
             categoriaActual = n; renderCats(); cargarPrendas(false);
         }
 

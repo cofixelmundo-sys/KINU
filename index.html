@@ -20,7 +20,7 @@
             --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
-        /* BLOQUEO DE ACCIONES NATIVAS DEL EXPLORADOR */
+        /* BLOQUEO DE ACCIONES NATIVAS */
         * { 
             box-sizing: border-box; 
             transition: all 0.3s ease; 
@@ -51,6 +51,7 @@
         .drive-btn img { width: 26px; height: auto; filter: grayscale(1) opacity(0.5); }
         .drive-btn.vinculado img { filter: grayscale(0) opacity(1); }
         
+        /* CATEGORÍAS EN HOME */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 5px 20px 20px; scrollbar-width: none; scroll-behavior: smooth; }
         .filter-scroll::-webkit-scrollbar { display: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; opacity: 0.4; cursor: pointer; }
@@ -74,11 +75,30 @@
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-        /* MODALES ESTILO KINU */
+        /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--arena-claro); border-radius: 30px; width: 85%; max-width: 320px; padding: 25px; text-align: center; }
-        .btn-accion { width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: 800; text-transform: uppercase; font-size: 10px; margin-bottom: 10px; cursor: pointer; }
+        .modal-content { background: var(--arena-claro); border-radius: 30px; width: 90%; max-width: 360px; padding: 25px; text-align: center; }
         
+        /* BOTONES DE ACCIÓN (GENERAL) */
+        .btn-accion { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 800; text-transform: uppercase; font-size: 11px; margin-bottom: 10px; cursor: pointer; }
+
+        /* AJUSTE: BOTONES DE CATEGORÍA MÁS GRANDES */
+        .cat-grid-save { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
+        .cat-btn-large { 
+            background: var(--arena-boton); 
+            border: none; 
+            padding: 18px 10px; 
+            border-radius: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 8px;
+            cursor: pointer;
+        }
+        .cat-btn-large i { font-size: 32px; color: var(--verde-oscuro); }
+        .cat-btn-large span { font-size: 9px; font-weight: 800; text-transform: uppercase; color: var(--verde-oscuro); }
+
+        /* SLIDER INICIO */
         .slider-wrapper { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 10px; }
         .step-card { min-width: 85%; background: var(--arena-claro); border-radius: 30px; padding: 40px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; }
         .step-card i { font-size: 50px; color: var(--verde-oliva); margin-bottom: 20px; }
@@ -90,7 +110,7 @@
     <div class="main-container">
         <header>
             <div class="header-info-box">
-                <i class="ph ph-sun" id="w-icon" style="font-size: 20px; color: white"></i>
+                <i class="ph ph-sun" id="w-icon" style="font-size: 22px; color: white"></i>
                 <span class="info-main-text" id="w-temp">--°</span>
                 <span class="info-sub-text" id="w-city">...</span>
             </div>
@@ -123,28 +143,28 @@
 
     <div id="modal-prenda" class="modal-overlay">
         <div class="modal-content">
-            <div id="prenda-nombre-modal" style="font-weight:900; text-transform:uppercase; font-size:12px; color:var(--verde-oscuro); margin-bottom:20px;">Prenda</div>
+            <div id="prenda-nombre-modal" style="font-weight:900; text-transform:uppercase; font-size:13px; color:var(--verde-oscuro); margin-bottom:20px;">Prenda</div>
             <button onclick="abrirSelectorCategorias(true)" class="btn-accion" style="background:var(--verde-oscuro); color:white;">Mover de Categoría</button>
             <button onclick="confirmarBorrado()" class="btn-accion" style="background:var(--rojo-borrar); color:white;">Eliminar Prenda</button>
-            <button onclick="cerrarModales()" style="background:none; border:none; color:var(--verde-oliva); font-weight:800; font-size: 10px; text-transform:uppercase; margin-top:10px;">Cerrar</button>
+            <button onclick="cerrarModales()" style="background:none; border:none; color:var(--verde-oliva); font-weight:800; font-size: 11px; text-transform:uppercase; margin-top:10px;">Cerrar</button>
         </div>
     </div>
 
     <div id="modal-confirm" class="modal-overlay">
         <div class="modal-content">
-            <i class="ph ph-warning-circle" style="font-size:40px; color:var(--rojo-borrar); margin-bottom:10px; display:block;"></i>
+            <i class="ph ph-warning-circle" style="font-size:48px; color:var(--rojo-borrar); margin-bottom:10px; display:block;"></i>
             <div style="font-weight:900; text-transform:uppercase; font-size:14px; color:var(--verde-oscuro); margin-bottom:10px;">¿Eliminar prenda?</div>
-            <p style="font-size:10px; color:var(--verde-oliva); font-weight:600; text-transform:uppercase; margin-bottom:20px;">Esta acción no se puede deshacer.</p>
-            <button onclick="ejecutarBorradoReal()" class="btn-accion" style="background:var(--rojo-borrar); color:white;">Confirmar</button>
+            <p style="font-size:10px; color:var(--verde-oliva); font-weight:600; text-transform:uppercase; margin-bottom:20px;">Se borrará de tu nube permanentemente.</p>
+            <button onclick="ejecutarBorradoReal()" class="btn-accion" style="background:var(--rojo-borrar); color:white;">Sí, Eliminar</button>
             <button onclick="cerrarConfirm()" style="background:var(--arena-boton); color:var(--verde-oscuro);" class="btn-accion">Cancelar</button>
         </div>
     </div>
 
     <div id="modal-categoria" class="modal-overlay">
         <div class="modal-content">
-            <div id="cat-title" style="font-weight: 800; text-transform: uppercase; font-size: 11px; margin-bottom: 15px; color: var(--verde-oscuro);">Seleccionar:</div>
-            <div id="cat-save-list" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;"></div>
-            <button onclick="cerrarModales()" style="background:none; border:none; color:var(--verde-oliva); font-weight:800; margin-top:20px; text-transform: uppercase; font-size: 10px;">CANCELAR</button>
+            <div id="cat-title" style="font-weight: 800; text-transform: uppercase; font-size: 12px; margin-bottom: 20px; color: var(--verde-oscuro);">Seleccionar:</div>
+            <div id="cat-save-list" class="cat-grid-save"></div>
+            <button onclick="cerrarModales()" style="background:none; border:none; color:var(--verde-oliva); font-weight:800; margin-top:25px; text-transform: uppercase; font-size: 11px;">CANCELAR</button>
         </div>
     </div>
 
@@ -162,7 +182,7 @@
             {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
-        // CLIMA POR IP (SIN POPUPS)
+        // CLIMA POR IP (ACTUALIZADO)
         async function actualizarClima() {
             try {
                 const geo = await fetch('https://ipapi.co/json/');
@@ -249,15 +269,17 @@
             cerrarConfirm(); cargarPrendas(false);
         }
 
+        // AJUSTADO: ABRIR SELECTOR CON BOTONES MÁS GRANDES
         function abrirSelectorCategorias(mover = false) {
             modoMover = mover;
             document.getElementById('modal-prenda').style.display = 'none';
+            document.getElementById('cat-title').innerText = mover ? "MOVER A:" : "GUARDAR EN:";
             const list = document.getElementById('cat-save-list');
             list.innerHTML = '';
             categorias.forEach(cat => {
                 const b = document.createElement('button');
-                b.style = "background:var(--arena-boton); border:none; padding:12px; border-radius:15px; display:flex; flex-direction:column; align-items:center; gap:5px;";
-                b.innerHTML = `<i class="ph ${cat.i}"></i><span style="font-size:7px; font-weight:800; text-transform:uppercase;">${cat.n}</span>`;
+                b.className = 'cat-btn-large';
+                b.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
                 b.onclick = () => { if(mover) moverPrenda(cat.n.toUpperCase()); else { categoriaActual = cat.n.toUpperCase(); ejecutarSubidaDrive(); } cerrarModales(); };
                 list.appendChild(b);
             });

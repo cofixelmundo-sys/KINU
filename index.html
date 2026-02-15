@@ -51,7 +51,6 @@
         .drive-btn img { width: 26px; height: auto; filter: grayscale(1) opacity(0.5); }
         .drive-btn.vinculado img { filter: grayscale(0) opacity(1); }
         
-        /* CATEGORÍAS EN HOME */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 5px 20px 20px; scrollbar-width: none; scroll-behavior: smooth; }
         .filter-scroll::-webkit-scrollbar { display: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; opacity: 0.4; cursor: pointer; }
@@ -75,14 +74,30 @@
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-        /* MODALES */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--arena-claro); border-radius: 30px; width: 90%; max-width: 360px; padding: 25px; text-align: center; }
+        /* MODALES - AJUSTE DE TRANSPARENCIA */
+        .modal-overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.5); /* Antes 0.8, ahora 0.5 para más transparencia */
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 9999; 
+            backdrop-filter: blur(4px); /* Menos desenfoque para ver más el fondo */
+        }
+        .modal-content { 
+            background: var(--arena-claro); 
+            border-radius: 30px; 
+            width: 90%; 
+            max-width: 360px; 
+            padding: 25px; 
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
         
-        /* BOTONES DE ACCIÓN (GENERAL) */
         .btn-accion { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 800; text-transform: uppercase; font-size: 11px; margin-bottom: 10px; cursor: pointer; }
 
-        /* AJUSTE: BOTONES DE CATEGORÍA MÁS GRANDES */
+        /* BOTONES DE CATEGORÍA GRANDES */
         .cat-grid-save { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
         .cat-btn-large { 
             background: var(--arena-boton); 
@@ -98,7 +113,6 @@
         .cat-btn-large i { font-size: 32px; color: var(--verde-oscuro); }
         .cat-btn-large span { font-size: 9px; font-weight: 800; text-transform: uppercase; color: var(--verde-oscuro); }
 
-        /* SLIDER INICIO */
         .slider-wrapper { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 10px; }
         .step-card { min-width: 85%; background: var(--arena-claro); border-radius: 30px; padding: 40px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; }
         .step-card i { font-size: 50px; color: var(--verde-oliva); margin-bottom: 20px; }
@@ -168,7 +182,7 @@
         </div>
     </div>
 
-    <div id="modal-studio" class="modal-overlay" style="background:black;"><iframe id="iframe-studio" src="" style="width:100%; height:100%; border:none;"></iframe></div>
+    <div id="modal-studio" class="modal-overlay" style="background:black; backdrop-filter: none;"><iframe id="iframe-studio" src="" style="width:100%; height:100%; border:none;"></iframe></div>
 
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
@@ -182,7 +196,6 @@
             {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
-        // CLIMA POR IP (ACTUALIZADO)
         async function actualizarClima() {
             try {
                 const geo = await fetch('https://ipapi.co/json/');
@@ -190,11 +203,9 @@
                 const lat = geoData.latitude || -34.90;
                 const lon = geoData.longitude || -56.16;
                 const city = (geoData.city || "KINU").toUpperCase();
-
                 const weather = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
                 const wData = await weather.json();
                 const temp = Math.round(wData.current_weather.temperature);
-                
                 document.getElementById('w-temp').innerText = temp + '°';
                 document.getElementById('w-city').innerText = city;
                 document.getElementById('w-icon').className = temp > 22 ? "ph ph-sun" : "ph ph-cloud-sun";
@@ -269,7 +280,6 @@
             cerrarConfirm(); cargarPrendas(false);
         }
 
-        // AJUSTADO: ABRIR SELECTOR CON BOTONES MÁS GRANDES
         function abrirSelectorCategorias(mover = false) {
             modoMover = mover;
             document.getElementById('modal-prenda').style.display = 'none';

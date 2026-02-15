@@ -20,7 +20,7 @@
             --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
-        /* BLOQUEO DE ACCIONES NATIVAS */
+        /* BLOQUEO DE ACCIONES NATIVAS DEL EXPLORADOR */
         * { 
             box-sizing: border-box; 
             transition: all 0.3s ease; 
@@ -51,7 +51,6 @@
         .drive-btn img { width: 26px; height: auto; filter: grayscale(1) opacity(0.5); }
         .drive-btn.vinculado img { filter: grayscale(0) opacity(1); }
         
-        /* CATEGORÍAS */
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 5px 20px 20px; scrollbar-width: none; scroll-behavior: smooth; }
         .filter-scroll::-webkit-scrollbar { display: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; opacity: 0.4; cursor: pointer; }
@@ -63,14 +62,11 @@
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 8px; text-transform: uppercase; }
 
         .content { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
-
-        /* GRID */
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
         .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; text-align: center; }
         .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
         .prenda-card span { color: white; font-size: 9px; font-weight: 600; text-transform: uppercase; opacity: 0.7; }
 
-        /* NAV */
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.4; }
@@ -78,12 +74,11 @@
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-        /* MODALES */
+        /* MODALES ESTILO KINU */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px); }
         .modal-content { background: var(--arena-claro); border-radius: 30px; width: 85%; max-width: 320px; padding: 25px; text-align: center; }
-        .btn-accion { width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: 800; text-transform: uppercase; font-size: 10px; margin-bottom: 10px; }
+        .btn-accion { width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: 800; text-transform: uppercase; font-size: 10px; margin-bottom: 10px; cursor: pointer; }
         
-        /* SLIDER INICIO */
         .slider-wrapper { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 10px; }
         .step-card { min-width: 85%; background: var(--arena-claro); border-radius: 30px; padding: 40px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; }
         .step-card i { font-size: 50px; color: var(--verde-oliva); margin-bottom: 20px; }
@@ -97,7 +92,7 @@
             <div class="header-info-box">
                 <i class="ph ph-sun" id="w-icon" style="font-size: 20px; color: white"></i>
                 <span class="info-main-text" id="w-temp">--°</span>
-                <span class="info-sub-text" id="w-city">KINU</span>
+                <span class="info-sub-text" id="w-city">...</span>
             </div>
             <div style="text-align:center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
@@ -138,16 +133,16 @@
     <div id="modal-confirm" class="modal-overlay">
         <div class="modal-content">
             <i class="ph ph-warning-circle" style="font-size:40px; color:var(--rojo-borrar); margin-bottom:10px; display:block;"></i>
-            <div style="font-weight:900; text-transform:uppercase; font-size:14px; color:var(--verde-oscuro); margin-bottom:10px;">¿Estás seguro?</div>
-            <p style="font-size:10px; color:var(--verde-oliva); font-weight:600; text-transform:uppercase; margin-bottom:20px;">Esta prenda se eliminará permanentemente de tu Drive.</p>
-            <button onclick="ejecutarBorradoReal()" class="btn-accion" style="background:var(--rojo-borrar); color:white;">Sí, Eliminar</button>
+            <div style="font-weight:900; text-transform:uppercase; font-size:14px; color:var(--verde-oscuro); margin-bottom:10px;">¿Eliminar prenda?</div>
+            <p style="font-size:10px; color:var(--verde-oliva); font-weight:600; text-transform:uppercase; margin-bottom:20px;">Esta acción no se puede deshacer.</p>
+            <button onclick="ejecutarBorradoReal()" class="btn-accion" style="background:var(--rojo-borrar); color:white;">Confirmar</button>
             <button onclick="cerrarConfirm()" style="background:var(--arena-boton); color:var(--verde-oscuro);" class="btn-accion">Cancelar</button>
         </div>
     </div>
 
     <div id="modal-categoria" class="modal-overlay">
         <div class="modal-content">
-            <div id="cat-title" style="font-weight: 800; text-transform: uppercase; font-size: 11px; margin-bottom: 15px; color: var(--verde-oscuro);">Guardar en:</div>
+            <div id="cat-title" style="font-weight: 800; text-transform: uppercase; font-size: 11px; margin-bottom: 15px; color: var(--verde-oscuro);">Seleccionar:</div>
             <div id="cat-save-list" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;"></div>
             <button onclick="cerrarModales()" style="background:none; border:none; color:var(--verde-oliva); font-weight:800; margin-top:20px; text-transform: uppercase; font-size: 10px;">CANCELAR</button>
         </div>
@@ -167,15 +162,23 @@
             {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
-        // CLIMA SIN PEDIR PERMISO (COORDENADAS FIJAS)
+        // CLIMA POR IP (SIN POPUPS)
         async function actualizarClima() {
             try {
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true`);
-                const data = await res.json();
-                const temp = Math.round(data.current_weather.temperature);
+                const geo = await fetch('https://ipapi.co/json/');
+                const geoData = await geo.json();
+                const lat = geoData.latitude || -34.90;
+                const lon = geoData.longitude || -56.16;
+                const city = (geoData.city || "KINU").toUpperCase();
+
+                const weather = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const wData = await weather.json();
+                const temp = Math.round(wData.current_weather.temperature);
+                
                 document.getElementById('w-temp').innerText = temp + '°';
-                document.getElementById('w-icon').className = temp > 20 ? "ph ph-sun" : "ph ph-cloud-snow";
-            } catch(e) {}
+                document.getElementById('w-city').innerText = city;
+                document.getElementById('w-icon').className = temp > 22 ? "ph ph-sun" : "ph ph-cloud-sun";
+            } catch(e) { document.getElementById('w-city').innerText = "KINU"; }
         }
 
         function mostrarInicio() {
@@ -186,9 +189,9 @@
             renderCats();
             document.getElementById('main-content').innerHTML = `
                 <div class="slider-wrapper" id="slider-home">
-                    <div class="step-card"><i class="ph ph-camera-plus"></i><h3>1. Digitaliza</h3><p>Toma una foto. La IA elimina el fondo.</p></div>
-                    <div class="step-card"><i class="ph ph-tag"></i><h3>2. Clasifica</h3><p>Guarda en carpetas inteligentes.</p></div>
-                    <div class="step-card"><i class="ph ph-sparkle"></i><h3>3. Disfruta</h3><p>Tu closet siempre contigo.</p></div>
+                    <div class="step-card"><i class="ph ph-camera-plus"></i><h3>1. Digitaliza</h3><p>Toma la foto y la IA hará el resto.</p></div>
+                    <div class="step-card"><i class="ph ph-tag"></i><h3>2. Clasifica</h3><p>Organiza por categorías inteligentes.</p></div>
+                    <div class="step-card"><i class="ph ph-sparkle"></i><h3>3. Disfruta</h3><p>Tu armario digital en tu mano.</p></div>
                 </div>`;
             iniciarAutoSlider();
         }
@@ -231,25 +234,20 @@
                 card.className = 'prenda-card';
                 card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${f.name.split('_')[1]}</span>`;
                 let t;
-                card.ontouchstart = () => t = setTimeout(() => { prendaSeleccionada = f; document.getElementById('modal-prenda').style.display = 'flex'; }, 600);
+                card.ontouchstart = () => t = setTimeout(() => { prendaSeleccionada = f; document.getElementById('prenda-nombre-modal').innerText = f.name.split('_')[1]; document.getElementById('modal-prenda').style.display = 'flex'; }, 600);
                 card.ontouchend = () => clearTimeout(t);
                 container.appendChild(card);
             });
         }
 
-        function confirmarBorrado() { 
-            document.getElementById('modal-prenda').style.display = 'none';
-            document.getElementById('modal-confirm').style.display = 'flex'; 
-        }
+        function confirmarBorrado() { document.getElementById('modal-prenda').style.display = 'none'; document.getElementById('modal-confirm').style.display = 'flex'; }
+        function cerrarConfirm() { document.getElementById('modal-confirm').style.display = 'none'; }
+        function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); modoMover = false; }
 
         async function ejecutarBorradoReal() {
             await fetch(`https://www.googleapis.com/drive/v3/files/${prendaSeleccionada.id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken } });
-            cerrarConfirm();
-            cargarPrendas(false);
+            cerrarConfirm(); cargarPrendas(false);
         }
-
-        function cerrarConfirm() { document.getElementById('modal-confirm').style.display = 'none'; }
-        function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
         function abrirSelectorCategorias(mover = false) {
             modoMover = mover;
@@ -284,7 +282,7 @@
         }
 
         async function obtenerOCrearCarpeta(n) {
-            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent("name='"+n+"' and mimeType='application/vnd.google-apps.folder'")}`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent("name='"+n+"' and mimeType='application/vnd.google-apps.folder' and trashed=false")}`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
             const d = await r.json();
             if(d.files?.[0]) return d.files[0].id;
             const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) });
@@ -298,7 +296,7 @@
             });
         }
         function manejarDrive() { if(!accessToken) tokenClient.requestAccessToken(); }
-        function actualizarDriveUI(v) { document.getElementById('drive-label').innerText = v ? "VINCULADO" : "CONECTAR"; document.getElementById('auth-btn').classList.toggle('vinculado', v); }
+        function actualizarDriveUI(v) { document.getElementById('drive-label').innerText = v ? "VINCULADO" : "VINCULAR"; document.getElementById('auth-btn').classList.toggle('vinculado', v); }
         function cargarTodoElCloset() { categoriaActual = ''; document.getElementById('btn-home').classList.remove('active'); document.getElementById('btn-archivador').classList.add('active'); renderCats(); cargarPrendas(true); }
         function enviarAStudio(i) { if(i.files?.[0]) { const r = new FileReader(); r.onload = (e) => { sessionStorage.setItem('imagen_para_procesar', e.target.result); document.getElementById('iframe-studio').src = 'photo_studio.html'; document.getElementById('modal-studio').style.display = 'flex'; }; r.readAsDataURL(i.files[0]); } }
         window.addEventListener("message", (e) => { if(e.data.type === "IMAGEN_LISTA") { imagenParaGuardar = e.data.data; document.getElementById('modal-studio').style.display = 'none'; abrirSelectorCategorias(false); } if(e.data.type === "CERRAR_STUDIO") cerrarModales(); });

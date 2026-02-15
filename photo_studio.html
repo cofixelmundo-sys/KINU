@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
-        
         const SPACE_ID = "COFIXELMUNDO/mi-recortador-objetos"; 
         let app;
 
@@ -17,19 +16,10 @@
                 window.parent.postMessage({ type: 'STUDIO_LISTO' }, '*');
                 const img = sessionStorage.getItem('imagen_para_procesar');
                 if (img) procesarImagen(img);
-            } catch (e) { 
-                console.error("Error conectando con IA:", e);
-                setTimeout(conectarIA, 3000); 
-            }
+            } catch (e) { setTimeout(conectarIA, 3000); }
         }
 
         window.onload = conectarIA;
-
-        window.addEventListener("message", (e) => {
-            if (e.data.type === 'PROCESAR_IMAGEN_DIRECTA') {
-                procesarImagen(e.data.data);
-            }
-        });
 
         async function procesarImagen(base64) {
             const loading = document.getElementById('loading');
@@ -41,15 +31,11 @@
                 const blob = await response.blob();
                 const result = await app.predict("/predict", [blob]);
                 if (result.data && result.data[0]) {
-                    const urlProcesada = result.data[0].url;
-                    document.getElementById('preview').src = urlProcesada;
+                    document.getElementById('preview').src = result.data[0].url;
                     loading.classList.add('hidden');
                     resultDiv.classList.remove('hidden');
                 }
-            } catch (e) {
-                console.error("Error en el proceso:", e);
-                loading.classList.add('hidden');
-            }
+            } catch (e) { loading.classList.add('hidden'); }
         }
 
         window.enviarAKinu = function() {
@@ -62,113 +48,37 @@
                 canvas.width = tempImg.width;
                 canvas.height = tempImg.height;
                 ctx.drawImage(tempImg, 0, 0);
-                const base64Final = canvas.toDataURL("image/png");
-                window.parent.postMessage({ 
-                    type: "IMAGEN_LISTA", 
-                    data: base64Final 
-                }, "*");
+                window.parent.postMessage({ type: "IMAGEN_LISTA", data: canvas.toDataURL("image/png") }, "*");
             };
             tempImg.src = imgElement.src;
         }
-
-        window.cancelarStudio = function() {
-            window.parent.postMessage({ type: "CERRAR_STUDIO" }, "*");
-        }
+        window.cancelarStudio = function() { window.parent.postMessage({ type: "CERRAR_STUDIO" }, "*"); }
     </script>
     <style>
-        :root { 
-            --verde-oliva: #848464; 
-            --verde-oscuro: #313628; 
-            --arena-claro: #F2EFE9;
-        }
+        :root { --verde-oliva: #848464; --verde-oscuro: #313628; --arena-claro: #F2EFE9; }
         body { background-color: var(--verde-oliva); overflow: hidden; margin: 0; }
-        
-        .image-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        #preview {
-            max-width: 100%;
-            max-height: 80%; /* Dejamos espacio abajo para los botones */
-            object-fit: contain;
-            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4));
-        }
-
-        /* Contenedor de botones elevado y por encima del marco */
-        .floating-controls {
-            position: absolute;
-            bottom: 20px; /* Ajusta este valor para subir o bajar todo el bloque */
-            left: 0;
-            right: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            z-index: 999;
-        }
-
-        .btn-principal {
-            background-color: var(--arena-claro);
-            color: var(--verde-oscuro);
-            width: 85%;
-            padding: 18px 0;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-cancelar {
-            color: rgba(255,255,255,0.6);
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
+        .image-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        #preview { max-width: 100%; max-height: 75%; object-fit: contain; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4)); }
+        .floating-controls { position: absolute; bottom: 30px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 999; }
+        .btn-principal { background-color: var(--arena-claro); color: var(--verde-oscuro); width: 85%; padding: 18px 0; border-radius: 20px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body class="h-screen flex flex-col items-center justify-center p-4">
-
     <div class="mb-6 text-center">
         <h1 class="text-white font-black tracking-[0.4em] text-[10px] uppercase opacity-60">KINU STUDIO AI</h1>
     </div>
-
     <div class="relative w-full max-w-[320px] aspect-[3/4] bg-[#2d3122]/50 backdrop-blur-2xl rounded-[50px] border border-white/10 shadow-2xl flex flex-col overflow-visible">
-        
         <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center z-50">
             <div class="w-10 h-10 border-2 border-white/10 border-t-white rounded-full animate-spin mb-4"></div>
             <p class="text-[9px] uppercase font-bold text-white/40 tracking-widest">IA Procesando...</p>
         </div>
-
         <div id="result" class="contents hidden">
-            <div class="image-container">
-                <img id="preview">
-            </div>
-
+            <div class="image-container"><img id="preview"></div>
             <div class="floating-controls">
-                <button onclick="enviarAKinu()" class="btn-principal active:scale-95 transition-transform">
-                    Aceptar y Clasificar
-                </button>
-                <button onclick="cancelarStudio()" class="btn-cancelar">
-                    Descartar
-                </button>
+                <button onclick="enviarAKinu()" class="btn-principal active:scale-95 transition-transform">Aceptar y Clasificar</button>
+                <button onclick="cancelarStudio()" class="text-white/50 text-[10px] font-bold uppercase tracking-widest">Descartar</button>
             </div>
         </div>
-
     </div>
-
-    <p class="mt-14 text-[9px] text-white/20 uppercase font-bold tracking-[5px]">Digital Closet</p>
-
 </body>
 </html>

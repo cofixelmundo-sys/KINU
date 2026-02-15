@@ -55,13 +55,11 @@
         .cat-item.active i { color: var(--verde-oscuro); }
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 8px; text-transform: uppercase; }
 
-        /* GRID CORREGIDO SEGÚN TU EJEMPLO */
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
         .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); text-align: center; position: relative; }
         .prenda-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 15px; margin-bottom: 8px; pointer-events: none; }
         .prenda-card span { color: white; font-size: 9px; font-weight: 600; text-transform: uppercase; opacity: 0.8; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        /* ONBOARDING */
         .onboarding-container { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
         .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 10px 20px 30px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; scroll-behavior: smooth; }
         .step-card { min-width: 85%; background: var(--arena-claro); border-radius: 30px; padding: 40px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
@@ -69,7 +67,6 @@
         .step-card h3 { color: var(--verde-oscuro); font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; }
         .step-card p { color: var(--verde-oliva); font-size: 11px; font-weight: 600; text-transform: uppercase; line-height: 1.6; margin: 0; opacity: 0.8; }
 
-        /* NAV */
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.4; cursor: pointer; }
@@ -78,7 +75,6 @@
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 26px; }
 
-        /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
         .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 380px; padding: 25px; }
         .action-btn { width: 100%; padding: 18px; border: none; background: var(--arena-boton); color: var(--verde-oscuro); font-weight: 700; border-radius: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; font-size: 11px; }
@@ -115,8 +111,8 @@
 
         <div class="nav-wrapper">
             <nav>
-                <div class="nav-icon active" id="btn-home" onclick="mostrarInicio()"><i class="ph ph-house-simple"></i></div>
-                <div class="nav-icon" id="btn-archivador" onclick="cargarTodoElCloset()"><i class="ph ph-archive"></i></div>
+                <div class="nav-icon active" id="btn-home" onclick="mostrarInicio()"><div class="ph ph-house-simple"></div></div>
+                <div class="nav-icon" id="btn-archivador" onclick="cargarTodoElCloset()"><div class="ph ph-archive"></div></div>
             </nav>
             <label for="cam-input" class="cam-trigger">
                 <div class="cam-inner"><i class="ph ph-camera"></i></div>
@@ -185,6 +181,24 @@
             }, 4000);
         }
 
+        function renderCats() {
+            const container = document.getElementById('main-cats');
+            container.innerHTML = '';
+            categorias.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
+                div.onclick = () => { 
+                    document.getElementById('btn-home').classList.remove('active');
+                    document.getElementById('btn-archivador').classList.remove('active');
+                    categoriaActual = cat.n.toUpperCase(); 
+                    renderCats(); 
+                    cargarPrendas(false); 
+                };
+                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
+                container.appendChild(div);
+            });
+        }
+
         async function cargarPrendas(todo = false) {
             clearInterval(intervalSlider);
             if(!accessToken) return;
@@ -204,15 +218,11 @@
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
                     
-                    // --- LÓGICA DE LIMPIEZA DE NOMBRE ---
-                    let nombreMostrar = f.name.replace(/\.[^/.]+$/, ""); // Quita .png, .jpg
+                    let nombreMostrar = f.name.replace(/\.[^/.]+$/, "");
                     if(nombreMostrar.startsWith('KINU_')) {
                         const partes = nombreMostrar.split('_');
-                        // Si el nombre es KINU_CAT_Nombre_123, quitamos KINU y CAT y el último número si es timestamp
-                        // Pero para mayor seguridad, simplemente mostramos lo que el usuario escribió después de la categoría
                         if(partes.length >= 3) {
                              nombreMostrar = partes.slice(2).join(' ');
-                             // Si el último bloque es solo números (timestamp), lo quitamos
                              let subPartes = nombreMostrar.split(' ');
                              if(/^\d+$/.test(subPartes[subPartes.length - 1])) {
                                  subPartes.pop();
@@ -220,7 +230,6 @@
                              }
                         }
                     }
-                    if(!nombreMostrar || nombreMostrar.trim() === "") nombreMostrar = "Sin nombre";
 
                     card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombreMostrar}</span>`;
                     
@@ -239,19 +248,29 @@
             } catch(e) {}
         }
 
-        // ... El resto de las funciones (mover, subir, drive, clima) se mantienen igual ...
-        async function moverCategoria(nuevaCat) {
-            cerrarModales();
-            try {
-                const partes = prendaActualObj.name.split('_');
-                partes[1] = nuevaCat.toUpperCase();
-                const nuevoNombre = partes.join('_');
-                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
-                    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: nuevoNombre })
-                });
-                cargarPrendas(categoriaActual === '');
-            } catch(e) {}
+        async function ejecutarSubidaDrive() {
+            const blob = await (await fetch(imagenParaGuardar)).blob();
+            const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+            const metadata = { name: `KINU_${categoriaActual}_${Date.now()}.png`, parents: [folderId] };
+            const formData = new FormData();
+            formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+            formData.append('file', blob);
+            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: formData });
+            
+            // ACTUALIZACIÓN DE CATEGORÍA ACTIVA
+            document.getElementById('btn-home').classList.remove('active');
+            document.getElementById('btn-archivador').classList.remove('active');
+            renderCats(); 
+            cargarPrendas(false);
+        }
+
+        async function obtenerOCrearCarpeta(n) {
+            const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+            const d = await r.json();
+            if(d.files?.[0]) return d.files[0].id;
+            const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) });
+            return (await res.json()).id;
         }
 
         function abrirSelectorCategorias() {
@@ -267,47 +286,6 @@
             document.getElementById('modal-categoria').style.display = 'flex';
         }
 
-        async function ejecutarSubidaDrive() {
-            const blob = await (await fetch(imagenParaGuardar)).blob();
-            const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-            const metadata = { name: `KINU_${categoriaActual}_${Date.now()}.png`, parents: [folderId] };
-            const formData = new FormData();
-            formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
-            formData.append('file', blob);
-            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: formData });
-            cargarTodoElCloset();
-        }
-
-        async function obtenerOCrearCarpeta(n) {
-            const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
-            const d = await r.json();
-            if(d.files?.[0]) return d.files[0].id;
-            const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) });
-            return (await res.json()).id;
-        }
-
-        function renderCats() {
-            const container = document.getElementById('main-cats');
-            container.innerHTML = '';
-            categorias.forEach(cat => {
-                const div = document.createElement('div');
-                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
-                div.onclick = () => { categoriaActual = cat.n.toUpperCase(); renderCats(); cargarPrendas(false); };
-                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
-                container.appendChild(div);
-            });
-        }
-
-        async function actualizarClima() {
-            try {
-                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true');
-                const data = await res.json();
-                document.getElementById('w-temp').innerText = Math.round(data.current_weather.temperature) + '°';
-                document.getElementById('w-city').innerText = "MONTEVIDEO";
-            } catch(e) {}
-        }
-
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: (r) => { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); actualizarDriveUI(true); } });
@@ -316,13 +294,27 @@
         }
         function manejarDrive() { if (!accessToken) tokenClient.requestAccessToken(); }
         function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); document.getElementById('drive-label').innerText = v ? "CONECTADO" : "SIN VINCULAR"; }
-        function cargarTodoElCloset() { categoriaActual = ''; renderCats(); cargarPrendas(true); }
+        function cargarTodoElCloset() { categoriaActual = ''; document.getElementById('btn-home').classList.remove('active'); document.getElementById('btn-archivador').classList.add('active'); renderCats(); cargarPrendas(true); }
         function abrirSelectorMover() { modoMover = true; document.getElementById('modal-acciones').style.display = 'none'; abrirSelectorCategorias(); }
         function mostrarConfirmarBorrado() { if(confirm("¿Eliminar prenda?")) ejecutarBorrado(); }
         async function ejecutarBorrado() { cerrarModales(); await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken } }); cargarPrendas(categoriaActual === ''); }
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); modoMover = false; }
         function enviarAStudio(i) { if (i.files?.[0]) { const r = new FileReader(); r.onload = (e) => { sessionStorage.setItem('imagen_para_procesar', e.target.result); document.getElementById('modal-studio').style.display = 'flex'; document.getElementById('modal-studio').querySelector('iframe').src = 'photo_studio.html'; }; r.readAsDataURL(i.files[0]); } }
+        async function moverCategoria(nuevaCat) {
+            cerrarModales();
+            try {
+                const partes = prendaActualObj.name.split('_');
+                partes[1] = nuevaCat.toUpperCase();
+                const nuevoNombre = partes.join('_');
+                await fetch(`https://www.googleapis.com/drive/v3/files/${idSeleccionado}`, {
+                    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: nuevoNombre })
+                });
+                cargarPrendas(categoriaActual === '');
+            } catch(e) {}
+        }
         window.addEventListener("message", (e) => { if (e.data.type === "IMAGEN_LISTA") { imagenParaGuardar = e.data.data; document.getElementById('modal-studio').style.display = 'none'; modoMover = false; abrirSelectorCategorias(); } if (e.data.type === "CERRAR_STUDIO") cerrarModales(); });
+        async function actualizarClima() { try { const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true'); const data = await res.json(); document.getElementById('w-temp').innerText = Math.round(data.current_weather.temperature) + '°'; document.getElementById('w-city').innerText = "MONTEVIDEO"; } catch(e) {} }
 
         window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); actualizarClima(); };
     </script>

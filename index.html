@@ -56,36 +56,26 @@
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 8px; text-transform: uppercase; }
 
         /* GRID Y CARDS UNIFORMES */
-        .closet-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 12px; 
-            padding-bottom: 120px; 
-        }
-
+        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 120px; }
         .prenda-card { 
             background: rgba(255,255,255,0.1); 
             border-radius: 20px; 
             padding: 10px; 
             border: 1px solid rgba(255,255,255,0.05); 
             text-align: center; 
-            position: relative;
             display: flex;
             flex-direction: column;
-            aspect-ratio: 4 / 5; /* Mantiene la proporción siempre igual */
+            aspect-ratio: 4 / 5;
             overflow: hidden;
         }
-
         .prenda-card img { 
             width: 100%; 
-            height: 80%; /* Altura fija para la imagen */
-            object-fit: cover; /* La imagen se ajusta al contenedor sin deformarse */
+            height: 80%; 
+            object-fit: cover; 
             border-radius: 12px; 
             margin-bottom: 8px; 
-            pointer-events: none;
             background: rgba(0,0,0,0.05);
         }
-
         .prenda-card span { 
             color: white; 
             font-size: 9px; 
@@ -96,11 +86,9 @@
             overflow: hidden; 
             text-overflow: ellipsis; 
             white-space: nowrap;
-            margin-top: auto; /* Empuja el texto al fondo */
-            padding-bottom: 2px;
+            margin-top: auto;
         }
 
-        /* ONBOARDING */
         .onboarding-container { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
         .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 10px 20px 30px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; scroll-behavior: smooth; }
         .step-card { min-width: 85%; background: var(--arena-claro); border-radius: 30px; padding: 40px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
@@ -108,7 +96,6 @@
         .step-card h3 { color: var(--verde-oscuro); font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; }
         .step-card p { color: var(--verde-oliva); font-size: 11px; font-weight: 600; text-transform: uppercase; line-height: 1.6; margin: 0; opacity: 0.8; }
 
-        /* NAVEGACIÓN */
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.4; cursor: pointer; }
@@ -117,7 +104,6 @@
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { color: var(--verde-oscuro); font-size: 26px; }
 
-        /* MODALES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
         .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 380px; padding: 25px; text-align: center; }
         .action-btn { width: 100%; padding: 18px; border: none; background: var(--arena-boton); color: var(--verde-oscuro); font-weight: 700; border-radius: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; font-size: 11px; }
@@ -203,11 +189,12 @@
         let accessToken = localStorage.getItem('drive_token'), tokenClient, imagenParaGuardar, categoriaActual = '';
         let intervalSlider, idSeleccionado, timerPulsacion, modoMover = false, prendaActualObj = null;
 
+        // "Colaboro" movido al final de la lista
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
             {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
-            {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Colaboro', i: 'ph-handshake'}, 
-            {n: 'Deporte', i: 'ph-barbell'}, {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}
+            {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}, 
+            {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
         function renderCats(hacerScroll = false) {
@@ -258,7 +245,6 @@
                     }
                     card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombre || 'Prenda'}</span>`;
                     
-                    // Eventos de pulsación larga
                     card.ontouchstart = () => { timerPulsacion = setTimeout(() => { idSeleccionado = f.id; prendaActualObj = f; document.getElementById('prenda-nombre-header').innerText = nombre; document.getElementById('modal-acciones').style.display='flex'; if(navigator.vibrate) navigator.vibrate(60); }, 800); };
                     card.ontouchend = () => clearTimeout(timerPulsacion);
                     card.onmousedown = () => { timerPulsacion = setTimeout(() => { idSeleccionado = f.id; prendaActualObj = f; document.getElementById('prenda-nombre-header').innerText = nombre; document.getElementById('modal-acciones').style.display='flex'; }, 800); };

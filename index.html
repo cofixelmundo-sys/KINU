@@ -20,12 +20,14 @@
             --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
+        /* EVITAR MENÚS NATIVOS Y SELECCIÓN DE TEXTO */
         * { 
             box-sizing: border-box; 
             transition: all 0.2s ease; 
             -webkit-tap-highlight-color: transparent; 
             user-select: none; 
             -webkit-user-select: none;
+            -webkit-touch-callout: none; /* Bloquea el menú de iOS en imágenes */
         }
 
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
@@ -54,7 +56,7 @@
         .cat-item.active i { color: var(--verde-oscuro); }
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 8px; text-transform: uppercase; }
 
-        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 160px; }
+        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 180px; }
         
         .prenda-card { 
             background: rgba(255,255,255,0.1); 
@@ -67,6 +69,7 @@
             aspect-ratio: 4 / 5;
             overflow: hidden;
             position: relative;
+            touch-action: manipulation;
         }
         .prenda-card.selected { 
             border-color: white; 
@@ -81,32 +84,35 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 5;
         }
         .prenda-card.selected .select-badge { display: flex; }
+        .prenda-card img { width: 100%; height: 80%; object-fit: cover; border-radius: 12px; margin-bottom: 8px; pointer-events: none; }
 
-        .prenda-card img { width: 100%; height: 80%; object-fit: cover; border-radius: 12px; margin-bottom: 8px; background: rgba(0,0,0,0.05); }
-        .prenda-card span { color: white; font-size: 9px; font-weight: 800; text-transform: uppercase; opacity: 0.9; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: auto; }
-
-        /* BARRA MULTI-ACCIÓN REPOSICIONADA HACIA ARRIBA */
+        /* BARRA MULTI-ACCIÓN PERMANENTE */
         .multi-action-bar {
             position: fixed; 
-            bottom: 110px; /* Separada de la barra nav inferior */
+            bottom: 95px; /* Más cerca del menú inferior */
             left: 50%; 
-            transform: translateX(-50%) translateY(200px);
+            transform: translateX(-50%);
             background: var(--verde-oscuro); 
-            padding: 12px 24px; 
-            border-radius: 40px;
+            padding: 10px 20px; 
+            border-radius: 30px;
             display: flex; 
-            gap: 25px; 
+            gap: 20px; 
             align-items: center; 
             z-index: 1000;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            opacity: 0.3; /* Desactivada por defecto */
+            pointer-events: none;
         }
-        .multi-action-bar.visible { transform: translateX(-50%) translateY(0); }
+        .multi-action-bar.active { 
+            opacity: 1; 
+            pointer-events: auto;
+            transform: translateX(-50%) scale(1.05);
+        }
         .multi-btn { color: white; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
-        .multi-btn i { font-size: 20px; }
-        .multi-btn span { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-        .multi-count { background: white; color: var(--verde-oscuro); padding: 5px 12px; border-radius: 12px; font-size: 11px; font-weight: 900; margin-right: 5px; }
+        .multi-btn i { font-size: 18px; }
+        .multi-btn span { font-size: 7px; font-weight: 800; text-transform: uppercase; }
+        .multi-count { background: white; color: var(--verde-oscuro); padding: 4px 10px; border-radius: 10px; font-size: 10px; font-weight: 900; }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
@@ -118,21 +124,6 @@
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
         .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 380px; padding: 25px; text-align: center; }
-        .cat-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .cat-btn-mini { background: var(--arena-boton); border: none; padding: 12px 5px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .cat-btn-mini i { font-size: 20px; color: var(--verde-oscuro); }
-        .cat-btn-mini span { font-size: 8px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; }
-        .btn-cerrar { background: none; border: none; color: var(--verde-oliva); font-weight: 800; font-size: 12px; margin-top: 15px; text-transform: uppercase; }
-        .flex-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-flex { flex: 1; padding: 16px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 10px; }
-
-        /* ONBOARDING */
-        .onboarding-container { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
-        .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 10px 20px 30px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; scroll-behavior: smooth; }
-        .step-card { min-width: 85%; background: var(--arena-claro); border-radius: 30px; padding: 40px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
-        .step-card i { font-size: 50px; color: var(--verde-oliva); margin-bottom: 20px; }
-        .step-card h3 { color: var(--verde-oscuro); font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; }
-        .step-card p { color: var(--verde-oliva); font-size: 11px; font-weight: 600; text-transform: uppercase; line-height: 1.6; margin: 0; opacity: 0.8; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -140,7 +131,7 @@
     <div class="main-container">
         <header>
             <div class="header-info-box">
-                <i class="ph ph-sun" id="w-icon" style="font-size: 22px; color: white"></i>
+                <i class="ph ph-sun" style="font-size: 22px; color: white"></i>
                 <span class="info-main-text" id="w-temp">--°</span>
                 <span class="info-sub-text" id="w-city">...</span>
             </div>
@@ -171,7 +162,7 @@
             </div>
             <div class="multi-btn" onclick="cancelarSeleccion()">
                 <i class="ph ph-x"></i>
-                <span>Cerrar</span>
+                <span>Listos</span>
             </div>
         </div>
 
@@ -188,23 +179,21 @@
     </div>
 
     <div id="modal-studio" class="modal-overlay"><iframe src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe></div>
-
     <div id="modal-categoria" class="modal-overlay">
         <div class="modal-content">
-            <div id="cat-title-modal" style="font-weight: 800; text-align: center; text-transform: uppercase; font-size: 13px; color: var(--verde-oliva); margin-bottom: 15px;">Mover a...</div>
-            <div id="cat-save-list" class="cat-grid-mini"></div>
-            <button onclick="cerrarModales()" class="btn-cerrar">Cancelar</button>
+            <div style="font-weight: 800; text-transform: uppercase; font-size: 13px; color: var(--verde-oliva); margin-bottom: 15px;">Mover a...</div>
+            <div id="cat-save-list" class="cat-grid-mini" style="display: grid; grid-template-columns: repeat(3,1fr); gap:10px;"></div>
+            <button onclick="cerrarModales()" style="background:none; border:none; color:var(--verde-oliva); font-weight:800; margin-top:15px;">CANCELAR</button>
         </div>
     </div>
 
     <div id="modal-confirm-delete" class="modal-overlay">
         <div class="modal-content">
             <i class="ph ph-warning-circle" style="font-size: 40px; color: var(--rojo-borrar); margin-bottom: 15px; display: block;"></i>
-            <div style="font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 10px;">¿Eliminar prendas?</div>
-            <div id="delete-text" style="font-size: 11px; color: var(--verde-oliva); margin-bottom: 25px; font-weight: 600; text-transform: uppercase;">Esta acción no se puede deshacer.</div>
-            <div class="flex-buttons">
-                <button class="btn-flex" style="background: var(--arena-boton); color: var(--verde-oscuro);" onclick="cerrarModales()">Cancelar</button>
-                <button class="btn-flex" style="background: var(--rojo-borrar); color: white;" onclick="ejecutarBorradoMulti()">Eliminar</button>
+            <div id="delete-text" style="font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 25px;">¿Eliminar prendas?</div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800;">VOLVER</button>
+                <button onclick="ejecutarBorradoMulti()" style="flex:1; padding:15px; border-radius:15px; border:none; background:var(--rojo-borrar); color:white; font-weight:800;">BORRAR</button>
             </div>
         </div>
     </div>
@@ -213,8 +202,7 @@
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token'), tokenClient, imagenParaGuardar, categoriaActual = '';
-        let intervalSlider, timerPulsacion, modoSeleccion = false;
-        let seleccionados = [];
+        let timerPulsacion, modoSeleccion = false, seleccionados = [];
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -230,27 +218,25 @@
                 const div = document.createElement('div');
                 div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
                 div.onclick = () => { 
-                    if(modoSeleccion) cancelarSeleccion();
+                    cancelarSeleccion();
                     document.getElementById('btn-home').classList.remove('active');
                     document.getElementById('btn-archivador').classList.remove('active');
                     categoriaActual = cat.n.toUpperCase(); 
-                    renderCats(true); 
-                    cargarPrendas(false); 
+                    renderCats(true); cargarPrendas(false); 
                 };
                 div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
                 container.appendChild(div);
                 if(hacerScroll && cat.n.toUpperCase() === categoriaActual) {
-                    setTimeout(() => div.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }), 50);
+                    setTimeout(() => div.scrollIntoView({ behavior: 'smooth', inline: 'center' }), 50);
                 }
             });
         }
 
         async function cargarPrendas(todo = false) {
-            clearInterval(intervalSlider);
             if(!accessToken) return;
-            const contentDiv = document.getElementById('main-content');
-            contentDiv.innerHTML = `<div class="closet-grid" id="closet-grid"></div>`;
-            const container = document.getElementById('closet-grid');
+            const container = document.getElementById('main-content');
+            container.innerHTML = `<div class="closet-grid" id="closet-grid"></div>`;
+            const grid = document.getElementById('closet-grid');
             
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
@@ -262,37 +248,48 @@
                 data.files?.forEach(f => {
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
-                    let nombre = f.name.replace(/\.[^/.]+$/, "");
-                    if(nombre.startsWith('KINU_')) {
-                        let partes = nombre.split('_');
-                        nombre = partes.slice(2).join(' ');
-                        let sub = nombre.split(' ');
-                        if(/^\d+$/.test(sub[sub.length-1])) { sub.pop(); nombre = sub.join(' '); }
-                    }
-                    card.innerHTML = `<div class="select-badge"><i class="ph ph-check"></i></div><img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombre || 'Prenda'}</span>`;
+                    card.innerHTML = `<div class="select-badge"><i class="ph ph-check"></i></div><img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${f.name.split('_').slice(2).join(' ').replace('.png','')}</span>`;
                     
                     card.onclick = () => { if(modoSeleccion) toggleSeleccion(f, card); };
-                    card.ontouchstart = () => { timerPulsacion = setTimeout(() => { if(!modoSeleccion) { modoSeleccion = true; toggleSeleccion(f, card); if(navigator.vibrate) navigator.vibrate(60); } }, 600); };
+                    
+                    // Lógica para activar selección sin que el navegador interfiera
+                    const startPress = () => {
+                        timerPulsacion = setTimeout(() => {
+                            if(!modoSeleccion) {
+                                modoSeleccion = true;
+                                toggleSeleccion(f, card);
+                                if(navigator.vibrate) navigator.vibrate(50);
+                            }
+                        }, 500);
+                    };
+                    card.ontouchstart = startPress;
+                    card.onmousedown = startPress;
                     card.ontouchend = () => clearTimeout(timerPulsacion);
-                    card.onmousedown = () => { timerPulsacion = setTimeout(() => { if(!modoSeleccion) { modoSeleccion = true; toggleSeleccion(f, card); } }, 600); };
                     card.onmouseup = () => clearTimeout(timerPulsacion);
-                    container.appendChild(card);
+
+                    grid.appendChild(card);
                 });
             } catch(e) {}
         }
 
         function toggleSeleccion(file, element) {
             const index = seleccionados.findIndex(s => s.id === file.id);
-            if (index > -1) { seleccionados.splice(index, 1); element.classList.remove('selected'); } 
-            else { seleccionados.push(file); element.classList.add('selected'); }
+            if (index > -1) { 
+                seleccionados.splice(index, 1); 
+                element.classList.remove('selected'); 
+            } else { 
+                seleccionados.push(file); 
+                element.classList.add('selected'); 
+            }
             actualizarBarraMulti();
         }
 
         function actualizarBarraMulti() {
             const bar = document.getElementById('multi-bar');
             const count = document.getElementById('multi-count');
-            if(seleccionados.length > 0) { bar.classList.add('visible'); count.innerText = seleccionados.length; } 
-            else { bar.classList.remove('visible'); modoSeleccion = false; }
+            count.innerText = seleccionados.length;
+            if(seleccionados.length > 0) bar.classList.add('active');
+            else bar.classList.remove('active');
         }
 
         function cancelarSeleccion() {
@@ -308,7 +305,8 @@
             categorias.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = 'cat-btn-mini';
-                btn.innerHTML = `<i class="ph ${cat.i}"></i><span>${cat.n}</span>`;
+                btn.style = "background:var(--arena-boton); border:none; padding:10px; border-radius:10px; display:flex; flex-direction:column; align-items:center; gap:5px;";
+                btn.innerHTML = `<i class="ph ${cat.i}" style="font-size:20px;"></i><span style="font-size:8px; font-weight:800;">${cat.n}</span>`;
                 btn.onclick = () => ejecutarMoverMulti(cat.n);
                 list.appendChild(btn);
             });
@@ -329,12 +327,11 @@
             await Promise.all(promesas);
             categoriaActual = nuevaCat.toUpperCase();
             cancelarSeleccion();
-            renderCats(true);
-            cargarPrendas(false);
+            renderCats(true); cargarPrendas(false);
         }
 
         function mostrarConfirmarBorradoMulti() {
-            document.getElementById('delete-text').innerText = `Vas a eliminar ${seleccionados.length} prendas.`;
+            document.getElementById('delete-text').innerText = `¿ELIMINAR ${seleccionados.length} PRENDAS?`;
             document.getElementById('modal-confirm-delete').style.display = 'flex';
         }
 
@@ -342,58 +339,28 @@
             cerrarModales();
             const promesas = seleccionados.map(file => fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken } }));
             await Promise.all(promesas);
-            const eraTodo = (categoriaActual === '');
             cancelarSeleccion();
-            cargarPrendas(eraTodo);
+            cargarPrendas(categoriaActual === '');
         }
 
-        async function ejecutarSubidaDrive() {
-            const blob = await (await fetch(imagenParaGuardar)).blob();
-            const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-            const metadata = { name: `KINU_${categoriaActual}_${Date.now()}.png`, parents: [folderId] };
-            const formData = new FormData();
-            formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
-            formData.append('file', blob);
-            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: formData });
-            document.getElementById('btn-home').classList.remove('active');
-            renderCats(true); cargarPrendas(false);
-        }
-
+        // --- Funciones Base ---
         function mostrarInicio() {
-            if(modoSeleccion) cancelarSeleccion();
-            clearInterval(intervalSlider);
+            cancelarSeleccion();
             document.getElementById('btn-archivador').classList.remove('active');
             document.getElementById('btn-home').classList.add('active');
             categoriaActual = ''; renderCats();
-            document.getElementById('main-content').innerHTML = `
-                <div class="onboarding-container">
-                    <div class="slider-wrapper" id="slider-home">
-                        <div class="step-card"><i class="ph ph-camera-plus"></i><h3>1. Digitaliza</h3><p>Toma una foto a tu prenda. Nuestra IA eliminará el fondo automáticamente.</p></div>
-                        <div class="step-card"><i class="ph ph-tag"></i><h3>2. Clasifica</h3><p>Guarda tus prendas en categorías organizadas en tu Google Drive.</p></div>
-                        <div class="step-card"><i class="ph ph-sparkle"></i><h3>3. Disfruta</h3><p>Visualiza todo tu closet desde cualquier lugar.</p></div>
-                    </div>
-                </div>`;
-            iniciarAutoSlider();
+            document.getElementById('main-content').innerHTML = `<div style="text-align:center; margin-top:100px; color:white; opacity:0.5;"><i class="ph ph-sparkle" style="font-size:40px;"></i><p style="font-size:10px; font-weight:800; text-transform:uppercase; margin-top:15px;">Bienvenido a tu closet inteligente</p></div>`;
         }
 
-        function iniciarAutoSlider() {
-            const slider = document.getElementById('slider-home');
-            let idx = 0;
-            intervalSlider = setInterval(() => {
-                idx = (idx + 1) % 3;
-                if(slider) { const cardWidth = slider.querySelector('.step-card').clientWidth + 20; slider.scrollTo({ left: cardWidth * idx, behavior: 'smooth' }); }
-            }, 4000);
-        }
-
-        function cargarTodoElCloset() { if(modoSeleccion) cancelarSeleccion(); categoriaActual = ''; document.getElementById('btn-home').classList.remove('active'); document.getElementById('btn-archivador').classList.add('active'); renderCats(); cargarPrendas(true); }
+        function cargarTodoElCloset() { cancelarSeleccion(); categoriaActual = ''; document.getElementById('btn-home').classList.remove('active'); document.getElementById('btn-archivador').classList.add('active'); renderCats(); cargarPrendas(true); }
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
         function manejarDrive() { if (!accessToken) tokenClient.requestAccessToken(); }
         function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); document.getElementById('drive-label').innerText = v ? "CONECTADO" : "SIN VINCULAR"; }
         async function obtenerOCrearCarpeta(n) { const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`; const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } }); const d = await r.json(); if(d.files?.[0]) return d.files[0].id; const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) }); const f = await res.json(); return f.id; }
         function startGoogle() { gapi.load('client', () => { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: (r) => { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); actualizarDriveUI(true); } }); if(accessToken) actualizarDriveUI(true); }); }
         function enviarAStudio(i) { if (i.files?.[0]) { const r = new FileReader(); r.onload = (e) => { sessionStorage.setItem('imagen_para_procesar', e.target.result); document.getElementById('modal-studio').style.display = 'flex'; document.getElementById('modal-studio').querySelector('iframe').src = 'photo_studio.html'; }; r.readAsDataURL(i.files[0]); } }
-        window.addEventListener("message", (e) => { if (e.data.type === "IMAGEN_LISTA") { imagenParaGuardar = e.data.data; document.getElementById('modal-studio').style.display = 'none'; abrirSelectorMoverMulti(); } if (e.data.type === "CERRAR_STUDIO") cerrarModales(); });
         async function actualizarClima() { try { const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true'); const data = await res.json(); document.getElementById('w-temp').innerText = Math.round(data.current_weather.temperature) + '°'; document.getElementById('w-city').innerText = "MONTEVIDEO"; } catch(e) {} }
+
         window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); actualizarClima(); };
     </script>
 </body>

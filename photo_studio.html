@@ -17,9 +17,7 @@
                 app = await client(SPACE_ID);
                 const img = sessionStorage.getItem('imagen_para_procesar');
                 if (img) procesarImagen(img);
-            } catch (e) { 
-                setTimeout(conectarIA, 2000); 
-            }
+            } catch (e) { setTimeout(conectarIA, 2000); }
         }
 
         async function procesarImagen(base64) {
@@ -27,15 +25,12 @@
                 document.getElementById('loading').style.display = 'flex';
                 const blob = await fetch(base64).then(r => r.blob());
                 const result = await app.predict("/predict", [blob]);
-                
                 if (result.data?.[0]?.url) {
                     document.getElementById('preview').src = result.data[0].url;
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('result').classList.remove('hidden');
                 }
-            } catch (e) {
-                window.parent.postMessage({ type: 'CERRAR_STUDIO' }, '*');
-            }
+            } catch (e) { window.parent.postMessage({ type: 'CERRAR_STUDIO' }, '*'); }
         }
 
         window.seleccionarCat = (cat, btn) => {
@@ -49,10 +44,10 @@
         };
 
         window.enviarAKinu = () => {
-            if (!categoriaSeleccionada) {
-                alert("Selecciona una categoría");
-                return;
-            }
+            const nombre = document.getElementById('input-nombre').value.trim();
+            if (!categoriaSeleccionada) return alert("Selecciona una categoría");
+            if (!nombre) return alert("Escribe un nombre para la prenda");
+
             const btn = document.getElementById('btn-save');
             btn.innerText = "GUARDANDO...";
             btn.disabled = true;
@@ -60,6 +55,7 @@
             window.parent.postMessage({
                 type: 'GUARDAR_PRENDA',
                 categoria: categoriaSeleccionada,
+                nombre: nombre,
                 imagen: document.getElementById('preview').src
             }, '*');
         };
@@ -67,21 +63,22 @@
         window.onload = conectarIA;
     </script>
     <style>
-        body { background: #848464; font-family: sans-serif; }
+        body { background: #848464; font-family: sans-serif; overflow: hidden; }
         .cat-btn { 
             background: rgba(255,255,255,0.1); color: white; 
-            font-size: 9px; font-weight: 800; padding: 12px 5px; 
-            border-radius: 15px; text-transform: uppercase; transition: all 0.2s;
+            font-size: 8px; font-weight: 800; padding: 10px 4px; 
+            border-radius: 12px; text-transform: uppercase; transition: all 0.2s;
         }
-        .btn-principal {
-            background: #313628; color: white;
-            border-radius: 20px; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 1px; font-size: 11px;
+        .input-kinu {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; border-radius: 15px; padding: 12px; font-size: 12px;
+            width: 100%; outline: none; text-align: center; text-transform: uppercase;
         }
+        .input-kinu::placeholder { color: rgba(255,255,255,0.4); }
     </style>
 </head>
 <body class="h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-[350px] h-[90vh] bg-[#313628]/20 rounded-[40px] overflow-hidden backdrop-blur-lg border border-white/20 flex flex-col">
+    <div class="w-full max-w-[360px] h-[95vh] bg-[#313628]/20 rounded-[40px] overflow-hidden backdrop-blur-lg border border-white/20 flex flex-col relative">
         
         <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-[#848464] z-50">
             <div class="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
@@ -89,21 +86,26 @@
         </div>
 
         <div id="result" class="flex flex-col h-full hidden">
-            <div class="flex-1 flex items-center justify-center p-6">
+            <div class="flex-1 flex items-center justify-center p-4 min-h-[200px]">
                 <img id="preview" class="max-h-full drop-shadow-2xl object-contain">
             </div>
 
-            <div class="bg-[#313628] p-6 rounded-t-[35px] shadow-2xl">
+            <div class="bg-[#313628] p-5 rounded-t-[35px] shadow-2xl">
+                <input type="text" id="input-nombre" class="input-kinu mb-4" placeholder="NOMBRE DE LA PRENDA (Ej: Camisa Lino)">
+                
                 <div class="grid grid-cols-3 gap-2 mb-6">
                     <button class="cat-btn" onclick="seleccionarCat('Superior', this)">Superior</button>
                     <button class="cat-btn" onclick="seleccionarCat('Inferior', this)">Inferior</button>
                     <button class="cat-btn" onclick="seleccionarCat('Abrigos', this)">Abrigos</button>
                     <button class="cat-btn" onclick="seleccionarCat('Calzado', this)">Calzado</button>
                     <button class="cat-btn" onclick="seleccionarCat('Vestidos', this)">Vestidos</button>
+                    <button class="cat-btn" onclick="seleccionarCat('Bolsos', this)">Bolsos</button>
                     <button class="cat-btn" onclick="seleccionarCat('Accesorios', this)">Accesorios</button>
+                    <button class="cat-btn" onclick="seleccionarCat('Vintage', this)">Vintage</button>
+                    <button class="cat-btn" onclick="seleccionarCat('Deporte', this)">Deporte</button>
                 </div>
 
-                <button id="btn-save" onclick="enviarAKinu()" class="w-full py-4 btn-principal mb-2">Aceptar y Clasificar</button>
+                <button id="btn-save" onclick="enviarAKinu()" class="w-full py-4 bg-white text-[#313628] rounded-2xl font-black uppercase text-[11px] tracking-widest mb-2 active:scale-95 transition-all">Aceptar y Clasificar</button>
                 <button onclick="window.parent.postMessage({type:'CERRAR_STUDIO'}, '*')" class="w-full text-[9px] text-white/50 font-bold uppercase py-2">Cancelar</button>
             </div>
         </div>

@@ -18,7 +18,6 @@
                 const img = sessionStorage.getItem('imagen_para_procesar');
                 if (img) procesarImagen(img);
             } catch (e) { 
-                console.error("Error IA:", e);
                 setTimeout(conectarIA, 2000); 
             }
         }
@@ -30,81 +29,72 @@
                 const result = await app.predict("/predict", [blob]);
                 
                 if (result.data?.[0]?.url) {
-                    const imgPreview = document.getElementById('preview');
-                    imgPreview.src = result.data[0].url;
+                    document.getElementById('preview').src = result.data[0].url;
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('result').classList.remove('hidden');
                 }
             } catch (e) {
-                alert("Error al procesar. Reintenta.");
-                cancelarStudio();
+                window.parent.postMessage({ type: 'CERRAR_STUDIO' }, '*');
             }
         }
 
         window.seleccionarCat = (cat, btn) => {
             categoriaSeleccionada = cat.toUpperCase();
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('bg-indigo-600', 'text-white'));
-            btn.classList.add('bg-indigo-600', 'text-white');
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                b.style.background = 'rgba(255,255,255,0.1)';
+                b.style.color = 'white';
+            });
+            btn.style.background = 'white';
+            btn.style.color = '#313628';
         };
 
-        window.enviarAKinu = async () => {
+        window.enviarAKinu = () => {
             if (!categoriaSeleccionada) {
-                alert("Por favor, selecciona una categoría primero.");
+                alert("Selecciona una categoría");
                 return;
             }
+            const btn = document.getElementById('btn-save');
+            btn.innerText = "GUARDANDO...";
+            btn.disabled = true;
 
-            const btnAceptar = document.getElementById('btn-aceptar');
-            btnAceptar.innerText = "GUARDANDO...";
-            btnAceptar.disabled = true;
-
-            const img = document.getElementById('preview');
-            
-            // Convertir imagen a Blob para el envío
-            const response = await fetch(img.src);
-            const blob = await response.blob();
-            const reader = new FileReader();
-            
-            reader.onloadend = () => {
-                window.parent.postMessage({
-                    type: 'GUARDAR_PRENDA',
-                    categoria: categoriaSeleccionada,
-                    imagen: reader.result
-                }, '*');
-            };
-            reader.readAsDataURL(blob);
-        };
-
-        window.cancelarStudio = () => {
-            sessionStorage.removeItem('imagen_para_procesar');
-            window.parent.postMessage({ type: 'CERRAR_STUDIO' }, '*');
+            window.parent.postMessage({
+                type: 'GUARDAR_PRENDA',
+                categoria: categoriaSeleccionada,
+                imagen: document.getElementById('preview').src
+            }, '*');
         };
 
         window.onload = conectarIA;
     </script>
     <style>
-        .image-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: hidden; }
-        #preview { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
-        .cat-btn { font-size: 9px; font-weight: 800; padding: 10px 5px; border-radius: 12px; background: #27272a; color: #71717a; text-transform: uppercase; transition: all 0.2s; }
+        body { background: #848464; font-family: sans-serif; }
+        .cat-btn { 
+            background: rgba(255,255,255,0.1); color: white; 
+            font-size: 9px; font-weight: 800; padding: 12px 5px; 
+            border-radius: 15px; text-transform: uppercase; transition: all 0.2s;
+        }
+        .btn-principal {
+            background: #313628; color: white;
+            border-radius: 20px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1px; font-size: 11px;
+        }
     </style>
 </head>
-<body class="bg-black h-screen flex items-center justify-center p-4">
-
-    <div class="relative w-full max-w-[350px] h-[90vh] bg-zinc-900 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl flex flex-col">
+<body class="h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-[350px] h-[90vh] bg-[#313628]/20 rounded-[40px] overflow-hidden backdrop-blur-lg border border-white/20 flex flex-col">
         
-        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-50">
-            <div class="w-10 h-10 border-2 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">Recortando Prenda...</p>
+        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-[#848464] z-50">
+            <div class="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+            <p class="text-[10px] font-bold text-white uppercase tracking-widest">Quitando fondo...</p>
         </div>
 
-        <div id="result" class="flex flex-col h-full w-full hidden">
-            <div class="image-container">
-                <img id="preview" class="drop-shadow-[0_10px_30px_rgba(255,255,255,0.1)]">
+        <div id="result" class="flex flex-col h-full hidden">
+            <div class="flex-1 flex items-center justify-center p-6">
+                <img id="preview" class="max-h-full drop-shadow-2xl object-contain">
             </div>
 
-            <div class="bg-zinc-800/50 p-4 rounded-t-[30px]">
-                <p class="text-[9px] text-center font-black text-zinc-500 uppercase tracking-widest mb-3">Selecciona Categoría</p>
-                <div class="cat-grid">
+            <div class="bg-[#313628] p-6 rounded-t-[35px] shadow-2xl">
+                <div class="grid grid-cols-3 gap-2 mb-6">
                     <button class="cat-btn" onclick="seleccionarCat('Superior', this)">Superior</button>
                     <button class="cat-btn" onclick="seleccionarCat('Inferior', this)">Inferior</button>
                     <button class="cat-btn" onclick="seleccionarCat('Abrigos', this)">Abrigos</button>
@@ -113,14 +103,8 @@
                     <button class="cat-btn" onclick="seleccionarCat('Accesorios', this)">Accesorios</button>
                 </div>
 
-                <div class="flex flex-col gap-2 mt-4">
-                    <button id="btn-aceptar" onclick="enviarAKinu()" class="w-full py-4 bg-indigo-600 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white active:scale-95 transition-all">
-                        Aceptar y Clasificar
-                    </button>
-                    <button onclick="cancelarStudio()" class="w-full py-2 text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
-                        Cancelar
-                    </button>
-                </div>
+                <button id="btn-save" onclick="enviarAKinu()" class="w-full py-4 btn-principal mb-2">Aceptar y Clasificar</button>
+                <button onclick="window.parent.postMessage({type:'CERRAR_STUDIO'}, '*')" class="w-full text-[9px] text-white/50 font-bold uppercase py-2">Cancelar</button>
             </div>
         </div>
     </div>

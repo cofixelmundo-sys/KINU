@@ -55,13 +55,53 @@
 
         .content { flex: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
         
-        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 200px; width: 100%; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 8px; border: 2px solid transparent; display: flex; flex-direction: column; aspect-ratio: 1 / 1.25; position: relative; width: 100%; }
+        /* GRID SIEMPRE 2 COLUMNAS IGUALES */
+        .closet-grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
+            padding-bottom: 200px; 
+            width: 100%; 
+        }
+
+        /* CONTENEDOR SIEMPRE CUADRADO */
+        .prenda-card { 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 20px; 
+            padding: 10px; 
+            border: 2px solid transparent; 
+            display: flex; 
+            flex-direction: column; 
+            aspect-ratio: 1 / 1; /* Esto obliga a que el contenedor sea siempre cuadrado */
+            position: relative; 
+            width: 100%; 
+            overflow: hidden;
+        }
+
         .prenda-card.selected { border-color: white; background: rgba(255,255,255,0.2); transform: scale(0.96); }
         .prenda-card .select-badge { position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; background: white; border-radius: 50%; display: none; align-items: center; justify-content: center; color: var(--verde-oscuro); font-size: 10px; font-weight: bold; z-index: 5; }
         .prenda-card.selected .select-badge { display: flex; }
-        .prenda-card img { width: 100%; height: 80%; object-fit: cover; border-radius: 12px; pointer-events: none; background: rgba(0,0,0,0.05); }
-        .prenda-card span { color: white; font-size: 8px; font-weight: 800; text-transform: uppercase; margin-top: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px 0; text-align: center; }
+
+        /* LA PRENDA SE ADAPTA AL CUADRADO */
+        .prenda-card img { 
+            width: 100%; 
+            height: 80%; 
+            object-fit: contain; /* Mantiene la proporción de la prenda sin estirar el cuadro */
+            pointer-events: none; 
+        }
+
+        .prenda-card span { 
+            color: white; 
+            font-size: 8px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            margin-top: auto; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+            padding: 2px 0; 
+            text-align: center; 
+        }
 
         .onboarding-container { display: flex; flex-direction: column; align-items: center; padding-top: 15px; }
         .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
@@ -91,16 +131,10 @@
             justify-content: center;
         }
 
-        .step-media video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
+        .step-media video { width: 100%; height: 100%; object-fit: cover; }
         .step-card h3 { color: var(--verde-oscuro); font-size: 13px; font-weight: 800; text-transform: uppercase; margin: 0 0 10px 0; }
         .step-card p { color: var(--verde-oliva); font-size: 9px; font-weight: 700; text-transform: uppercase; line-height: 1.4; margin: 0; opacity: 0.8; }
 
-        /* BARRA MULTI-ACCIÓN RESTAURADA */
         .multi-action-bar {
             position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%);
             background: var(--verde-oscuro); padding: 8px 18px; border-radius: 30px;
@@ -263,7 +297,6 @@
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
                     
-                    // Limpieza de nombre
                     let nombreLimpio = f.name.replace(/\.[^/.]+$/, "");
                     if(nombreLimpio.startsWith('KINU_')) {
                         let partes = nombreLimpio.split('_');

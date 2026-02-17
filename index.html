@@ -144,38 +144,52 @@
             {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
-        // --- GESTIÓN DE STUDIO Y GUARDADO ---
+        // --- COMUNICACIÓN CON PHOTO STUDIO ---
         window.addEventListener("message", async (e) => {
-            if (e.data.type === 'CERRAR_STUDIO') document.getElementById('modal-studio').style.display = 'none';
+            if (e.data.type === 'CERRAR_STUDIO') {
+                document.getElementById('modal-studio').style.display = 'none';
+            }
+            
             if (e.data.type === 'GUARDAR_PRENDA') {
                 try {
-                    await subirADrive(e.data.imagen, e.data.categoria, e.data.nombre);
+                    if (!accessToken) {
+                        alert("Drive no conectado");
+                        const studioIframe = document.querySelector('#modal-studio iframe');
+                        studioIframe.contentWindow.postMessage({ type: 'ERROR_GUARDADO' }, '*');
+                        return;
+                    }
+                    await subirADrive(e.data.imagenUrl, e.data.categoria, e.data.nombre);
                     document.getElementById('modal-studio').style.display = 'none';
                     categoriaActual = e.data.categoria.toUpperCase();
-                    renderCats(true); cargarPrendas(false);
-                } catch (err) { alert("Error al guardar"); }
+                    renderCats(true);
+                    cargarPrendas(false);
+                } catch (err) {
+                    alert("Error al guardar en Drive");
+                    const studioIframe = document.querySelector('#modal-studio iframe');
+                    studioIframe.contentWindow.postMessage({ type: 'ERROR_GUARDADO' }, '*');
+                }
             }
         });
 
-        async function subirADrive(base64, cat, nombre) {
-            if (!accessToken) return alert("Conecta Google Drive");
+        async function subirADrive(imgUrl, cat, nombre) {
+            const response = await fetch(imgUrl);
+            const blob = await response.blob();
             const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-            const nombreArchivo = `KINU_${cat.toUpperCase()}_${nombre.replace(/\s+/g, '_')}_${Date.now()}.png`;
-            const byteString = atob(base64.split(',')[1]);
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-            const blob = new Blob([ab], {type: 'image/png'});
-            const metadata = { name: nombreArchivo, parents: [folderId] };
+            const cleanName = nombre.replace(/[^a-z0-9]/gi, '_').toUpperCase();
+            const nombreArchivo = `KINU_${cat.toUpperCase()}_${cleanName}_${Date.now()}.png`;
+
+            const metadata = { name: nombreArchivo, parents: [folderId], mimeType: 'image/png' };
             const formData = new FormData();
             formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             formData.append('file', blob);
-            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+
+            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                 method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: formData
             });
+            if (!uploadRes.ok) throw new Error("Upload Error");
         }
 
-        // --- LÓGICA DE NAVEGACIÓN ---
+        // --- LÓGICA DE INTERFAZ ---
         function mostrarInicio() {
             cancelarSeleccion(); clearInterval(intervalSlider);
             document.getElementById('btn-archivador').classList.remove('active');
@@ -196,7 +210,14 @@
             categorias.forEach(cat => {
                 const div = document.createElement('div');
                 div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
-                div.onclick = () => { cancelarSeleccion(); document.getElementById('btn-home').classList.remove('active'); document.getElementById('btn-archivador').classList.remove('active'); categoriaActual = cat.n.toUpperCase(); renderCats(true); cargarPrendas(false); };
+                div.onclick = () => { 
+                    cancelarSeleccion(); 
+                    document.getElementById('btn-home').classList.remove('active'); 
+                    document.getElementById('btn-archivador').classList.remove('active'); 
+                    categoriaActual = cat.n.toUpperCase(); 
+                    renderCats(true); 
+                    cargarPrendas(false); 
+                };
                 div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
                 container.appendChild(div);
                 if(hacerScroll && cat.n.toUpperCase() === categoriaActual) setTimeout(() => div.scrollIntoView({ behavior: 'smooth', inline: 'center' }), 50);
@@ -216,8 +237,9 @@
                 const data = await res.json();
                 data.files?.forEach(f => {
                     const card = document.createElement('div'); card.className = 'prenda-card';
-                    let n = f.name.split('_').slice(2, -1).join(' ');
-                    card.innerHTML = `<div class="select-badge"><i class="ph ph-check"></i></div><img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${n || 'Prenda'}</span>`;
+                    let partes = f.name.replace('.png','').split('_');
+                    let displayNombre = partes.slice(2, partes.length - 1).join(' ');
+                    card.innerHTML = `<div class="select-badge"><i class="ph ph-check"></i></div><img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${displayNombre || 'Prenda'}</span>`;
                     card.onclick = () => { if(modoSeleccion) toggleSeleccion(f, card); };
                     const startPress = () => { timerPulsacion = setTimeout(() => { if(!modoSeleccion) { modoSeleccion = true; toggleSeleccion(f, card); } }, 500); };
                     card.ontouchstart = startPress; card.onmousedown = startPress;

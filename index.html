@@ -296,7 +296,23 @@
 
         function cargarTodoElCloset() { cancelarSeleccion(); categoriaActual = ''; document.getElementById('btn-home').classList.remove('active'); document.getElementById('btn-archivador').classList.add('active'); renderCats(); cargarPrendas(true); }
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
-        function manejarDrive() { if (!accessToken) tokenClient.requestAccessToken(); }
+        
+        function manejarDrive() { 
+            if (accessToken) {
+                document.getElementById('modal-logout').style.display = 'flex';
+            } else {
+                tokenClient.requestAccessToken(); 
+            }
+        }
+        
+        function ejecutarDesvinculacion() {
+            accessToken = null;
+            localStorage.removeItem('drive_token');
+            actualizarDriveUI(false);
+            cerrarModales();
+            mostrarInicio();
+        }
+
         function actualizarDriveUI(v) { document.getElementById('auth-btn').classList.toggle('vinculado', v); document.getElementById('drive-label').innerText = v ? "CONECTADO" : "SIN VINCULAR"; }
         async function obtenerOCrearCarpeta(n) { const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`; const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } }); const d = await r.json(); if(d.files?.[0]) return d.files[0].id; const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) }); const f = await res.json(); return f.id; }
         function startGoogle() { gapi.load('client', () => { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: (r) => { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); actualizarDriveUI(true); } }); if(accessToken) actualizarDriveUI(true); }); }
@@ -309,6 +325,21 @@
 
     <div id="modal-studio" class="modal-overlay"><iframe src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe></div>
     <div id="modal-categoria" class="modal-overlay"><div class="modal-content"></div></div>
+    
+    <div id="modal-logout" class="modal-overlay">
+        <div class="modal-content">
+            <div style="background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                <img src="https://i.imgur.com/Go2a4Hs.png" style="width: 30px; height: auto;">
+            </div>
+            <div style="font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 10px;">¿DESCONECTAR DRIVE?</div>
+            <p style="font-size: 11px; color: #666; margin-bottom: 25px; line-height: 1.4;">Dejarás de ver tus prendas guardadas hasta que vuelvas a iniciar sesión.</p>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background: #eee; color: #666;">VOLVER</button>
+                <button onclick="ejecutarDesvinculacion()" style="flex:1; padding:15px; border-radius:15px; border:none; background:var(--verde-oscuro); color:white; font-weight:800;">SÍ, CERRAR</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-confirm-delete" class="modal-overlay">
         <div class="modal-content">
             <i class="ph ph-warning-circle" style="font-size: 40px; color: var(--rojo-borrar); margin-bottom: 15px; display: block;"></i>

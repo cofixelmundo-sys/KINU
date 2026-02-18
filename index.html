@@ -94,12 +94,12 @@
         .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 380px; padding: 25px; text-align: center; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
     <div class="main-container">
         <header>
             <div class="header-info-box">
-                <i class="ph ph-sun" style="font-size: 22px; color: white"></i>
+                <i class="ph ph-sun" id="w-icon" style="font-size: 22px; color: white"></i>
                 <span class="info-main-text" id="w-temp">--°</span>
                 <span class="info-sub-text" id="w-city">...</span>
             </div>
@@ -149,6 +149,26 @@
             {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}, 
             {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
         ];
+
+        async function actualizarClima() {
+            try {
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true');
+                const data = await res.json();
+                document.getElementById('w-temp').innerText = Math.round(data.current_weather.temperature) + '°';
+                document.getElementById('w-city').innerText = "MONTEVIDEO";
+                
+                const code = data.current_weather.weathercode;
+                const icon = document.getElementById('w-icon');
+                let nuevoIcono = 'ph-sun';
+                if (code >= 1 && code <= 3) nuevoIcono = 'ph-cloud-sun';
+                if (code >= 45 && code <= 48) nuevoIcono = 'ph-cloud-fog';
+                if (code >= 51 && code <= 67) nuevoIcono = 'ph-cloud-rain';
+                if (code >= 71 && code <= 77) nuevoIcono = 'ph-snowflake';
+                if (code >= 80 && code <= 82) nuevoIcono = 'ph-cloud-showers';
+                if (code >= 95) nuevoIcono = 'ph-cloud-lightning';
+                icon.className = `ph ${nuevoIcono}`;
+            } catch(e) {}
+        }
 
         function manejarDrive(esAdvertencia = false) {
             document.getElementById('modal-drive-confirm').style.display = 'flex';
@@ -231,9 +251,7 @@
                     cancelarSeleccion(); 
                     categoriaActual = cat.n.toUpperCase(); 
                     renderCats(true); 
-                    if (categoriaActual === 'COLABORO') {
-                        document.getElementById('modal-retiro').style.display = 'flex';
-                    }
+                    if (categoriaActual === 'COLABORO') document.getElementById('modal-retiro').style.display = 'flex';
                     cargarPrendas(false); 
                 };
                 div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
@@ -300,18 +318,10 @@
             cerrarModales();
             const catDestino = nuevaCat.toUpperCase();
             const promesas = seleccionados.map(file => {
-                const partes = file.name.split('_'); 
-                partes[1] = catDestino;
-                return fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { 
-                    method: 'PATCH', 
-                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ name: partes.join('_') }) 
-                });
+                const partes = file.name.split('_'); partes[1] = catDestino;
+                return fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: partes.join('_') }) });
             });
-
             await Promise.all(promesas);
-            
-            // Navegación automática a la nueva categoría
             categoriaActual = catDestino;
             cancelarSeleccion();
             renderCats(true); 
@@ -330,26 +340,10 @@
             const direccion = document.getElementById('retiro-direccion').value;
             const cantidad = document.getElementById('retiro-cantidad').value;
             const fecha = document.getElementById('retiro-fecha').value;
-
-            if (!nombre || !direccion || !fecha) {
-                alert("Por favor completa todos los campos.");
-                return;
-            }
-
-            const mensaje = `¡Hola KINU! 👋\n\nQuiero coordinar un retiro para *COLABORO*:\n\n👤 *Nombre:* ${nombre}\n📍 *Dirección:* ${direccion}\n👕 *Cantidad:* ${cantidad}\n📅 *Día:* ${fecha}`;
-            const fono = "59892199199";
-            
-            // Disparar WhatsApp
-            window.open(`https://wa.me/${fono}?text=${encodeURIComponent(mensaje)}`, '_blank');
-            
-            // Reseteo visual inmediato para cuando el usuario regrese
-            setTimeout(() => {
-                cerrarModales();
-                mostrarInicio();
-                document.getElementById('retiro-nombre').value = '';
-                document.getElementById('retiro-direccion').value = '';
-                document.getElementById('retiro-fecha').value = '';
-            }, 300);
+            if (!nombre || !direccion || !fecha) { alert("Completa los campos."); return; }
+            const mensaje = `¡Hola KINU! 👋\n\nQuiero coordinar un retiro:\n👤 *Nombre:* ${nombre}\n📍 *Dirección:* ${direccion}\n👕 *Cantidad:* ${cantidad}\n📅 *Día:* ${fecha}`;
+            window.open(`https://wa.me/59892199199?text=${encodeURIComponent(mensaje)}`, '_blank');
+            setTimeout(() => { cerrarModales(); mostrarInicio(); }, 300);
         }
 
         function cargarTodoElCloset() { cancelarSeleccion(); categoriaActual = ''; cargarPrendas(true); renderCats(); }
@@ -358,7 +352,6 @@
         async function obtenerOCrearCarpeta(n) { const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`; const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } }); const d = await r.json(); if(d.files?.[0]) return d.files[0].id; const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) }); const f = await res.json(); return f.id; }
         function startGoogle() { gapi.load('client', () => { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: (r) => { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); actualizarDriveUI(true); cargarPrendas(false); } }); if(accessToken) actualizarDriveUI(true); }); }
         function enviarAStudio(i) { if (i.files?.[0]) { const r = new FileReader(); r.onload = (e) => { sessionStorage.setItem('imagen_para_procesar', e.target.result); document.getElementById('modal-studio').style.display = 'flex'; document.getElementById('modal-studio').querySelector('iframe').src = 'photo_studio.html'; }; r.readAsDataURL(i.files[0]); } }
-        async function actualizarClima() { try { const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true'); const data = await res.json(); document.getElementById('w-temp').innerText = Math.round(data.current_weather.temperature) + '°'; document.getElementById('w-city').innerText = "MONTEVIDEO"; } catch(e) {} }
         function iniciarAutoSlider() { const slider = document.getElementById('slider-home'); let idx = 0; intervalSlider = setInterval(() => { idx = (idx + 1) % 3; if(slider) { const w = slider.querySelector('.step-card').clientWidth + 20; slider.scrollTo({ left: w * idx, behavior: 'smooth' }); } }, 4000); }
 
         window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); actualizarClima(); };
@@ -371,18 +364,10 @@
         <div class="modal-content">
             <div style="font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 20px;">Planilla de Retiro</div>
             <div class="retiro-form">
-                <label>Nombre Completo</label>
-                <input type="text" id="retiro-nombre" placeholder="Ej: Juan Pérez">
-                <label>Dirección de Retiro</label>
-                <input type="text" id="retiro-direccion" placeholder="Calle, Número, Apto">
-                <label>Cantidad de prendas</label>
-                <select id="retiro-cantidad">
-                    <option>1 a 5 prendas</option>
-                    <option>5 a 15 prendas</option>
-                    <option>Más de 15 prendas</option>
-                </select>
-                <label>Día preferido</label>
-                <input type="date" id="retiro-fecha">
+                <label>Nombre Completo</label><input type="text" id="retiro-nombre" placeholder="Nombre">
+                <label>Dirección</label><input type="text" id="retiro-direccion" placeholder="Calle, Número">
+                <label>Cantidad</label><select id="retiro-cantidad"><option>1 a 5</option><option>5 a 15</option><option>Más de 15</option></select>
+                <label>Día</label><input type="date" id="retiro-fecha">
             </div>
             <div style="display: flex; gap: 10px; margin-top: 25px;">
                 <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background: #eee;">CANCELAR</button>
@@ -393,13 +378,11 @@
 
     <div id="modal-drive-confirm" class="modal-overlay">
         <div class="modal-content">
-            <div style="background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                <img src="https://i.imgur.com/Go2a4Hs.png" style="width: 30px; height: auto;">
-            </div>
-            <div id="drive-confirm-title" style="font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 10px;">---</div>
-            <p id="drive-confirm-text" style="font-size: 11px; color: #666; margin-bottom: 25px; line-height: 1.4;">---</p>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background: #eee; color: #666;">VOLVER</button>
+            <div style="background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;"><img src="https://i.imgur.com/Go2a4Hs.png" style="width: 30px;"></div>
+            <div id="drive-confirm-title" style="font-size:14px; font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; margin-bottom:10px;">---</div>
+            <p id="drive-confirm-text" style="font-size:11px; color:#666; margin-bottom:25px;">---</p>
+            <div style="display: flex; gap:10px;">
+                <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:#eee;">VOLVER</button>
                 <button id="drive-confirm-btn" style="flex:1; padding:15px; border-radius:15px; border:none; background:var(--verde-oscuro); color:white; font-weight:800;">---</button>
             </div>
         </div>

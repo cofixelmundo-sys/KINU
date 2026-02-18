@@ -71,7 +71,6 @@
         .step-card h3 { font-size: 16px; font-weight: 800; color: var(--verde-oscuro); margin: 5px 0; text-transform: uppercase; }
         .step-card p { font-size: 11px; color: #666; line-height: 1.4; margin: 0; }
 
-        /* Formulario Retiro */
         .retiro-form { display: flex; flex-direction: column; gap: 12px; text-align: left; }
         .retiro-form label { font-size: 9px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: -8px; margin-left: 5px; }
         .retiro-form input, .retiro-form select { width: 100%; padding: 12px; border-radius: 15px; border: 1px solid rgba(0,0,0,0.1); background: white; font-size: 12px; outline: none; }
@@ -239,7 +238,7 @@
                 };
                 div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
                 container.appendChild(div);
-                if(hacerScroll && cat.n.toUpperCase() === categoriaActual) setTimeout(() => div.scrollIntoView({ behavior: 'smooth', inline: 'center' }), 50);
+                if(hacerScroll && cat.n.toUpperCase() === categoriaActual) setTimeout(() => div.scrollIntoView({ behavior: 'smooth', inline: 'center' }), 100);
             });
         }
 
@@ -291,18 +290,32 @@
                 btn.innerHTML = `<i class="ph ${cat.i}" style="font-size:20px;"></i><span style="font-size:8px; font-weight:800;">${cat.n}</span>`;
                 btn.onclick = () => ejecutarMoverMulti(cat.n); list.appendChild(btn);
             });
-            document.getElementById('modal-categoria').querySelector('.modal-content').innerHTML = `<div style="font-weight:800; text-transform:uppercase; font-size:13px; color:var(--verde-oliva); margin-bottom:15px;">Mover a...</div>`;
-            document.getElementById('modal-categoria').querySelector('.modal-content').appendChild(list);
+            const modalCont = document.getElementById('modal-categoria').querySelector('.modal-content');
+            modalCont.innerHTML = `<div style="font-weight:800; text-transform:uppercase; font-size:13px; color:var(--verde-oliva); margin-bottom:15px;">Mover a...</div>`;
+            modalCont.appendChild(list);
             document.getElementById('modal-categoria').style.display = 'flex';
         }
 
         async function ejecutarMoverMulti(nuevaCat) {
             cerrarModales();
+            const catDestino = nuevaCat.toUpperCase();
             const promesas = seleccionados.map(file => {
-                const partes = file.name.split('_'); partes[1] = nuevaCat.toUpperCase();
-                return fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: partes.join('_') }) });
+                const partes = file.name.split('_'); 
+                partes[1] = catDestino;
+                return fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { 
+                    method: 'PATCH', 
+                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ name: partes.join('_') }) 
+                });
             });
-            await Promise.all(promesas); cancelarSeleccion(); cargarPrendas(false);
+
+            await Promise.all(promesas);
+            
+            // Navegación automática a la nueva categoría
+            categoriaActual = catDestino;
+            cancelarSeleccion();
+            renderCats(true); 
+            cargarPrendas(false);
         }
 
         function mostrarConfirmarBorradoMulti() { document.getElementById('modal-confirm-delete').style.display = 'flex'; }
@@ -323,17 +336,20 @@
                 return;
             }
 
-            const mensaje = `¡Hola KINU! 👋\n\nQuiero coordinar un retiro para *COLABORO*:\n\n` +
-                            `👤 *Nombre:* ${nombre}\n` +
-                            `📍 *Dirección:* ${direccion}\n` +
-                            `👕 *Cantidad:* ${cantidad}\n` +
-                            `📅 *Día:* ${fecha}`;
-
+            const mensaje = `¡Hola KINU! 👋\n\nQuiero coordinar un retiro para *COLABORO*:\n\n👤 *Nombre:* ${nombre}\n📍 *Dirección:* ${direccion}\n👕 *Cantidad:* ${cantidad}\n📅 *Día:* ${fecha}`;
             const fono = "59892199199";
-            const url = `https://wa.me/${fono}?text=${encodeURIComponent(mensaje)}`;
             
-            window.open(url, '_blank');
-            cerrarModales();
+            // Disparar WhatsApp
+            window.open(`https://wa.me/${fono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+            
+            // Reseteo visual inmediato para cuando el usuario regrese
+            setTimeout(() => {
+                cerrarModales();
+                mostrarInicio();
+                document.getElementById('retiro-nombre').value = '';
+                document.getElementById('retiro-direccion').value = '';
+                document.getElementById('retiro-fecha').value = '';
+            }, 300);
         }
 
         function cargarTodoElCloset() { cancelarSeleccion(); categoriaActual = ''; cargarPrendas(true); renderCats(); }
@@ -357,17 +373,14 @@
             <div class="retiro-form">
                 <label>Nombre Completo</label>
                 <input type="text" id="retiro-nombre" placeholder="Ej: Juan Pérez">
-                
                 <label>Dirección de Retiro</label>
                 <input type="text" id="retiro-direccion" placeholder="Calle, Número, Apto">
-                
                 <label>Cantidad de prendas</label>
                 <select id="retiro-cantidad">
                     <option>1 a 5 prendas</option>
                     <option>5 a 15 prendas</option>
                     <option>Más de 15 prendas</option>
                 </select>
-
                 <label>Día preferido</label>
                 <input type="date" id="retiro-fecha">
             </div>

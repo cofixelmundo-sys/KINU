@@ -71,6 +71,11 @@
         .step-card h3 { font-size: 16px; font-weight: 800; color: var(--verde-oscuro); margin: 5px 0; text-transform: uppercase; }
         .step-card p { font-size: 11px; color: #666; line-height: 1.4; margin: 0; }
 
+        /* Formulario Retiro */
+        .retiro-form { display: flex; flex-direction: column; gap: 12px; text-align: left; }
+        .retiro-form label { font-size: 9px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: -8px; margin-left: 5px; }
+        .retiro-form input, .retiro-form select { width: 100%; padding: 12px; border-radius: 15px; border: 1px solid rgba(0,0,0,0.1); background: white; font-size: 12px; outline: none; }
+
         .multi-action-bar { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); background: var(--verde-oscuro); padding: 8px 18px; border-radius: 30px; display: flex; gap: 18px; align-items: center; z-index: 1000; box-shadow: 0 8px 25px rgba(0,0,0,0.4); opacity: 0; pointer-events: none; border: 1px solid rgba(255,255,255,0.1); }
         .multi-action-bar.active { opacity: 1; pointer-events: auto; }
         .multi-btn { color: white; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
@@ -87,7 +92,7 @@
         .cam-inner i { color: var(--verde-oscuro); font-size: 26px; }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
-        .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 380px; padding: 25px; text-align: center; }
+        .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 380px; padding: 25px; text-align: center; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -146,7 +151,6 @@
             {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
-        // --- MANEJO DE DRIVE CON CONFIRMACIÓN ---
         function manejarDrive(esAdvertencia = false) {
             document.getElementById('modal-drive-confirm').style.display = 'flex';
             if (accessToken) {
@@ -164,36 +168,17 @@
             }
         }
 
-        function ejecutarVinculacion() {
-            cerrarModales();
-            tokenClient.requestAccessToken();
-        }
+        function ejecutarVinculacion() { cerrarModales(); tokenClient.requestAccessToken(); }
+        function ejecutarDesvinculacion() { accessToken = null; localStorage.removeItem('drive_token'); actualizarDriveUI(false); cerrarModales(); mostrarInicio(); }
 
-        function ejecutarDesvinculacion() {
-            accessToken = null;
-            localStorage.removeItem('drive_token');
-            actualizarDriveUI(false);
-            cerrarModales();
-            mostrarInicio();
-        }
-
-        // --- COMUNICACIÓN CON PHOTO STUDIO ---
         window.addEventListener("message", async (e) => {
             if (e.data.type === 'CERRAR_STUDIO') document.getElementById('modal-studio').style.display = 'none';
             if (e.data.type === 'GUARDAR_PRENDA') {
-                try {
-                    if (!accessToken) {
-                        manejarDrive(true);
-                        return;
-                    }
-                    await subirADrive(e.data.imagenUrl, e.data.categoria, e.data.nombre);
-                    document.getElementById('modal-studio').style.display = 'none';
-                    categoriaActual = e.data.categoria.toUpperCase();
-                    renderCats(true);
-                    cargarPrendas(false);
-                } catch (err) {
-                    alert("Error al guardar en Drive");
-                }
+                if (!accessToken) { manejarDrive(true); return; }
+                await subirADrive(e.data.imagenUrl, e.data.categoria, e.data.nombre);
+                document.getElementById('modal-studio').style.display = 'none';
+                categoriaActual = e.data.categoria.toUpperCase();
+                renderCats(true); cargarPrendas(false);
             }
         });
 
@@ -203,24 +188,18 @@
             const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
             const cleanName = nombre.replace(/[^a-z0-9]/gi, '_').toUpperCase();
             const nombreArchivo = `KINU_${cat.toUpperCase()}_${cleanName}_${Date.now()}.png`;
-
             const metadata = { name: nombreArchivo, parents: [folderId], mimeType: 'image/png' };
             const formData = new FormData();
             formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             formData.append('file', blob);
-
-            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: formData
-            });
+            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: formData });
         }
 
         function mostrarInicio() {
-            cancelarSeleccion(); 
-            clearInterval(intervalSlider);
+            cancelarSeleccion(); clearInterval(intervalSlider);
             document.getElementById('btn-archivador').classList.remove('active');
             document.getElementById('btn-home').classList.add('active');
-            categoriaActual = ''; 
-            renderCats();
+            categoriaActual = ''; renderCats();
             document.getElementById('main-content').innerHTML = `
                 <div class="onboarding-container">
                     <div class="slider-wrapper" id="slider-home">
@@ -253,6 +232,9 @@
                     cancelarSeleccion(); 
                     categoriaActual = cat.n.toUpperCase(); 
                     renderCats(true); 
+                    if (categoriaActual === 'COLABORO') {
+                        document.getElementById('modal-retiro').style.display = 'flex';
+                    }
                     cargarPrendas(false); 
                 };
                 div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
@@ -262,13 +244,9 @@
         }
 
         async function cargarPrendas(todo = false) {
-            if(!accessToken) {
-                if(categoriaActual !== '' || todo) manejarDrive(true);
-                return;
-            }
+            if(!accessToken) { if(categoriaActual !== '' || todo) manejarDrive(true); return; }
             document.getElementById('btn-home').classList.remove('active');
             if(todo) document.getElementById('btn-archivador').classList.add('active');
-            
             const content = document.getElementById('main-content');
             content.innerHTML = `<div class="closet-grid" id="closet-grid"></div>`;
             const grid = document.getElementById('closet-grid');
@@ -322,10 +300,7 @@
             cerrarModales();
             const promesas = seleccionados.map(file => {
                 const partes = file.name.split('_'); partes[1] = nuevaCat.toUpperCase();
-                return fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, {
-                    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: partes.join('_') })
-                });
+                return fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: partes.join('_') }) });
             });
             await Promise.all(promesas); cancelarSeleccion(); cargarPrendas(false);
         }
@@ -335,6 +310,11 @@
             cerrarModales();
             const promesas = seleccionados.map(file => fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken } }));
             await Promise.all(promesas); cancelarSeleccion(); cargarPrendas(categoriaActual === '');
+        }
+
+        function enviarRetiro() {
+            alert("Planilla enviada. Nos pondremos en contacto para coordinar el retiro.");
+            cerrarModales();
         }
 
         function cargarTodoElCloset() { cancelarSeleccion(); categoriaActual = ''; cargarPrendas(true); renderCats(); }
@@ -352,6 +332,33 @@
     <div id="modal-studio" class="modal-overlay"><iframe src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe></div>
     <div id="modal-categoria" class="modal-overlay"><div class="modal-content"></div></div>
     
+    <div id="modal-retiro" class="modal-overlay">
+        <div class="modal-content">
+            <div style="font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 20px;">Planilla de Retiro</div>
+            <div class="retiro-form">
+                <label>Nombre Completo</label>
+                <input type="text" placeholder="Ej: Juan Pérez">
+                
+                <label>Dirección de Retiro</label>
+                <input type="text" placeholder="Calle, Número, Apto">
+                
+                <label>Cantidad de prendas</label>
+                <select>
+                    <option>1 a 5 prendas</option>
+                    <option>5 a 15 prendas</option>
+                    <option>Más de 15 prendas</option>
+                </select>
+
+                <label>Día preferido</label>
+                <input type="date">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background: #eee;">CANCELAR</button>
+                <button onclick="enviarRetiro()" style="flex:1; padding:15px; border-radius:15px; border:none; background:var(--verde-oscuro); color:white; font-weight:800;">ENVIAR</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-drive-confirm" class="modal-overlay">
         <div class="modal-content">
             <div style="background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">

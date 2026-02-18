@@ -313,7 +313,26 @@
         }
 
         function enviarRetiro() {
-            alert("Planilla enviada. Nos pondremos en contacto para coordinar el retiro.");
+            const nombre = document.getElementById('retiro-nombre').value;
+            const direccion = document.getElementById('retiro-direccion').value;
+            const cantidad = document.getElementById('retiro-cantidad').value;
+            const fecha = document.getElementById('retiro-fecha').value;
+
+            if (!nombre || !direccion || !fecha) {
+                alert("Por favor completa todos los campos.");
+                return;
+            }
+
+            const mensaje = `¡Hola KINU! 👋\n\nQuiero coordinar un retiro para *COLABORO*:\n\n` +
+                            `👤 *Nombre:* ${nombre}\n` +
+                            `📍 *Dirección:* ${direccion}\n` +
+                            `👕 *Cantidad:* ${cantidad}\n` +
+                            `📅 *Día:* ${fecha}`;
+
+            const fono = "59892199199";
+            const url = `https://wa.me/${fono}?text=${encodeURIComponent(mensaje)}`;
+            
+            window.open(url, '_blank');
             cerrarModales();
         }
 
@@ -337,20 +356,20 @@
             <div style="font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 20px;">Planilla de Retiro</div>
             <div class="retiro-form">
                 <label>Nombre Completo</label>
-                <input type="text" placeholder="Ej: Juan Pérez">
+                <input type="text" id="retiro-nombre" placeholder="Ej: Juan Pérez">
                 
                 <label>Dirección de Retiro</label>
-                <input type="text" placeholder="Calle, Número, Apto">
+                <input type="text" id="retiro-direccion" placeholder="Calle, Número, Apto">
                 
                 <label>Cantidad de prendas</label>
-                <select>
+                <select id="retiro-cantidad">
                     <option>1 a 5 prendas</option>
                     <option>5 a 15 prendas</option>
                     <option>Más de 15 prendas</option>
                 </select>
 
                 <label>Día preferido</label>
-                <input type="date">
+                <input type="date" id="retiro-fecha">
             </div>
             <div style="display: flex; gap: 10px; margin-top: 25px;">
                 <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background: #eee;">CANCELAR</button>

@@ -108,7 +108,7 @@
                 <div class="nav-icon active" id="btn-home" onclick="mostrarInicio()"><i class="ph ph-house-simple"></i></div>
                 <div class="nav-icon" id="btn-archivador" onclick="cargarTodoElCloset()"><i class="ph ph-archive"></i></div>
             </nav>
-            <label for="cam-input" class="cam-trigger"><div class="cam-inner"><i class="ph ph-camera"></i></div></label>
+            <div class="cam-trigger" onclick="validarAccesoCamara()"><div class="cam-inner"><i class="ph ph-camera"></i></div></div>
             <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="enviarAStudio(this)">
         </div>
     </div>
@@ -152,6 +152,20 @@
             });
         }
 
+        // Nueva función para validar si el usuario está vinculado antes de abrir la cámara
+        function validarAccesoCamara() {
+            if (!accessToken) {
+                mostrarPopup({
+                    titulo: "Vincular Google Drive",
+                    texto: "KINU guardará tus prendas de forma segura en tu Drive. ¿Deseas vincular tu cuenta para empezar a digitalizar?",
+                    confirmarText: "VINCULAR CUENTA",
+                    onConfirm: () => tokenClient.requestAccessToken()
+                });
+            } else {
+                document.getElementById('cam-input').click();
+            }
+        }
+
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -191,9 +205,18 @@
                 const div = document.createElement('div');
                 div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
                 div.onclick = () => { 
-                    if(!accessToken) { manejarDrive(); return; }
+                    if(!accessToken) { 
+                        // Reutilizamos el popup estético
+                        mostrarPopup({
+                            titulo: "Vincular Google Drive",
+                            texto: "KINU guardará tus prendas de forma segura en tu Drive. ¿Deseas vincular tu cuenta?",
+                            confirmarText: "VINCULAR CUENTA",
+                            onConfirm: () => tokenClient.requestAccessToken()
+                        });
+                        return; 
+                    }
                     categoriaActual = cat.n.toUpperCase(); renderCats();
-                    cargarPrendas(false); 
+                    // cargarPrendas(false); 
                 };
                 div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
                 container.appendChild(div);

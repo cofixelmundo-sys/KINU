@@ -78,7 +78,7 @@
 
         .retiro-form { display: flex; flex-direction: column; gap: 10px; text-align: left; }
         .retiro-form label { font-size: 9px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: -6px; margin-left: 5px; }
-        .retiro-form input, .retiro-form select { width: 100%; padding: 10px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); background: white; font-size: 12px; outline: none; }
+        .retiro-form input, .retiro-form select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); background: white; font-size: 12px; outline: none; }
 
         .multi-action-bar { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); background: var(--verde-oscuro); padding: 8px 18px; border-radius: 30px; display: flex; gap: 18px; align-items: center; z-index: 1000; box-shadow: 0 8px 25px rgba(0,0,0,0.4); opacity: 0; pointer-events: none; border: 1px solid rgba(255,255,255,0.1); }
         .multi-action-bar.active { opacity: 1; pointer-events: auto; }
@@ -179,7 +179,7 @@
             cancelarSeleccion(); clearInterval(intervalSlider);
             document.getElementById('btn-archivador').classList.remove('active');
             document.getElementById('btn-home').classList.add('active');
-            document.getElementById('extra-actions').innerHTML = ''; // Limpiar barra
+            document.getElementById('extra-actions').innerHTML = '';
             categoriaActual = ''; renderCats();
             document.getElementById('main-content').innerHTML = `
                 <div class="onboarding-container">
@@ -208,15 +208,12 @@
                     cancelarSeleccion(); 
                     categoriaActual = cat.n.toUpperCase(); 
                     renderCats(true); 
-                    
-                    // Mostrar u ocultar barra de retiro
                     const extra = document.getElementById('extra-actions');
                     if(categoriaActual === 'COLABORO') {
                         extra.innerHTML = `<div class="action-bar-colaboro" onclick="document.getElementById('modal-retiro').style.display='flex'"><span>Coordinar Retiro</span><i class="ph ph-calendar-plus"></i></div>`;
                     } else {
                         extra.innerHTML = '';
                     }
-                    
                     cargarPrendas(false); 
                 };
                 div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
@@ -253,11 +250,13 @@
         }
 
         function validarMartes(input) {
+            if(!input.value) return;
             const fecha = new Date(input.value + 'T00:00:00');
-            const dia = fecha.getDay(); // 0 domingo, 1 lunes, 2 martes...
-            if (dia !== 2) {
-                alert("Por el momento, solo coordinamos retiros los días Martes.");
-                input.value = '';
+            const diaSemana = fecha.getDay(); 
+            // 2 es Martes en JavaScript (0: Domingo, 1: Lunes, 2: Martes...)
+            if (diaSemana !== 2) {
+                alert("Por el momento, solo coordinamos retiros los días Martes. Por favor, selecciona un martes del calendario.");
+                input.value = ''; // Limpia el valor para que tenga que elegir otro
             }
         }
 
@@ -268,19 +267,23 @@
             const cantidad = document.getElementById('retiro-cantidad').value;
             const fecha = document.getElementById('retiro-fecha').value;
 
-            if (!nombre || !tel || !direccion || !fecha) { alert("Completa todos los campos."); return; }
+            if (!nombre || !tel || !direccion || !fecha) { 
+                alert("Por favor, completa todos los campos para continuar."); 
+                return; 
+            }
 
-            const mensaje = `¡Hola KINU! 👋\n\nQuiero coordinar un retiro:\n👤 *Nombre:* ${nombre}\n📞 *Tel:* ${tel}\n📍 *Dirección:* ${direccion}\n👕 *Cantidad:* ${cantidad}\n📅 *Día:* ${fecha}`;
+            const mensaje = `¡Hola KINU! 👋\n\nQuiero coordinar un retiro para COLABORO:\n👤 *Nombre:* ${nombre}\n📞 *Tel:* ${tel}\n📍 *Dirección:* ${direccion}\n👕 *Cantidad:* ${cantidad}\n📅 *Día:* ${fecha}`;
+            
             window.open(`https://wa.me/59892199199?text=${encodeURIComponent(mensaje)}`, '_blank');
             
             setTimeout(() => {
                 cerrarModales();
                 mostrarInicio();
                 document.querySelectorAll('.retiro-form input').forEach(i => i.value = '');
-            }, 300);
+            }, 500);
         }
 
-        // --- Funciones de soporte (iguales) ---
+        // SOPORTE DRIVE Y SELECCIÓN
         function toggleSeleccion(f, el) { const i = seleccionados.findIndex(s => s.id === f.id); if (i > -1) { seleccionados.splice(i, 1); el.classList.remove('selected'); } else { seleccionados.push(f); el.classList.add('selected'); } document.getElementById('multi-count').innerText = seleccionados.length; document.getElementById('multi-bar').classList.toggle('active', seleccionados.length > 0); }
         function cancelarSeleccion() { seleccionados = []; modoSeleccion = false; document.querySelectorAll('.prenda-card').forEach(c => c.classList.remove('selected')); document.getElementById('multi-bar').classList.remove('active'); }
         function abrirSelectorMoverMulti() { const list = document.createElement('div'); list.style = "display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"; categorias.forEach(cat => { const btn = document.createElement('button'); btn.style = "background:var(--arena-boton); border:none; padding:12px 5px; border-radius:15px; display:flex; flex-direction:column; align-items:center; gap:5px;"; btn.innerHTML = `<i class="ph ${cat.i}" style="font-size:20px;"></i><span style="font-size:8px; font-weight:800;">${cat.n}</span>`; btn.onclick = () => ejecutarMoverMulti(cat.n); list.appendChild(btn); }); const modalCont = document.getElementById('modal-categoria').querySelector('.modal-content'); modalCont.innerHTML = `<div style=\"font-weight:800; text-transform:uppercase; font-size:13px; color:var(--verde-oliva); margin-bottom:15px;\">Mover a...</div>`; modalCont.appendChild(list); document.getElementById('modal-categoria').style.display = 'flex'; }
@@ -296,6 +299,7 @@
         function ejecutarDesvinculacion() { accessToken=null; localStorage.removeItem('drive_token'); actualizarDriveUI(false); cerrarModales(); mostrarInicio(); }
         function enviarAStudio(i) { if (i.files?.[0]) { const r = new FileReader(); r.onload = (e) => { sessionStorage.setItem('imagen_para_procesar', e.target.result); document.getElementById('modal-studio').style.display = 'flex'; document.getElementById('modal-studio').querySelector('iframe').src = 'photo_studio.html'; }; r.readAsDataURL(i.files[0]); } }
         function iniciarAutoSlider() { const slider = document.getElementById('slider-home'); let idx = 0; intervalSlider = setInterval(() => { idx = (idx + 1) % 2; if(slider) { const w = slider.querySelector('.step-card').clientWidth + 20; slider.scrollTo({ left: w * idx, behavior: 'smooth' }); } }, 4000); }
+        
         window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); actualizarClima(); };
     </script>
 
@@ -308,17 +312,21 @@
             <div class="retiro-form">
                 <label>Nombre Completo</label>
                 <input type="text" id="retiro-nombre" placeholder="Tu nombre">
+                
                 <label>Teléfono / WhatsApp</label>
                 <input type="tel" id="retiro-tel" placeholder="09X XXX XXX">
+                
                 <label>Dirección</label>
                 <input type="text" id="retiro-direccion" placeholder="Calle y número">
-                <label>Cantidad aproximada</label>
+                
+                <label>Cantidad de prendas</label>
                 <select id="retiro-cantidad">
                     <option>1 a 5 prendas</option>
                     <option>5 a 15 prendas</option>
                     <option>Más de 15 prendas</option>
                 </select>
-                <label>Día de retiro (Solo Martes)</label>
+                
+                <label>Día de retiro (Elige un Martes)</label>
                 <input type="date" id="retiro-fecha" onchange="validarMartes(this)">
             </div>
             <div style="display: flex; gap: 10px; margin-top: 25px;">

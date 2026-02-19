@@ -87,8 +87,11 @@
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.4; cursor: pointer; }
         .nav-icon.active { opacity: 1; }
-        .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
+        .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        
+        /* CORRECCIÓN TAMAÑO CÁMARA */
+        .cam-inner i { font-size: 42px; color: var(--verde-oscuro); }
 
         /* FORMULARIOS */
         .retiro-form { display: flex; flex-direction: column; gap: 10px; text-align: left; margin-top: 15px; }
@@ -181,21 +184,17 @@
             {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
-        // --- SISTEMA DE MODALES ---
         function mostrarPopup({titulo, texto, confirmarText = "Aceptar", cancelarText = "Cancelar", onConfirm}) {
             const modal = document.getElementById('modal-custom');
             document.getElementById('custom-title').innerText = titulo;
             document.getElementById('custom-text').innerText = texto;
             const btnConfirm = document.getElementById('btn-modal-confirm');
             const btnCancel = document.getElementById('btn-modal-cancel');
-            
             btnConfirm.innerText = confirmarText;
             btnCancel.innerText = cancelarText;
             btnCancel.style.display = onConfirm ? 'block' : 'none';
-
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('active'), 10);
-
             btnConfirm.onclick = () => { cerrarModales(); if(onConfirm) onConfirm(); };
             btnCancel.onclick = cerrarModales;
         }
@@ -207,7 +206,6 @@
             });
         }
 
-        // --- CLIMA ---
         async function actualizarClima() {
             try {
                 const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9033&longitude=-56.1882&current_weather=true');
@@ -224,7 +222,6 @@
             } catch(e) { document.getElementById('temp-text').innerText = "--°"; }
         }
 
-        // --- CATEGORÍAS ---
         function renderCats() {
             const container = document.getElementById('main-cats'); container.innerHTML = '';
             categorias.forEach(cat => {
@@ -232,8 +229,7 @@
                 div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
                 div.onclick = () => { 
                     if(!accessToken) { manejarDrive(); return; }
-                    categoriaActual = cat.n.toUpperCase(); 
-                    renderCats(); 
+                    categoriaActual = cat.n.toUpperCase(); renderCats();
                     const extra = document.getElementById('extra-actions');
                     extra.innerHTML = (categoriaActual === 'COLABORO') ? `<div class="action-bar-colaboro" onclick="document.getElementById('modal-retiro').style.display='flex'; setTimeout(()=>document.getElementById('modal-retiro').classList.add('active'),10)"><span>Coordinar Retiro</span><i class="ph ph-calendar-plus"></i></div>` : '';
                     cargarPrendas(false); 
@@ -243,7 +239,6 @@
             });
         }
 
-        // --- INICIO ---
         function mostrarInicio() {
             clearInterval(intervalSlider);
             document.getElementById('btn-archivador').classList.remove('active');
@@ -285,7 +280,6 @@
             }, 4000);
         }
 
-        // --- DRIVE ---
         function manejarDrive() {
             if (accessToken) {
                 mostrarPopup({
@@ -319,7 +313,6 @@
                             localStorage.setItem('drive_token', accessToken);
                             document.getElementById('auth-btn').classList.add('vinculado');
                             document.getElementById('drive-label').innerText = "CONECTADO";
-                            if(categoriaActual) cargarPrendas(false);
                         }
                     }
                 });

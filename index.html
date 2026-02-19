@@ -20,7 +20,7 @@
             --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
-        * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; user-select: none; }
 
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
@@ -45,21 +45,30 @@
         .cat-item.active .cat-circle { background: white; }
         .cat-circle i { font-size: 26px; color: white; }
         .cat-item.active i { color: var(--verde-oscuro); }
-        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 8px; text-transform: uppercase; }
+        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 8px; text-transform: uppercase; text-align: center; }
 
-        .action-bar-colaboro { background: var(--verde-oscuro); margin: 0 15px 15px; padding: 15px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; color: white; cursor: pointer; }
+        .action-bar-colaboro { background: var(--verde-oscuro); margin: 0 15px 15px; padding: 15px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; color: white; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .action-bar-colaboro span { font-size: 11px; font-weight: 900; text-transform: uppercase; }
 
         .content { flex: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
+        
+        /* Estilos Onboarding */
+        .onboarding-container { display: flex; flex-direction: column; align-items: center; padding-top: 15px; }
+        .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+        .step-card { min-width: 85%; max-height: 320px; background: var(--arena-claro); border-radius: 30px; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .step-media { width: 140px; height: 140px; margin-bottom: 10px; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.05); }
+        .step-media video { width: 100%; height: 100%; object-fit: cover; }
+        .step-card h3 { font-size: 16px; font-weight: 800; color: var(--verde-oscuro); margin: 5px 0; text-transform: uppercase; }
+        .step-card p { font-size: 11px; color: #666; line-height: 1.4; margin: 0; }
+
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 200px; }
         .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; aspect-ratio: 1/1; position: relative; border: 2px solid transparent; }
-        .prenda-card.selected { border-color: white; background: rgba(255,255,255,0.2); }
         .prenda-card img { width: 100%; height: 80%; object-fit: contain; }
         .prenda-card span { color: white; font-size: 8px; font-weight: 800; text-transform: uppercase; text-align: center; margin-top: auto; }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
-        .nav-icon { color: white; font-size: 22px; opacity: 0.4; }
+        .nav-icon { color: white; font-size: 22px; opacity: 0.4; cursor: pointer; }
         .nav-icon.active { opacity: 1; }
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -69,7 +78,7 @@
         .modal-content { background: var(--arena-claro); border-radius: 30px; width: 90%; max-width: 380px; padding: 25px; text-align: center; }
         .retiro-form { display: flex; flex-direction: column; gap: 10px; text-align: left; margin-top: 15px; }
         .retiro-form label { font-size: 9px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; margin-left: 5px; }
-        .retiro-form input, .retiro-form select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); font-size: 14px; }
+        .retiro-form input, .retiro-form select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); font-size: 14px; outline: none; }
     </style>
 </head>
 <body>
@@ -113,9 +122,9 @@
             <div class="retiro-form">
                 <label>Nombre Completo</label>
                 <input type="text" id="retiro-nombre" placeholder="Tu nombre">
-                <label>WhatsApp</label>
+                <label>Teléfono / WhatsApp</label>
                 <input type="tel" id="retiro-tel" placeholder="09X XXX XXX">
-                <label>Dirección de retiro</label>
+                <label>Dirección</label>
                 <input type="text" id="retiro-direccion" placeholder="Calle y número">
                 <label>Cantidad de prendas</label>
                 <select id="retiro-cantidad">
@@ -123,7 +132,7 @@
                     <option>5 a 15 prendas</option>
                     <option>Más de 15 prendas</option>
                 </select>
-                <label>Día de retiro (Solo Martes)</label>
+                <label>Día de retiro (Elige un Martes)</label>
                 <input type="date" id="retiro-fecha">
             </div>
             <div style="display: flex; gap: 10px; margin-top: 25px;">
@@ -137,6 +146,7 @@
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token'), tokenClient, categoriaActual = '';
+        let intervalSlider;
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -151,12 +161,6 @@
                 const data = await res.json();
                 document.getElementById('w-temp').innerText = Math.round(data.current_weather.temperature) + '°';
                 document.getElementById('w-city').innerText = "MONTEVIDEO";
-                const code = data.current_weather.weathercode;
-                const icon = document.getElementById('w-icon');
-                let ni = 'ph-sun';
-                if (code >= 1 && code <= 3) ni = 'ph-cloud-sun';
-                if (code >= 51 && code <= 67) ni = 'ph-cloud-rain';
-                icon.className = `ph ${ni}`;
             } catch(e) {}
         }
 
@@ -177,6 +181,42 @@
             });
         }
 
+        function mostrarInicio() {
+            clearInterval(intervalSlider);
+            document.getElementById('btn-archivador').classList.remove('active');
+            document.getElementById('btn-home').classList.add('active');
+            document.getElementById('extra-actions').innerHTML = '';
+            categoriaActual = ''; renderCats();
+            document.getElementById('main-content').innerHTML = `
+                <div class="onboarding-container">
+                    <div class="slider-wrapper" id="slider-home">
+                        <div class="step-card">
+                            <div class="step-media"><video src="v1.mp4" autoplay loop muted playsinline></video></div>
+                            <h3>1. Digitaliza</h3>
+                            <p>Toma una foto. Nuestra IA eliminará el fondo automáticamente.</p>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-media"><video src="v2.mp4" autoplay loop muted playsinline></video></div>
+                            <h3>2. Clasifica</h3>
+                            <p>Organiza tu ropa por categorías para encontrarla siempre rápido.</p>
+                        </div>
+                    </div>
+                </div>`;
+            iniciarAutoSlider();
+        }
+
+        function iniciarAutoSlider() {
+            const slider = document.getElementById('slider-home');
+            let idx = 0;
+            intervalSlider = setInterval(() => {
+                idx = (idx + 1) % 2;
+                if(slider) {
+                    const w = slider.querySelector('.step-card').clientWidth + 20;
+                    slider.scrollTo({ left: w * idx, behavior: 'smooth' });
+                }
+            }, 4000);
+        }
+
         function enviarRetiro() {
             const nombre = document.getElementById('retiro-nombre').value;
             const tel = document.getElementById('retiro-tel').value;
@@ -184,19 +224,16 @@
             const fechaVal = document.getElementById('retiro-fecha').value;
             const cant = document.getElementById('retiro-cantidad').value;
 
-            if (!nombre || !tel || !direccion || !fechaVal) { alert("Completa todos los campos"); return; }
+            if (!nombre || !tel || !direccion || !fechaVal) { alert("Por favor, completa todos los campos."); return; }
 
-            // VALIDACIÓN DE MARTES AL ENVIAR
             const fechaObj = new Date(fechaVal + 'T00:00:00');
-            const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-            const nombreDia = dias[fechaObj.getDay()];
-
             if (fechaObj.getDay() !== 2) {
-                alert("Has seleccionado un " + nombreDia + ". Por favor, elige un Martes del calendario para el retiro.");
+                const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+                alert("Has seleccionado un " + dias[fechaObj.getDay()] + ". Los retiros son únicamente los días MARTES. Por favor, selecciona un martes.");
                 return;
             }
 
-            const mensaje = `¡Hola KINU! 👋\n\nCoordinar retiro:\n👤 *Nombre:* ${nombre}\n📞 *WhatsApp:* ${tel}\n📍 *Dirección:* ${direccion}\n👕 *Prendas:* ${cant}\n📅 *Fecha:* ${fechaVal} (Martes)`;
+            const mensaje = `¡Hola KINU! 👋\n\nCoordinar retiro COLABORO:\n👤 *Nombre:* ${nombre}\n📞 *Tel:* ${tel}\n📍 *Dirección:* ${direccion}\n👕 *Prendas:* ${cant}\n📅 *Día:* ${fechaVal} (Martes)`;
             window.open(`https://wa.me/59892199199?text=${encodeURIComponent(mensaje)}`, '_blank');
             cerrarModales();
         }
@@ -221,18 +258,45 @@
             } catch(e) {}
         }
 
-        function mostrarInicio() {
-            document.getElementById('btn-archivador').classList.remove('active');
-            document.getElementById('btn-home').classList.add('active');
-            document.getElementById('extra-actions').innerHTML = '';
-            categoriaActual = ''; renderCats();
-            document.getElementById('main-content').innerHTML = `<div style="text-align:center; color:white; margin-top:50px; opacity:0.6;"><h3>¡Hola!</h3><p>Escanea una prenda para empezar.</p></div>`;
-        }
-
         function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
         async function obtenerOCrearCarpeta(n) { const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`; const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } }); const d = await r.json(); if(d.files?.[0]) return d.files[0].id; const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) }); const f = await res.json(); return f.id; }
-        function startGoogle() { gapi.load('client', () => { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: (r) => { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); renderCats(); } }); }); }
-        function manejarDrive() { tokenClient.requestAccessToken(); }
+        
+        function startGoogle() {
+            gapi.load('client', () => {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID,
+                    scope: SCOPES,
+                    callback: (r) => {
+                        if (r.access_token) {
+                            accessToken = r.access_token;
+                            localStorage.setItem('drive_token', accessToken);
+                            document.getElementById('auth-btn').classList.add('vinculado');
+                            document.getElementById('drive-label').innerText = "CONECTADO";
+                            if(categoriaActual) cargarPrendas(false);
+                        }
+                    }
+                });
+                if(accessToken) {
+                    document.getElementById('auth-btn').classList.add('vinculado');
+                    document.getElementById('drive-label').innerText = "CONECTADO";
+                }
+            });
+        }
+
+        function manejarDrive() {
+            if (accessToken) {
+                if(confirm("¿Deseas cerrar sesión de Google Drive?")) {
+                    accessToken = null;
+                    localStorage.removeItem('drive_token');
+                    document.getElementById('auth-btn').classList.remove('vinculado');
+                    document.getElementById('drive-label').innerText = "SIN VINCULAR";
+                    mostrarInicio();
+                }
+            } else {
+                tokenClient.requestAccessToken();
+            }
+        }
+
         function enviarAStudio(i) { if (i.files?.[0]) { const r = new FileReader(); r.onload = (e) => { sessionStorage.setItem('imagen_para_procesar', e.target.result); location.href='photo_studio.html'; }; r.readAsDataURL(i.files[0]); } }
         function cargarTodoElCloset() { categoriaActual = ''; document.getElementById('extra-actions').innerHTML = ''; cargarPrendas(true); renderCats(); }
 

@@ -20,7 +20,7 @@
     <style>
         :root { 
             --verde-oliva: #848464; --verde-oscuro: #313628; --arena-claro: #F2EFE9;
-            --arena-boton: #E5E1D5; --rojo-borrar: #D64545; --rojo-dia: #5e1313;
+            --arena-boton: #E5E1D5; --rojo-borrar: #D64545; --rojo-fuerte: #8B0000;
         }
 
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -73,12 +73,12 @@
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-        /* Estilos Calendario Flatpickr */
-        .flatpickr-calendar { background: var(--arena-claro) !important; border-radius: 20px !important; border: none !important; }
-        .flatpickr-day { color: var(--rojo-dia) !important; font-weight: 600; }
-        .flatpickr-day.is-tuesday { color: var(--verde-oscuro) !important; font-weight: 900 !important; background: rgba(49, 54, 40, 0.1); }
-        .flatpickr-day.selected { background: var(--verde-oscuro) !important; color: white !important; }
-        .flatpickr-day.flatpickr-disabled { color: #ccc !important; opacity: 0.3; }
+        /* ESTILOS CALENDARIO REFORZADOS */
+        .flatpickr-calendar { background: var(--arena-claro) !important; border-radius: 20px !important; box-shadow: 0 12px 30px rgba(0,0,0,0.3) !important; }
+        .flatpickr-day.flatpickr-disabled { color: var(--rojo-fuerte) !important; opacity: 0.9 !important; font-weight: 700 !important; }
+        .flatpickr-day.is-tuesday:not(.flatpickr-disabled) { color: var(--verde-oscuro) !important; font-weight: 900 !important; background: rgba(132, 132, 100, 0.2) !important; border-radius: 10px; }
+        .flatpickr-day.selected { background: var(--verde-oscuro) !important; color: white !important; border-radius: 10px; }
+        .flatpickr-current-month { font-weight: 800 !important; text-transform: uppercase; }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
         .modal-content { background: var(--arena-claro); border-radius: 30px; width: 90%; max-width: 380px; padding: 25px; text-align: center; }
@@ -128,7 +128,7 @@
             <div class="retiro-form">
                 <label>Nombre Completo</label>
                 <input type="text" id="retiro-nombre" placeholder="Tu nombre">
-                <label>Teléfono / WhatsApp</label>
+                <label>WhatsApp</label>
                 <input type="tel" id="retiro-tel" placeholder="09X XXX XXX">
                 <label>Dirección</label>
                 <input type="text" id="retiro-direccion" placeholder="Calle y número">
@@ -139,7 +139,7 @@
                     <option>Más de 15 prendas</option>
                 </select>
                 <label>Día de retiro (Solo Martes)</label>
-                <input type="text" id="retiro-fecha" placeholder="Elegir Martes">
+                <input type="text" id="retiro-fecha" placeholder="Toca para elegir">
             </div>
             <div style="display: flex; gap: 10px; margin-top: 25px;">
                 <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background: #eee;">CANCELAR</button>
@@ -218,7 +218,10 @@
             fp = flatpickr("#retiro-fecha", {
                 disableMobile: true,
                 dateFormat: "d/m/Y",
-                locale: { firstDayOfWeek: 1 },
+                locale: { 
+                    firstDayOfWeek: 1,
+                    weekdays: { shorthand: ['D', 'L', 'M', 'M', 'J', 'V', 'S'], longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'] }
+                },
                 disable: [ function(date) { return (date.getDay() !== 2); } ],
                 onDayCreate: function(dObj, dStr, fp, dayElem) {
                     if (dayElem.dateObj.getDay() === 2) dayElem.classList.add("is-tuesday");
@@ -232,9 +235,7 @@
             const dir = document.getElementById('retiro-direccion').value;
             const fecha = document.getElementById('retiro-fecha').value;
             const cant = document.getElementById('retiro-cantidad').value;
-
             if (!nombre || !tel || !dir || !fecha) { alert("Completa todos los campos"); return; }
-
             const mensaje = `¡Hola KINU! 👋\n\nCoordinar retiro COLABORO:\n👤 *Nombre:* ${nombre}\n📞 *Tel:* ${tel}\n📍 *Dirección:* ${dir}\n👕 *Cantidad:* ${cant}\n📅 *Día:* ${fecha} (Martes)`;
             window.open(`https://wa.me/59892199199?text=${encodeURIComponent(mensaje)}`, '_blank');
             cerrarModales();

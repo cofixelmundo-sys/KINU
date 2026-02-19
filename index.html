@@ -32,13 +32,8 @@
         .logo-header { width: 110px; height: auto; }
         .brand-text { color: white; letter-spacing: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
 
-        /* DRIVE LOGO CON PULSO Y TRANSPARENCIA */
         .drive-btn { background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; outline: none; }
-        .drive-btn img { 
-            width: 26px; height: auto; 
-            opacity: 0.35; 
-            animation: pulse-drive 2s infinite ease-in-out; 
-        }
+        .drive-btn img { width: 26px; height: auto; opacity: 0.35; animation: pulse-drive 2s infinite ease-in-out; }
         .drive-btn.vinculado img { opacity: 1 !important; animation: none !important; transform: scale(1) !important; }
         @keyframes pulse-drive {
             0% { transform: scale(0.9); opacity: 0.3; }
@@ -46,7 +41,6 @@
             100% { transform: scale(0.9); opacity: 0.3; }
         }
         
-        /* CATEGORIAS */
         .filter-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; opacity: 0.4; cursor: pointer; }
         .cat-item.active { opacity: 1; transform: scale(1.05); }
@@ -56,7 +50,6 @@
         .cat-item.active i { color: var(--verde-oscuro); }
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 8px; text-transform: uppercase; text-align: center; }
 
-        /* CONTENIDO Y ONBOARDING */
         .content { flex: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
         .onboarding-container { display: flex; flex-direction: column; align-items: center; padding-top: 15px; }
         .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
@@ -66,37 +59,23 @@
         .step-card h3 { font-size: 16px; font-weight: 800; color: var(--verde-oscuro); margin: 5px 0; text-transform: uppercase; }
         .step-card p { font-size: 11px; color: #666; line-height: 1.4; margin: 0; }
 
-        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 200px; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; aspect-ratio: 1/1; }
-        .prenda-card img { width: 100%; height: 80%; object-fit: contain; }
-        .prenda-card span { color: white; font-size: 8px; font-weight: 800; text-transform: uppercase; text-align: center; margin-top: auto; }
-
-        /* MODALES ESTÉTICOS KINU */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); padding: 20px; }
         .modal-content { background: var(--arena-claro); border-radius: 30px; width: 100%; max-width: 340px; padding: 30px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: translateY(20px); opacity: 0; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .modal-overlay.active .modal-content { transform: translateY(0); opacity: 1; }
-        .modal-title { font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; }
+        .modal-title { font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 12px; }
         .modal-text { font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 25px; }
         .modal-btns { display: flex; gap: 10px; }
         .btn-modal { flex: 1; padding: 16px; border-radius: 18px; border: none; font-size: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
         .btn-secundario { background: var(--arena-boton); color: var(--verde-oscuro); }
         .btn-primario { background: var(--verde-oscuro); color: white; }
 
-        /* NAV */
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.4; cursor: pointer; }
         .nav-icon.active { opacity: 1; }
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        
-        /* CORRECCIÓN TAMAÑO CÁMARA */
         .cam-inner i { font-size: 42px; color: var(--verde-oscuro); }
-
-        /* FORMULARIOS */
-        .retiro-form { display: flex; flex-direction: column; gap: 10px; text-align: left; margin-top: 15px; }
-        .retiro-form label { font-size: 9px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; margin-left: 5px; }
-        .retiro-form input, .retiro-form select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); font-size: 14px; outline: none; background: white; }
     </style>
 </head>
 <body>
@@ -145,44 +124,11 @@
         </div>
     </div>
 
-    <div id="modal-retiro" class="modal-overlay">
-        <div class="modal-content" style="max-width: 380px;">
-            <div class="modal-title">Planilla de Retiro</div>
-            <div class="retiro-form">
-                <label>Nombre Completo</label>
-                <input type="text" id="retiro-nombre" placeholder="Tu nombre">
-                <label>WhatsApp</label>
-                <input type="tel" id="retiro-tel" placeholder="09X XXX XXX">
-                <label>Dirección</label>
-                <input type="text" id="retiro-direccion" placeholder="Calle y número">
-                <label>Cantidad aproximada</label>
-                <select id="retiro-cantidad">
-                    <option>1 a 5 prendas</option>
-                    <option>5 a 15 prendas</option>
-                    <option>Más de 15 prendas</option>
-                </select>
-                <label>Día de retiro (Solo Martes)</label>
-                <input type="text" id="retiro-fecha" placeholder="Toca para elegir">
-            </div>
-            <div class="modal-btns" style="margin-top: 25px;">
-                <button onclick="cerrarModales()" class="btn-modal btn-secundario">CANCELAR</button>
-                <button onclick="enviarRetiro()" class="btn-modal btn-primario">ENVIAR</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token'), tokenClient, categoriaActual = '';
-        let intervalSlider, fp;
-
-        const categorias = [
-            {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
-            {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
-            {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}, 
-            {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
-        ];
+        let intervalSlider;
 
         function mostrarPopup({titulo, texto, confirmarText = "Aceptar", cancelarText = "Cancelar", onConfirm}) {
             const modal = document.getElementById('modal-custom');
@@ -206,6 +152,17 @@
             });
         }
 
+        function enviarAStudio(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    sessionStorage.setItem('imagen_para_procesar', e.target.result);
+                    window.location.href = 'photo_studio.html';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         async function actualizarClima() {
             try {
                 const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9033&longitude=-56.1882&current_weather=true');
@@ -224,14 +181,18 @@
 
         function renderCats() {
             const container = document.getElementById('main-cats'); container.innerHTML = '';
+            const categorias = [
+                {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
+                {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
+                {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}, 
+                {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
+            ];
             categorias.forEach(cat => {
                 const div = document.createElement('div');
                 div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
                 div.onclick = () => { 
                     if(!accessToken) { manejarDrive(); return; }
                     categoriaActual = cat.n.toUpperCase(); renderCats();
-                    const extra = document.getElementById('extra-actions');
-                    extra.innerHTML = (categoriaActual === 'COLABORO') ? `<div class="action-bar-colaboro" onclick="document.getElementById('modal-retiro').style.display='flex'; setTimeout(()=>document.getElementById('modal-retiro').classList.add('active'),10)"><span>Coordinar Retiro</span><i class="ph ph-calendar-plus"></i></div>` : '';
                     cargarPrendas(false); 
                 };
                 div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
@@ -239,12 +200,30 @@
             });
         }
 
+        function manejarDrive() {
+            if (accessToken) {
+                mostrarPopup({
+                    titulo: "Cerrar Sesión",
+                    texto: "¿Deseas desvincular tu cuenta de Drive?",
+                    confirmarText: "SÍ, SALIR",
+                    onConfirm: () => {
+                        accessToken = null; localStorage.removeItem('drive_token');
+                        document.getElementById('auth-btn').classList.remove('vinculado');
+                        document.getElementById('drive-label').innerText = "SIN VINCULAR";
+                    }
+                });
+            } else { 
+                mostrarPopup({
+                    titulo: "Vincular Google Drive",
+                    texto: "KINU guardará tus prendas de forma segura en tu Drive. ¿Deseas vincular tu cuenta?",
+                    confirmarText: "VINCULAR CUENTA",
+                    onConfirm: () => tokenClient.requestAccessToken()
+                });
+            }
+        }
+
         function mostrarInicio() {
             clearInterval(intervalSlider);
-            document.getElementById('btn-archivador').classList.remove('active');
-            document.getElementById('btn-home').classList.add('active');
-            document.getElementById('extra-actions').innerHTML = '';
-            categoriaActual = ''; renderCats();
             document.getElementById('main-content').innerHTML = `
                 <div class="onboarding-container">
                     <div class="slider-wrapper" id="slider-home">
@@ -280,29 +259,6 @@
             }, 4000);
         }
 
-        function manejarDrive() {
-            if (accessToken) {
-                mostrarPopup({
-                    titulo: "Cerrar Sesión",
-                    texto: "¿Deseas desvincular tu cuenta de Drive?",
-                    confirmarText: "SÍ, SALIR",
-                    onConfirm: () => {
-                        accessToken = null; localStorage.removeItem('drive_token');
-                        document.getElementById('auth-btn').classList.remove('vinculado');
-                        document.getElementById('drive-label').innerText = "SIN VINCULAR";
-                        mostrarInicio();
-                    }
-                });
-            } else { 
-                mostrarPopup({
-                    titulo: "Vincular Google Drive",
-                    texto: "KINU guardará tus prendas de forma segura en tu Drive. ¿Deseas vincular tu cuenta?",
-                    confirmarText: "VINCULAR CUENTA",
-                    onConfirm: () => tokenClient.requestAccessToken()
-                });
-            }
-        }
-
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -323,7 +279,7 @@
             });
         }
 
-        window.onload = () => { mostrarInicio(); startGoogle(); actualizarClima(); };
+        window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); actualizarClima(); };
     </script>
 </body>
 </html>

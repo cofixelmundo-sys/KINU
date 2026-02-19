@@ -14,10 +14,13 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js"></script>
     
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
     <style>
         :root { 
             --verde-oliva: #848464; --verde-oscuro: #313628; --arena-claro: #F2EFE9;
-            --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
+            --arena-boton: #E5E1D5; --rojo-borrar: #D64545; --rojo-dia: #5e1313;
         }
 
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -39,7 +42,7 @@
         .drive-btn.vinculado img { filter: grayscale(0) opacity(1); }
         
         .filter-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; opacity: 0.4; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; opacity: 0.4; cursor: pointer; }
         .cat-item.active { opacity: 1; transform: scale(1.05); }
         .cat-circle { width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
         .cat-item.active .cat-circle { background: white; }
@@ -52,17 +55,14 @@
 
         .content { flex: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
         
-        /* Estilos Onboarding */
         .onboarding-container { display: flex; flex-direction: column; align-items: center; padding-top: 15px; }
         .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
         .step-card { min-width: 85%; max-height: 320px; background: var(--arena-claro); border-radius: 30px; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
         .step-media { width: 140px; height: 140px; margin-bottom: 10px; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.05); }
         .step-media video { width: 100%; height: 100%; object-fit: cover; }
-        .step-card h3 { font-size: 16px; font-weight: 800; color: var(--verde-oscuro); margin: 5px 0; text-transform: uppercase; }
-        .step-card p { font-size: 11px; color: #666; line-height: 1.4; margin: 0; }
 
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 200px; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; aspect-ratio: 1/1; position: relative; border: 2px solid transparent; }
+        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; aspect-ratio: 1/1; border: 2px solid transparent; }
         .prenda-card img { width: 100%; height: 80%; object-fit: contain; }
         .prenda-card span { color: white; font-size: 8px; font-weight: 800; text-transform: uppercase; text-align: center; margin-top: auto; }
 
@@ -72,13 +72,19 @@
         .nav-icon.active { opacity: 1; }
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .cam-inner i { color: var(--verde-oscuro); font-size: 26px; }
+
+        /* Estilos Calendario Flatpickr */
+        .flatpickr-calendar { background: var(--arena-claro) !important; border-radius: 20px !important; border: none !important; }
+        .flatpickr-day { color: var(--rojo-dia) !important; font-weight: 600; }
+        .flatpickr-day.is-tuesday { color: var(--verde-oscuro) !important; font-weight: 900 !important; background: rgba(49, 54, 40, 0.1); }
+        .flatpickr-day.selected { background: var(--verde-oscuro) !important; color: white !important; }
+        .flatpickr-day.flatpickr-disabled { color: #ccc !important; opacity: 0.3; }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
         .modal-content { background: var(--arena-claro); border-radius: 30px; width: 90%; max-width: 380px; padding: 25px; text-align: center; }
         .retiro-form { display: flex; flex-direction: column; gap: 10px; text-align: left; margin-top: 15px; }
         .retiro-form label { font-size: 9px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; margin-left: 5px; }
-        .retiro-form input, .retiro-form select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); font-size: 14px; outline: none; }
+        .retiro-form input, .retiro-form select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); font-size: 14px; outline: none; background: white; }
     </style>
 </head>
 <body>
@@ -86,9 +92,9 @@
     <div class="main-container">
         <header>
             <div class="header-info-box">
-                <i class="ph ph-sun" id="w-icon" style="font-size: 22px; color: white"></i>
+                <i class="ph ph-sun" style="font-size: 22px; color: white"></i>
                 <span class="info-main-text" id="w-temp">--°</span>
-                <span class="info-sub-text" id="w-city">...</span>
+                <span class="info-sub-text">MONTEVIDEO</span>
             </div>
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
@@ -126,14 +132,14 @@
                 <input type="tel" id="retiro-tel" placeholder="09X XXX XXX">
                 <label>Dirección</label>
                 <input type="text" id="retiro-direccion" placeholder="Calle y número">
-                <label>Cantidad de prendas</label>
+                <label>Cantidad aproximada</label>
                 <select id="retiro-cantidad">
                     <option>1 a 5 prendas</option>
                     <option>5 a 15 prendas</option>
                     <option>Más de 15 prendas</option>
                 </select>
-                <label>Día de retiro (Elige un Martes)</label>
-                <input type="date" id="retiro-fecha">
+                <label>Día de retiro (Solo Martes)</label>
+                <input type="text" id="retiro-fecha" placeholder="Elegir Martes">
             </div>
             <div style="display: flex; gap: 10px; margin-top: 25px;">
                 <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background: #eee;">CANCELAR</button>
@@ -146,7 +152,7 @@
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token'), tokenClient, categoriaActual = '';
-        let intervalSlider;
+        let intervalSlider, fp;
 
         const categorias = [
             {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
@@ -154,15 +160,6 @@
             {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}, 
             {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
         ];
-
-        async function actualizarClima() {
-            try {
-                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true');
-                const data = await res.json();
-                document.getElementById('w-temp').innerText = Math.round(data.current_weather.temperature) + '°';
-                document.getElementById('w-city').innerText = "MONTEVIDEO";
-            } catch(e) {}
-        }
 
         function renderCats() {
             const container = document.getElementById('main-cats'); container.innerHTML = '';
@@ -217,23 +214,28 @@
             }, 4000);
         }
 
+        function inicializarCalendario() {
+            fp = flatpickr("#retiro-fecha", {
+                disableMobile: true,
+                dateFormat: "d/m/Y",
+                locale: { firstDayOfWeek: 1 },
+                disable: [ function(date) { return (date.getDay() !== 2); } ],
+                onDayCreate: function(dObj, dStr, fp, dayElem) {
+                    if (dayElem.dateObj.getDay() === 2) dayElem.classList.add("is-tuesday");
+                }
+            });
+        }
+
         function enviarRetiro() {
             const nombre = document.getElementById('retiro-nombre').value;
             const tel = document.getElementById('retiro-tel').value;
-            const direccion = document.getElementById('retiro-direccion').value;
-            const fechaVal = document.getElementById('retiro-fecha').value;
+            const dir = document.getElementById('retiro-direccion').value;
+            const fecha = document.getElementById('retiro-fecha').value;
             const cant = document.getElementById('retiro-cantidad').value;
 
-            if (!nombre || !tel || !direccion || !fechaVal) { alert("Por favor, completa todos los campos."); return; }
+            if (!nombre || !tel || !dir || !fecha) { alert("Completa todos los campos"); return; }
 
-            const fechaObj = new Date(fechaVal + 'T00:00:00');
-            if (fechaObj.getDay() !== 2) {
-                const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-                alert("Has seleccionado un " + dias[fechaObj.getDay()] + ". Los retiros son únicamente los días MARTES. Por favor, selecciona un martes.");
-                return;
-            }
-
-            const mensaje = `¡Hola KINU! 👋\n\nCoordinar retiro COLABORO:\n👤 *Nombre:* ${nombre}\n📞 *Tel:* ${tel}\n📍 *Dirección:* ${direccion}\n👕 *Prendas:* ${cant}\n📅 *Día:* ${fechaVal} (Martes)`;
+            const mensaje = `¡Hola KINU! 👋\n\nCoordinar retiro COLABORO:\n👤 *Nombre:* ${nombre}\n📞 *Tel:* ${tel}\n📍 *Dirección:* ${dir}\n👕 *Cantidad:* ${cant}\n📅 *Día:* ${fecha} (Martes)`;
             window.open(`https://wa.me/59892199199?text=${encodeURIComponent(mensaje)}`, '_blank');
             cerrarModales();
         }
@@ -264,8 +266,7 @@
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID,
-                    scope: SCOPES,
+                    client_id: CLIENT_ID, scope: SCOPES,
                     callback: (r) => {
                         if (r.access_token) {
                             accessToken = r.access_token;
@@ -285,22 +286,19 @@
 
         function manejarDrive() {
             if (accessToken) {
-                if(confirm("¿Deseas cerrar sesión de Google Drive?")) {
-                    accessToken = null;
-                    localStorage.removeItem('drive_token');
+                if(confirm("¿Cerrar sesión de Drive?")) {
+                    accessToken = null; localStorage.removeItem('drive_token');
                     document.getElementById('auth-btn').classList.remove('vinculado');
                     document.getElementById('drive-label').innerText = "SIN VINCULAR";
                     mostrarInicio();
                 }
-            } else {
-                tokenClient.requestAccessToken();
-            }
+            } else { tokenClient.requestAccessToken(); }
         }
 
         function enviarAStudio(i) { if (i.files?.[0]) { const r = new FileReader(); r.onload = (e) => { sessionStorage.setItem('imagen_para_procesar', e.target.result); location.href='photo_studio.html'; }; r.readAsDataURL(i.files[0]); } }
         function cargarTodoElCloset() { categoriaActual = ''; document.getElementById('extra-actions').innerHTML = ''; cargarPrendas(true); renderCats(); }
 
-        window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); actualizarClima(); };
+        window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); inicializarCalendario(); };
     </script>
 </body>
 </html>

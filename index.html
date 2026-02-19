@@ -32,24 +32,21 @@
         .logo-header { width: 110px; height: auto; }
         .brand-text { color: white; letter-spacing: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
 
-        /* LOGO DRIVE PULSANTE */
+        /* DRIVE LOGO CON PULSO Y TRANSPARENCIA */
         .drive-btn { background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; outline: none; }
         .drive-btn img { 
             width: 26px; height: auto; 
             opacity: 0.35; 
             animation: pulse-drive 2s infinite ease-in-out; 
         }
-        .drive-btn.vinculado img { 
-            opacity: 1 !important; 
-            animation: none !important; 
-            transform: scale(1) !important;
-        }
+        .drive-btn.vinculado img { opacity: 1 !important; animation: none !important; transform: scale(1) !important; }
         @keyframes pulse-drive {
             0% { transform: scale(0.9); opacity: 0.3; }
             50% { transform: scale(1.15); opacity: 0.7; }
             100% { transform: scale(0.9); opacity: 0.3; }
         }
         
+        /* CATEGORIAS */
         .filter-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; opacity: 0.4; cursor: pointer; }
         .cat-item.active { opacity: 1; transform: scale(1.05); }
@@ -63,20 +60,19 @@
         .action-bar-colaboro span { font-size: 11px; font-weight: 900; text-transform: uppercase; }
 
         .content { flex: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
-        
-        .onboarding-container { display: flex; flex-direction: column; align-items: center; padding-top: 15px; }
-        .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
-        .step-card { min-width: 85%; max-height: 320px; background: var(--arena-claro); border-radius: 30px; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
-        .step-media { width: 140px; height: 140px; margin-bottom: 10px; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.05); }
-        .step-media video { width: 100%; height: 100%; object-fit: cover; }
-        .step-card h3 { font-size: 16px; font-weight: 800; color: var(--verde-oscuro); margin: 5px 0; text-transform: uppercase; }
-        .step-card p { font-size: 11px; color: #666; line-height: 1.4; margin: 0; }
 
-        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 200px; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; aspect-ratio: 1/1; }
-        .prenda-card img { width: 100%; height: 80%; object-fit: contain; }
-        .prenda-card span { color: white; font-size: 8px; font-weight: 800; text-transform: uppercase; text-align: center; margin-top: auto; }
+        /* MODALES ESTÉTICOS */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); padding: 20px; }
+        .modal-content { background: var(--arena-claro); border-radius: 30px; width: 100%; max-width: 340px; padding: 30px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: translateY(20px); transition: 0.3s; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-title { font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; }
+        .modal-text { font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 25px; }
+        .modal-btns { display: flex; gap: 10px; }
+        .btn-modal { flex: 1; padding: 16px; border-radius: 18px; border: none; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
+        .btn-secundario { background: #E5E1D5; color: var(--verde-oscuro); }
+        .btn-primario { background: var(--verde-oscuro); color: white; }
 
+        /* NAV */
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.4; cursor: pointer; }
@@ -84,8 +80,7 @@
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
-        .modal-content { background: var(--arena-claro); border-radius: 30px; width: 90%; max-width: 380px; padding: 25px; text-align: center; }
+        /* FORMULARIOS */
         .retiro-form { display: flex; flex-direction: column; gap: 10px; text-align: left; margin-top: 15px; }
         .retiro-form label { font-size: 9px; font-weight: 800; color: var(--verde-oscuro); text-transform: uppercase; margin-left: 5px; }
         .retiro-form input, .retiro-form select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); font-size: 14px; outline: none; background: white; }
@@ -126,9 +121,20 @@
         </div>
     </div>
 
-    <div id="modal-retiro" class="modal-overlay">
+    <div id="modal-custom" class="modal-overlay">
         <div class="modal-content">
-            <div style="font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase;">Planilla de Retiro</div>
+            <div class="modal-title" id="custom-title">Título</div>
+            <div class="modal-text" id="custom-text">Mensaje del sistema.</div>
+            <div class="modal-btns">
+                <button class="btn-modal btn-secundario" id="btn-modal-cancel">Cancelar</button>
+                <button class="btn-modal btn-primario" id="btn-modal-confirm">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-retiro" class="modal-overlay">
+        <div class="modal-content" style="max-width: 380px;">
+            <div class="modal-title">Planilla de Retiro</div>
             <div class="retiro-form">
                 <label>Nombre Completo</label>
                 <input type="text" id="retiro-nombre" placeholder="Tu nombre">
@@ -145,9 +151,9 @@
                 <label>Día de retiro (Solo Martes)</label>
                 <input type="text" id="retiro-fecha" placeholder="Toca para elegir">
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 25px;">
-                <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background: #eee;">CANCELAR</button>
-                <button onclick="enviarRetiro()" style="flex:1; padding:15px; border-radius:15px; border:none; background:var(--verde-oscuro); color:white; font-weight:800;">ENVIAR</button>
+            <div class="modal-btns" style="margin-top: 25px;">
+                <button onclick="cerrarModales()" class="btn-modal btn-secundario">CANCELAR</button>
+                <button onclick="enviarRetiro()" class="btn-modal btn-primario">ENVIAR</button>
             </div>
         </div>
     </div>
@@ -158,12 +164,31 @@
         let accessToken = localStorage.getItem('drive_token'), tokenClient, categoriaActual = '';
         let intervalSlider, fp;
 
-        const categorias = [
-            {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
-            {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
-            {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}, 
-            {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
-        ];
+        // SISTEMA DE MODAL ESTÉTICO
+        function mostrarPopup({titulo, texto, confirmarText = "Aceptar", cancelarText = "Cancelar", onConfirm}) {
+            const modal = document.getElementById('modal-custom');
+            document.getElementById('custom-title').innerText = titulo;
+            document.getElementById('custom-text').innerText = texto;
+            const btnConfirm = document.getElementById('btn-modal-confirm');
+            const btnCancel = document.getElementById('btn-modal-cancel');
+            
+            btnConfirm.innerText = confirmarText;
+            btnCancel.innerText = cancelarText;
+            btnCancel.style.display = onConfirm ? 'block' : 'none'; // Si no hay acción, es un alert (solo un botón)
+
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+
+            btnConfirm.onclick = () => { cerrarModales(); if(onConfirm) onConfirm(); };
+            btnCancel.onclick = cerrarModales;
+        }
+
+        function cerrarModales() { 
+            document.querySelectorAll('.modal-overlay').forEach(m => {
+                m.classList.remove('active');
+                setTimeout(() => m.style.display = 'none', 300);
+            });
+        }
 
         async function actualizarClima() {
             try {
@@ -183,11 +208,17 @@
 
         function renderCats() {
             const container = document.getElementById('main-cats'); container.innerHTML = '';
+            const categorias = [
+                {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
+                {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
+                {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}, 
+                {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
+            ];
             categorias.forEach(cat => {
                 const div = document.createElement('div');
                 div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
                 div.onclick = () => { 
-                    if(!accessToken) { manejarDrive(); return; } // ALERTA SI NO HAY VINCULO
+                    if(!accessToken) { manejarDrive(); return; }
                     categoriaActual = cat.n.toUpperCase(); 
                     renderCats(); 
                     const extra = document.getElementById('extra-actions');
@@ -199,94 +230,37 @@
             });
         }
 
+        function manejarDrive() {
+            if (accessToken) {
+                mostrarPopup({
+                    titulo: "Cerrar Sesión",
+                    texto: "¿Deseas desvincular tu cuenta de Google Drive?",
+                    confirmarText: "SÍ, DESVINCULAR",
+                    onConfirm: () => {
+                        accessToken = null; localStorage.removeItem('drive_token');
+                        document.getElementById('auth-btn').classList.remove('vinculado');
+                        document.getElementById('drive-label').innerText = "SIN VINCULAR";
+                        mostrarInicio();
+                    }
+                });
+            } else { 
+                mostrarPopup({
+                    titulo: "Vincular Google Drive",
+                    texto: "KINU guardará tus prendas de forma segura en tu propio Drive. ¿Deseas continuar?",
+                    confirmarText: "VINCULAR AHORA",
+                    onConfirm: () => tokenClient.requestAccessToken()
+                });
+            }
+        }
+
         function mostrarInicio() {
             clearInterval(intervalSlider);
             document.getElementById('btn-archivador').classList.remove('active');
             document.getElementById('btn-home').classList.add('active');
-            document.getElementById('extra-actions').innerHTML = '';
-            categoriaActual = ''; renderCats();
-            document.getElementById('main-content').innerHTML = `
-                <div class="onboarding-container">
-                    <div class="slider-wrapper" id="slider-home">
-                        <div class="step-card">
-                            <div class="step-media"><video src="v1.mp4" autoplay loop muted playsinline></video></div>
-                            <h3>1. Digitaliza</h3>
-                            <p>Toma una foto. Nuestra IA eliminará el fondo automáticamente.</p>
-                        </div>
-                        <div class="step-card">
-                            <div class="step-media"><video src="v2.mp4" autoplay loop muted playsinline></video></div>
-                            <h3>2. Clasifica</h3>
-                            <p>Organiza tu ropa por categorías para encontrarla siempre rápido.</p>
-                        </div>
-                        <div class="step-card">
-                            <div class="step-media"><video src="v3.mp4" autoplay loop muted playsinline></video></div>
-                            <h3>3. Inspira</h3>
-                            <p>Arma outfits increíbles y ten el control total de tu closet.</p>
-                        </div>
-                    </div>
-                </div>`;
-            iniciarAutoSlider();
+            document.getElementById('main-content').innerHTML = `<div class="onboarding-container">... (Contenido Onboarding)</div>`;
+            renderCats();
         }
 
-        function iniciarAutoSlider() {
-            const slider = document.getElementById('slider-home');
-            let idx = 0;
-            intervalSlider = setInterval(() => {
-                idx = (idx + 1) % 3;
-                if(slider) {
-                    const w = slider.querySelector('.step-card').clientWidth + 20;
-                    slider.scrollTo({ left: w * idx, behavior: 'smooth' });
-                }
-            }, 4000);
-        }
-
-        function inicializarCalendario() {
-            fp = flatpickr("#retiro-fecha", {
-                disableMobile: true,
-                dateFormat: "d/m/Y",
-                locale: { firstDayOfWeek: 1 },
-                disable: [ function(date) { return (date.getDay() !== 2); } ],
-                onDayCreate: function(dObj, dStr, fp, dayElem) {
-                    if (dayElem.dateObj.getDay() === 2) dayElem.classList.add("is-tuesday");
-                }
-            });
-        }
-
-        function enviarRetiro() {
-            const nombre = document.getElementById('retiro-nombre').value;
-            const tel = document.getElementById('retiro-tel').value;
-            const dir = document.getElementById('retiro-direccion').value;
-            const fecha = document.getElementById('retiro-fecha').value;
-            const cant = document.getElementById('retiro-cantidad').value;
-            if (!nombre || !tel || !dir || !fecha) { alert("Completa todos los campos"); return; }
-            const mensaje = `¡Hola KINU! 👋\n\nCoordinar retiro COLABORO:\n👤 *Nombre:* ${nombre}\n📞 *Tel:* ${tel}\n📍 *Dirección:* ${dir}\n👕 *Cantidad:* ${cant}\n📅 *Día:* ${fecha} (Martes)`;
-            window.open(`https://wa.me/59892199199?text=${encodeURIComponent(mensaje)}`, '_blank');
-            cerrarModales();
-        }
-
-        async function cargarPrendas(todo = false) {
-            if(!accessToken) { manejarDrive(); return; }
-            document.getElementById('btn-home').classList.remove('active');
-            const grid = document.getElementById('main-content');
-            grid.innerHTML = `<div class="closet-grid" id="closet-grid"></div>`;
-            const container = document.getElementById('closet-grid');
-            try {
-                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
-                const filtro = todo ? "KINU_" : `KINU_${categoriaActual}_`;
-                const q = `'${folderId}' in parents and name contains '${filtro}' and trashed = false`;
-                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
-                const data = await res.json();
-                data.files?.forEach(f => {
-                    const card = document.createElement('div'); card.className = 'prenda-card';
-                    card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${f.name.split('_')[2] || 'Prenda'}</span>`;
-                    container.appendChild(card);
-                });
-            } catch(e) {}
-        }
-
-        function cerrarModales() { document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
-        async function obtenerOCrearCarpeta(n) { const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`; const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } }); const d = await r.json(); if(d.files?.[0]) return d.files[0].id; const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) }); const f = await res.json(); return f.id; }
-        
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
@@ -301,32 +275,10 @@
                         }
                     }
                 });
-                if(accessToken) {
-                    document.getElementById('auth-btn').classList.add('vinculado');
-                    document.getElementById('drive-label').innerText = "CONECTADO";
-                }
             });
         }
 
-        function manejarDrive() {
-            if (accessToken) {
-                if(confirm("¿Cerrar sesión de Drive?")) {
-                    accessToken = null; localStorage.removeItem('drive_token');
-                    document.getElementById('auth-btn').classList.remove('vinculado');
-                    document.getElementById('drive-label').innerText = "SIN VINCULAR";
-                    mostrarInicio();
-                }
-            } else { 
-                if(confirm("KINU usará su Google Drive para guardar las prendas de forma segura. ¿Desea vincular su cuenta?")) {
-                    tokenClient.requestAccessToken(); 
-                }
-            }
-        }
-
-        function enviarAStudio(i) { if (i.files?.[0]) { const r = new FileReader(); r.onload = (e) => { sessionStorage.setItem('imagen_para_procesar', e.target.result); location.href='photo_studio.html'; }; r.readAsDataURL(i.files[0]); } }
-        function cargarTodoElCloset() { if(!accessToken) { manejarDrive(); return; } categoriaActual = ''; document.getElementById('extra-actions').innerHTML = ''; cargarPrendas(true); renderCats(); }
-
-        window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); inicializarCalendario(); actualizarClima(); };
+        window.onload = () => { mostrarInicio(); startGoogle(); actualizarClima(); };
     </script>
 </body>
 </html>

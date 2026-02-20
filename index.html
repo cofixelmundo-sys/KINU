@@ -53,11 +53,9 @@
 
         .content { flex: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
         
-        /* Contenedor Studio Iframe */
         #studio-container { position: fixed; inset: 0; z-index: 10000; background: var(--verde-oliva); display: none; }
         #studio-iframe { width: 100%; height: 100%; border: none; }
 
-        /* Estilos Onboarding */
         .onboarding-container { display: flex; flex-direction: column; align-items: center; padding-top: 15px; }
         .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
         .step-card { min-width: 85%; max-height: 320px; background: var(--arena-claro); border-radius: 30px; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
@@ -83,6 +81,8 @@
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { font-size: 42px; color: var(--verde-oscuro); }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -140,22 +140,96 @@
         let accessToken = localStorage.getItem('drive_token'), tokenClient, categoriaActual = '';
         let intervalSlider;
 
-        // --- RECEPCIÓN DE MENSAJES DEL STUDIO ---
+        // --- LÓGICA DE DRIVE (LECTURA REAL) ---
+        async function cargarPrendas(esTodoElCloset = false) {
+            clearInterval(intervalSlider);
+            const content = document.getElementById('main-content');
+            
+            if (!accessToken) {
+                content.innerHTML = `<div style="color:white; text-align:center; padding:50px; opacity:0.6; font-size:12px;">VINCULA DRIVE PARA VER TU CLOSET</div>`;
+                return;
+            }
+
+            content.innerHTML = `
+                <div style="padding: 10px 0;">
+                    <h2 style="color: white; font-size: 12px; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2px;">
+                        ${esTodoElCloset ? 'MI CLOSET COMPLETO' : categoriaActual}
+                    </h2>
+                    <div id="grid-prendas" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: white; opacity: 0.5;">
+                            <i class="ph ph-circle-notched-bold" style="font-size: 30px; animation: spin 1s linear infinite;"></i>
+                        </div>
+                    </div>
+                </div>`;
+
+            try {
+                // 1. Buscar carpeta KINU
+                let q = "name = 'KINU' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
+                let res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                let data = await res.json();
+                
+                if (!data.files || data.files.length === 0) {
+                    mostrarVacio(); return;
+                }
+
+                const folderId = data.files[0].id;
+                
+                // 2. Buscar archivos (filtrar por nombre de categoría si no es "todo")
+                let fileQ = `'${folderId}' in parents and trashed = false`;
+                if (!esTodoElCloset && categoriaActual) {
+                    fileQ += ` and name contains '${categoriaActual.toLowerCase()}'`;
+                }
+
+                let resFiles = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(fileQ)}&fields=files(id,name,thumbnailLink)&pageSize=100`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                let dataFiles = await resFiles.json();
+
+                const grid = document.getElementById('grid-prendas');
+                grid.innerHTML = '';
+
+                if (!dataFiles.files || dataFiles.files.length === 0) {
+                    mostrarVacio(); return;
+                }
+
+                dataFiles.files.forEach(file => {
+                    const card = document.createElement('div');
+                    card.style.cssText = "background: var(--arena-claro); border-radius: 20px; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; padding: 15px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.1);";
+                    
+                    const imgUrl = file.thumbnailLink ? file.thumbnailLink.replace('s220', 's500') : '';
+                    card.innerHTML = `
+                        <img src="${imgUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        <div style="position: absolute; bottom: 8px; background: white; padding: 3px 10px; border-radius: 10px; font-size: 7px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase;">
+                            ${file.name.split('-')[0]}
+                        </div>`;
+                    grid.appendChild(card);
+                });
+
+            } catch (err) {
+                content.innerHTML = `<div style="color:white; text-align:center; padding:50px; opacity:0.6;">ERROR DE CONEXIÓN</div>`;
+            }
+        }
+
+        function mostrarVacio() {
+            document.getElementById('grid-prendas').innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.4); font-size: 10px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 25px;">
+                    <i class="ph ph-sparkle" style="font-size: 28px; margin-bottom: 12px; display: block; width: 100%;"></i>
+                    NO HAY PRENDAS AQUÍ
+                </div>`;
+        }
+
+        // --- COMUNICACIÓN STUDIO ---
         window.addEventListener("message", (e) => {
             if (e.data.type === 'GUARDAR_PRENDA') {
                 cerrarStudio();
-                // Aquí simulamos el éxito. En el siguiente paso añadiremos la subida real.
-                mostrarPopup({
-                    titulo: "¡Prenda Guardada!",
-                    texto: `${e.data.nombre} se ha añadido a la categoría ${e.data.categoria}.`
-                });
-                categoriaActual = e.data.categoria;
+                mostrarPopup({ titulo: "¡Éxito!", texto: "Prenda guardada." });
+                categoriaActual = e.data.categoria.toUpperCase();
                 renderCats();
                 cargarPrendas();
             }
-            if (e.data.type === 'CERRAR_STUDIO') {
-                cerrarStudio();
-            }
+            if (e.data.type === 'CERRAR_STUDIO') cerrarStudio();
         });
 
         function cerrarStudio() {
@@ -166,157 +240,83 @@
         function enviarAStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = (e) => {
                     sessionStorage.setItem('imagen_para_procesar', e.target.result);
-                    const container = document.getElementById('studio-container');
                     document.getElementById('studio-iframe').src = 'photo_studio.html';
-                    container.style.display = 'block';
+                    document.getElementById('studio-container').style.display = 'block';
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // --- LÓGICA DE NAVEGACIÓN Y CATEGORÍAS ---
-        function cargarPrendas(esTodoElCloset = false) {
-            clearInterval(intervalSlider);
-            const content = document.getElementById('main-content');
-            
-            // Actualizar estado botones nav
-            document.getElementById('btn-home').classList.remove('active');
-            if(esTodoElCloset) document.getElementById('btn-archivador').classList.add('active');
-
-            content.innerHTML = `
-                <div style="padding: 10px 0;">
-                    <h2 style="color: white; font-size: 14px; text-transform: uppercase; margin-bottom: 15px;">
-                        ${esTodoElCloset ? 'Todo mi Closet' : categoriaActual}
-                    </h2>
-                    <div id="grid-prendas" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                        <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.4); font-size: 10px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 25px;">
-                            <i class="ph ph-sparkle" style="font-size: 28px; margin-bottom: 12px; display: block; width: 100%;"></i>
-                            TODAVÍA NO TIENES PRENDAS AQUÍ
-                        </div>
-                    </div>
-                </div>`;
-        }
-
-        function cargarTodoElCloset() {
-            categoriaActual = '';
-            renderCats();
-            cargarPrendas(true);
-        }
-
+        // --- NAVEGACIÓN Y OTROS ---
         function mostrarInicio() {
             clearInterval(intervalSlider);
-            categoriaActual = '';
-            renderCats();
-            
+            categoriaActual = ''; renderCats();
             document.getElementById('btn-home').classList.add('active');
             document.getElementById('btn-archivador').classList.remove('active');
-
             document.getElementById('main-content').innerHTML = `
                 <div class="onboarding-container">
                     <div class="slider-wrapper" id="slider-home">
                         <div class="step-card">
                             <div class="step-media"><video src="v1.mp4" autoplay loop muted playsinline></video></div>
-                            <h3>1. Digitaliza</h3>
-                            <p>Toma una foto. Nuestra IA eliminará el fondo automáticamente.</p>
+                            <h3>1. Digitaliza</h3><p>Toma una foto y elimina el fondo.</p>
                         </div>
                         <div class="step-card">
                             <div class="step-media"><video src="v2.mp4" autoplay loop muted playsinline></video></div>
-                            <h3>2. Clasifica</h3>
-                            <p>Organiza tu ropa por categorías para encontrarla siempre rápido.</p>
-                        </div>
-                        <div class="step-card">
-                            <div class="step-media"><video src="v3.mp4" autoplay loop muted playsinline></video></div>
-                            <h3>3. Inspira</h3>
-                            <p>Arma outfits increíbles y ten el control total de tu closet.</p>
+                            <h3>2. Clasifica</h3><p>Organiza por categorías.</p>
                         </div>
                     </div>
                 </div>`;
             iniciarAutoSlider();
         }
 
+        function cargarTodoElCloset() {
+            categoriaActual = ''; renderCats(); cargarPrendas(true);
+            document.getElementById('btn-home').classList.remove('active');
+            document.getElementById('btn-archivador').classList.add('active');
+        }
+
         function renderCats() {
-            const container = document.getElementById('main-cats'); 
-            container.innerHTML = '';
-            const categorias = [
-                {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
-                {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
-                {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}
-            ];
-            categorias.forEach(cat => {
+            const container = document.getElementById('main-cats'); container.innerHTML = '';
+            const cats = ['Superior', 'Inferior', 'Abrigos', 'Calzado', 'Vestidos', 'Bolsos', 'Accesorios'];
+            const icons = ['ph-t-shirt', 'ph-pants', 'ph-hoodie', 'ph-sneaker', 'ph-dress', 'ph-handbag', 'ph-watch'];
+            
+            cats.forEach((n, i) => {
                 const div = document.createElement('div');
-                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
+                div.className = `cat-item ${n.toUpperCase() === categoriaActual ? 'active' : ''}`;
                 div.onclick = () => { 
                     if(!accessToken) { manejarDrive(); return; }
-                    categoriaActual = cat.n.toUpperCase(); 
-                    renderCats();
-                    cargarPrendas(false); 
+                    categoriaActual = n.toUpperCase(); renderCats(); cargarPrendas();
                 };
-                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
+                div.innerHTML = `<div class="cat-circle"><i class="ph ${icons[i]}"></i></div><span class="cat-label">${n}</span>`;
                 container.appendChild(div);
             });
-        }
-
-        // --- FUNCIONES RESTANTES (CLIMA, DRIVE, MODALES) ---
-        function mostrarPopup({titulo, texto, confirmarText = "Aceptar", cancelarText = "Cancelar", onConfirm}) {
-            const modal = document.getElementById('modal-custom');
-            document.getElementById('custom-title').innerText = titulo;
-            document.getElementById('custom-text').innerText = texto;
-            const btnConfirm = document.getElementById('btn-modal-confirm');
-            const btnCancel = document.getElementById('btn-modal-cancel');
-            btnConfirm.innerText = confirmarText;
-            btnCancel.innerText = cancelarText;
-            btnCancel.style.display = onConfirm ? 'block' : 'none';
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
-            btnConfirm.onclick = () => { cerrarModales(); if(onConfirm) onConfirm(); };
-            btnCancel.onclick = cerrarModales;
-        }
-
-        function cerrarModales() {
-            document.querySelectorAll('.modal-overlay').forEach(m => {
-                m.classList.remove('active');
-                setTimeout(() => m.style.display = 'none', 300);
-            });
-        }
-
-        async function actualizarClima() {
-            try {
-                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9033&longitude=-56.1882&current_weather=true');
-                const data = await res.json();
-                document.getElementById('temp-text').innerText = Math.round(data.current_weather.temperature) + '°';
-                document.getElementById('ciudad-text').innerText = "MONTEVIDEO";
-            } catch(e) { document.getElementById('temp-text').innerText = "--°"; }
-        }
-
-        function iniciarAutoSlider() {
-            const slider = document.getElementById('slider-home');
-            let idx = 0;
-            intervalSlider = setInterval(() => {
-                idx = (idx + 1) % 3;
-                if(slider) {
-                    const w = slider.querySelector('.step-card').clientWidth + 20;
-                    slider.scrollTo({ left: w * idx, behavior: 'smooth' });
-                }
-            }, 4000);
         }
 
         function manejarDrive() {
             if (accessToken) {
                 mostrarPopup({
-                    titulo: "Cerrar Sesión",
-                    texto: "¿Deseas desvincular tu cuenta de Drive?",
-                    confirmarText: "SÍ, SALIR",
+                    titulo: "Cerrar Sesión", texto: "¿Desvincular Drive?", confirmarText: "SÍ",
                     onConfirm: () => {
                         accessToken = null; localStorage.removeItem('drive_token');
                         document.getElementById('auth-btn').classList.remove('vinculado');
                         document.getElementById('drive-label').innerText = "SIN VINCULAR";
                     }
                 });
-            } else { 
-                tokenClient.requestAccessToken();
-            }
+            } else { tokenClient.requestAccessToken(); }
+        }
+
+        function mostrarPopup({titulo, texto, confirmarText = "Ok", onConfirm}) {
+            const m = document.getElementById('modal-custom');
+            document.getElementById('custom-title').innerText = titulo;
+            document.getElementById('custom-text').innerText = texto;
+            const bC = document.getElementById('btn-modal-confirm');
+            bC.innerText = confirmarText;
+            m.style.display = 'flex';
+            setTimeout(() => m.classList.add('active'), 10);
+            bC.onclick = () => { m.classList.remove('active'); setTimeout(()=>m.style.display='none',300); if(onConfirm) onConfirm(); };
+            document.getElementById('btn-modal-cancel').onclick = () => { m.classList.remove('active'); setTimeout(()=>m.style.display='none',300); };
         }
 
         function startGoogle() {
@@ -339,7 +339,15 @@
             });
         }
 
-        window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); actualizarClima(); };
+        function iniciarAutoSlider() {
+            const s = document.getElementById('slider-home'); let i = 0;
+            intervalSlider = setInterval(() => {
+                i = (i + 1) % 2;
+                if(s) s.scrollTo({ left: (s.querySelector('.step-card').clientWidth + 20) * i, behavior: 'smooth' });
+            }, 4000);
+        }
+
+        window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); };
     </script>
 </body>
 </html>

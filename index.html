@@ -9,13 +9,10 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js"></script>
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    
     <style>
         :root { 
             --verde-oliva: #848464; --verde-oscuro: #313628; --arena-claro: #F2EFE9;
-            --arena-boton: #E5E1D5; --rojo-borrar: #D64545; --rojo-fuerte: #8B0000;
+            --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
         * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -33,13 +30,8 @@
         .brand-text { color: white; letter-spacing: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
 
         .drive-btn { background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; outline: none; }
-        .drive-btn img { width: 26px; height: auto; opacity: 0.35; animation: pulse-drive 2s infinite ease-in-out; }
-        .drive-btn.vinculado img { opacity: 1 !important; animation: none !important; transform: scale(1) !important; }
-        @keyframes pulse-drive {
-            0% { transform: scale(0.9); opacity: 0.3; }
-            50% { transform: scale(1.15); opacity: 0.7; }
-            100% { transform: scale(0.9); opacity: 0.3; }
-        }
+        .drive-btn img { width: 26px; height: auto; opacity: 0.35; }
+        .drive-btn.vinculado img { opacity: 1; }
         
         .filter-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; opacity: 0.4; cursor: pointer; }
@@ -51,6 +43,13 @@
         .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 8px; text-transform: uppercase; text-align: center; }
 
         .content { flex: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
+        
+        /* CUADRÍCULA DE PRENDAS */
+        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 100px; }
+        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; aspect-ratio: 1/1; position: relative; overflow: hidden; }
+        .prenda-card img { width: 100%; height: 80%; object-fit: contain; }
+        .prenda-card span { color: white; font-size: 8px; font-weight: 800; text-transform: uppercase; margin-top: auto; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
         .onboarding-container { display: flex; flex-direction: column; align-items: center; padding-top: 15px; }
         .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
         .step-card { min-width: 85%; max-height: 320px; background: var(--arena-claro); border-radius: 30px; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
@@ -60,14 +59,8 @@
         .step-card p { font-size: 11px; color: #666; line-height: 1.4; margin: 0; }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); padding: 20px; }
-        .modal-content { background: var(--arena-claro); border-radius: 30px; width: 100%; max-width: 340px; padding: 30px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: translateY(20px); opacity: 0; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal-content { background: var(--arena-claro); border-radius: 30px; width: 100%; max-width: 340px; padding: 30px; text-align: center; transform: translateY(20px); opacity: 0; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .modal-overlay.active .modal-content { transform: translateY(0); opacity: 1; }
-        .modal-title { font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 12px; }
-        .modal-text { font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 25px; }
-        .modal-btns { display: flex; gap: 10px; }
-        .btn-modal { flex: 1; padding: 16px; border-radius: 18px; border: none; font-size: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
-        .btn-secundario { background: var(--arena-boton); color: var(--verde-oscuro); }
-        .btn-primario { background: var(--verde-oscuro); color: white; }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
@@ -83,7 +76,7 @@
     <div class="main-container">
         <header>
             <div class="header-info-box">
-                <i id="clima-icon" class="ph ph-circle-notched" style="font-size: 22px; color: white"></i>
+                <i id="clima-icon" class="ph ph-sun" style="font-size: 22px; color: white"></i>
                 <span class="info-main-text" id="temp-text">--°</span>
                 <span class="info-sub-text" id="ciudad-text">CARGANDO...</span>
             </div>
@@ -100,7 +93,6 @@
         </header>
         
         <div class="filter-scroll" id="main-cats"></div>
-        <div id="extra-actions"></div>
         <div class="content" id="main-content"></div>
 
         <div class="nav-wrapper">
@@ -115,11 +107,11 @@
 
     <div id="modal-custom" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-title" id="custom-title">Título</div>
-            <div class="modal-text" id="custom-text">Mensaje.</div>
-            <div class="modal-btns">
-                <button class="btn-modal btn-secundario" id="btn-modal-cancel">Cancelar</button>
-                <button class="btn-modal btn-primario" id="btn-modal-confirm">Aceptar</button>
+            <div id="custom-title" style="font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 12px;">Título</div>
+            <div id="custom-text" style="font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 25px;">Mensaje.</div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btn-modal-cancel" style="flex: 1; padding: 16px; border-radius: 18px; border: none; font-size: 10px; font-weight: 800; text-transform: uppercase; background: var(--arena-boton); color: var(--verde-oscuro);">Cancelar</button>
+                <button id="btn-modal-confirm" style="flex: 1; padding: 16px; border-radius: 18px; border: none; font-size: 10px; font-weight: 800; text-transform: uppercase; background: var(--verde-oscuro); color: white;">Aceptar</button>
             </div>
         </div>
     </div>
@@ -130,53 +122,57 @@
         let accessToken = localStorage.getItem('drive_token'), tokenClient, categoriaActual = '';
         let intervalSlider;
 
-        function mostrarPopup({titulo, texto, confirmarText = "Aceptar", cancelarText = "Cancelar", onConfirm}) {
-            const modal = document.getElementById('modal-custom');
-            document.getElementById('custom-title').innerText = titulo;
-            document.getElementById('custom-text').innerText = texto;
-            const btnConfirm = document.getElementById('btn-modal-confirm');
-            const btnCancel = document.getElementById('btn-modal-cancel');
-            btnConfirm.innerText = confirmarText;
-            btnCancel.innerText = cancelarText;
-            btnCancel.style.display = onConfirm ? 'block' : 'none';
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
-            btnConfirm.onclick = () => { cerrarModales(); if(onConfirm) onConfirm(); };
-            btnCancel.onclick = cerrarModales;
-        }
-
-        function cerrarModales() {
-            document.querySelectorAll('.modal-overlay').forEach(m => {
-                m.classList.remove('active');
-                setTimeout(() => m.style.display = 'none', 300);
+        // --- GESTIÓN DE DRIVE Y CARPETAS ---
+        async function obtenerOCrearCarpeta(n) {
+            const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { 
+                headers: { 'Authorization': 'Bearer ' + accessToken } 
             });
+            const d = await r.json();
+            if(d.files && d.files[0]) return d.files[0].id;
+
+            const res = await fetch('https://www.googleapis.com/drive/v3/files', { 
+                method: 'POST', 
+                headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) 
+            });
+            const f = await res.json();
+            return f.id;
         }
 
-        function enviarAStudio(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    sessionStorage.setItem('imagen_para_procesar', e.target.result);
-                    window.location.href = 'photo_studio.html';
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        async function actualizarClima() {
+        async function cargarPrendas(todo = false) {
+            if(!accessToken) return;
+            const content = document.getElementById('main-content');
+            content.innerHTML = `<div class="closet-grid" id="closet-grid"></div>`;
+            const grid = document.getElementById('closet-grid');
+            
             try {
-                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9033&longitude=-56.1882&current_weather=true');
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
+                const filtro = todo ? "KINU_" : `KINU_${categoriaActual}_`;
+                const q = `'${folderId}' in parents and name contains '${filtro}' and trashed = false`;
+                
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, { 
+                    headers: { 'Authorization': 'Bearer ' + accessToken } 
+                });
                 const data = await res.json();
-                const temp = Math.round(data.current_weather.temperature);
-                const code = data.current_weather.weathercode;
-                document.getElementById('temp-text').innerText = temp + '°';
-                document.getElementById('ciudad-text').innerText = "MONTEVIDEO";
-                const icon = document.getElementById('clima-icon');
-                if (code <= 1) icon.className = "ph ph-sun";
-                else if (code <= 3) icon.className = "ph ph-cloud-sun";
-                else if (code >= 51 && code <= 67) icon.className = "ph ph-cloud-rain";
-                else icon.className = "ph ph-cloud";
-            } catch(e) { document.getElementById('temp-text').innerText = "--°"; }
+                
+                if (data.files && data.files.length > 0) {
+                    data.files.forEach(f => {
+                        const card = document.createElement('div');
+                        card.className = 'prenda-card';
+                        let partes = f.name.replace('.png','').split('_');
+                        let nombre = partes.slice(2, partes.length - 1).join(' ') || "PRENDA";
+                        
+                        card.innerHTML = `
+                            <img src="${f.thumbnailLink.replace('=s220','=s500')}">
+                            <span>${nombre}</span>
+                        `;
+                        grid.appendChild(card);
+                    });
+                } else {
+                    grid.innerHTML = `<p style="color: white; opacity: 0.5; grid-column: 1/-1; text-align: center; font-size: 10px; margin-top: 40px;">CARPETA VACÍA</p>`;
+                }
+            } catch(e) { console.error(e); }
         }
 
         function renderCats() {
@@ -193,6 +189,8 @@
                 div.onclick = () => { 
                     if(!accessToken) { manejarDrive(); return; }
                     categoriaActual = cat.n.toUpperCase(); renderCats();
+                    document.getElementById('btn-home').classList.remove('active');
+                    document.getElementById('btn-archivador').classList.remove('active');
                     cargarPrendas(false); 
                 };
                 div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
@@ -200,51 +198,30 @@
             });
         }
 
-        function manejarDrive() {
-            if (accessToken) {
-                mostrarPopup({
-                    titulo: "Cerrar Sesión",
-                    texto: "¿Deseas desvincular tu cuenta de Drive?",
-                    confirmarText: "SÍ, SALIR",
-                    onConfirm: () => {
-                        accessToken = null; localStorage.removeItem('drive_token');
-                        document.getElementById('auth-btn').classList.remove('vinculado');
-                        document.getElementById('drive-label').innerText = "SIN VINCULAR";
-                    }
-                });
-            } else { 
-                mostrarPopup({
-                    titulo: "Vincular Google Drive",
-                    texto: "KINU guardará tus prendas de forma segura en tu Drive. ¿Deseas vincular tu cuenta?",
-                    confirmarText: "VINCULAR CUENTA",
-                    onConfirm: () => tokenClient.requestAccessToken()
-                });
-            }
-        }
-
+        // --- NAVEGACIÓN Y OTROS ---
         function mostrarInicio() {
             clearInterval(intervalSlider);
+            categoriaActual = '';
+            document.getElementById('btn-archivador').classList.remove('active');
+            document.getElementById('btn-home').classList.add('active');
+            renderCats();
             document.getElementById('main-content').innerHTML = `
                 <div class="onboarding-container">
                     <div class="slider-wrapper" id="slider-home">
-                        <div class="step-card">
-                            <div class="step-media"><video src="v1.mp4" autoplay loop muted playsinline></video></div>
-                            <h3>1. Digitaliza</h3>
-                            <p>Toma una foto. Nuestra IA eliminará el fondo automáticamente.</p>
-                        </div>
-                        <div class="step-card">
-                            <div class="step-media"><video src="v2.mp4" autoplay loop muted playsinline></video></div>
-                            <h3>2. Clasifica</h3>
-                            <p>Organiza tu ropa por categorías para encontrarla siempre rápido.</p>
-                        </div>
-                        <div class="step-card">
-                            <div class="step-media"><video src="v3.mp4" autoplay loop muted playsinline></video></div>
-                            <h3>3. Inspira</h3>
-                            <p>Arma outfits increíbles y ten el control total de tu closet.</p>
-                        </div>
+                        <div class="step-card"><div class="step-media"><video src="v1.mp4" autoplay loop muted playsinline></video></div><h3>1. Digitaliza</h3><p>Toma una foto. La IA eliminará el fondo.</p></div>
+                        <div class="step-card"><div class="step-media"><video src="v2.mp4" autoplay loop muted playsinline></video></div><h3>2. Clasifica</h3><p>Organiza tu ropa por categorías.</p></div>
+                        <div class="step-card"><div class="step-media"><video src="v3.mp4" autoplay loop muted playsinline></video></div><h3>3. Inspira</h3><p>Arma outfits increíbles.</p></div>
                     </div>
                 </div>`;
             iniciarAutoSlider();
+        }
+
+        function cargarTodoElCloset() {
+            categoriaActual = '';
+            document.getElementById('btn-home').classList.remove('active');
+            document.getElementById('btn-archivador').classList.add('active');
+            renderCats();
+            cargarPrendas(true);
         }
 
         function iniciarAutoSlider() {
@@ -257,6 +234,43 @@
                     slider.scrollTo({ left: w * idx, behavior: 'smooth' });
                 }
             }, 4000);
+        }
+
+        function manejarDrive() {
+            if (accessToken) {
+                mostrarPopup("Cerrar Sesión", "¿Deseas desvincular tu cuenta?", () => {
+                    accessToken = null; localStorage.removeItem('drive_token');
+                    document.getElementById('auth-btn').classList.remove('vinculado');
+                    document.getElementById('drive-label').innerText = "SIN VINCULAR";
+                });
+            } else { tokenClient.requestAccessToken(); }
+        }
+
+        function mostrarPopup(titulo, texto, onConfirm) {
+            const modal = document.getElementById('modal-custom');
+            document.getElementById('custom-title').innerText = titulo;
+            document.getElementById('custom-text').innerText = texto;
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            document.getElementById('btn-modal-confirm').onclick = () => { cerrarModales(); if(onConfirm) onConfirm(); };
+            document.getElementById('btn-modal-cancel').onclick = cerrarModales;
+        }
+
+        function cerrarModales() {
+            const modal = document.getElementById('modal-custom');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        function enviarAStudio(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    sessionStorage.setItem('imagen_para_procesar', e.target.result);
+                    window.location.href = 'photo_studio.html';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         }
 
         function startGoogle() {
@@ -279,7 +293,16 @@
             });
         }
 
-        window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); actualizarClima(); };
+        async function actualizarClima() {
+            try {
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true');
+                const data = await res.json();
+                document.getElementById('temp-text').innerText = Math.round(data.current_weather.temperature) + '°';
+                document.getElementById('ciudad-text').innerText = "MONTEVIDEO";
+            } catch(e) {}
+        }
+
+        window.onload = () => { mostrarInicio(); startGoogle(); actualizarClima(); };
     </script>
 </body>
 </html>

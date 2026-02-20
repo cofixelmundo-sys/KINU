@@ -9,78 +9,43 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js"></script>
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    
     <style>
         :root { 
             --verde-oliva: #848464; --verde-oscuro: #313628; --arena-claro: #F2EFE9;
-            --arena-boton: #E5E1D5; --rojo-borrar: #D64545; --rojo-fuerte: #8B0000;
+            --arena-boton: #E5E1D5;
         }
-
-        * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; user-select: none; }
-
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
+        * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; overflow: hidden; position: fixed; width: 100%; }
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
         
         header { padding: calc(env(safe-area-inset-top) + 10px) 15px 10px; display: flex; justify-content: space-between; align-items: center; }
-        .header-info-box { display: flex; flex-direction: column; align-items: center; min-width: 80px; }
-        .info-main-text { font-size: 16px; font-weight: 800; color: white; margin: 4px 0; }
-        .info-sub-text { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); font-weight: 700; }
-        
-        .header-center { display: flex; flex-direction: column; align-items: center; flex: 1; }
-        .logo-header { width: 110px; height: auto; }
-        .brand-text { color: white; letter-spacing: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
+        .logo-header { width: 110px; }
+        .brand-text { color: white; letter-spacing: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; text-align: center; }
 
-        .drive-btn { background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; outline: none; }
-        .drive-btn img { width: 26px; height: auto; opacity: 0.35; animation: pulse-drive 2s infinite ease-in-out; }
-        .drive-btn.vinculado img { opacity: 1 !important; animation: none !important; transform: scale(1) !important; }
-        
-        @keyframes pulse-drive {
-            0% { transform: scale(0.9); opacity: 0.3; }
-            50% { transform: scale(1.15); opacity: 0.7; }
-            100% { transform: scale(0.9); opacity: 0.3; }
-        }
-        
-        .filter-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
-        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; opacity: 0.4; cursor: pointer; }
-        .cat-item.active { opacity: 1; transform: scale(1.05); }
-        .cat-circle { width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
-        .cat-item.active .cat-circle { background: white; }
-        .cat-circle i { font-size: 26px; color: white; }
-        .cat-item.active i { color: var(--verde-oscuro); }
-        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 8px; text-transform: uppercase; text-align: center; }
+        .drive-btn { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+        .drive-btn img { width: 26px; opacity: 0.3; }
+        .drive-btn.vinculado img { opacity: 1; }
+        .info-sub-text { font-size: 8px; color: white; font-weight: 700; margin-top: 4px; }
+
+        .filter-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 15px; scrollbar-width: none; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; opacity: 0.4; }
+        .cat-item.active { opacity: 1; transform: scale(1.1); }
+        .cat-circle { width: 55px; height: 55px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; }
+        .cat-item.active .cat-circle { background: white; color: var(--verde-oscuro); }
+        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 8px; text-transform: uppercase; }
 
         .content { flex: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
         
+        #grid-prendas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 100px; }
+        .prenda-card { background: var(--arena-claro); border-radius: 20px; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; padding: 15px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .prenda-card img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
         #studio-container { position: fixed; inset: 0; z-index: 10000; background: var(--verde-oliva); display: none; }
         #studio-iframe { width: 100%; height: 100%; border: none; }
 
-        .onboarding-container { display: flex; flex-direction: column; align-items: center; padding-top: 15px; }
-        .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
-        .step-card { min-width: 85%; max-height: 320px; background: var(--arena-claro); border-radius: 30px; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
-        .step-media { width: 140px; height: 140px; margin-bottom: 10px; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.05); }
-        .step-media video { width: 100%; height: 100%; object-fit: cover; }
-        .step-card h3 { font-size: 16px; font-weight: 800; color: var(--verde-oscuro); margin: 5px 0; text-transform: uppercase; }
-        .step-card p { font-size: 11px; color: #666; line-height: 1.4; margin: 0; }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); padding: 20px; }
-        .modal-content { background: var(--arena-claro); border-radius: 30px; width: 100%; max-width: 340px; padding: 30px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: translateY(20px); opacity: 0; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .modal-overlay.active .modal-content { transform: translateY(0); opacity: 1; }
-        .modal-title { font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 12px; }
-        .modal-text { font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 25px; }
-        .modal-btns { display: flex; gap: 10px; }
-        .btn-modal { flex: 1; padding: 16px; border-radius: 18px; border: none; font-size: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
-        .btn-secundario { background: var(--arena-boton); color: var(--verde-oscuro); }
-        .btn-primario { background: var(--verde-oscuro); color: white; }
-
-        .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
-        nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
-        .nav-icon { color: white; font-size: 22px; opacity: 0.4; cursor: pointer; }
+        .nav-wrapper { position: fixed; bottom: 30px; left: 25px; right: 25px; height: 55px; background: var(--verde-oscuro); border-radius: 30px; display: flex; justify-content: space-around; align-items: center; z-index: 999; }
+        .nav-icon { color: white; font-size: 22px; opacity: 0.4; }
         .nav-icon.active { opacity: 1; }
-        .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .cam-inner i { font-size: 42px; color: var(--verde-oscuro); }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
@@ -89,152 +54,202 @@
 
     <div class="main-container">
         <header>
-            <div class="header-info-box">
-                <i id="clima-icon" class="ph ph-circle-notched" style="font-size: 22px; color: white"></i>
-                <span class="info-main-text" id="temp-text">--°</span>
-                <span class="info-sub-text" id="ciudad-text">CARGANDO...</span>
-            </div>
+            <div style="width:80px"></div>
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
                 <div class="brand-text">KINU</div>
             </div>
-            <div class="header-info-box">
-                <button id="auth-btn" class="drive-btn" onclick="manejarDrive()">
-                    <img src="https://i.imgur.com/Go2a4Hs.png">
-                    <span class="info-sub-text" id="drive-label">SIN VINCULAR</span>
-                </button>
-            </div>
+            <button id="auth-btn" class="drive-btn" onclick="manejarDrive()">
+                <img src="https://i.imgur.com/Go2a4Hs.png">
+                <span class="info-sub-text" id="drive-label">DESCONECTADO</span>
+            </button>
         </header>
         
         <div class="filter-scroll" id="main-cats"></div>
-        <div class="content" id="main-content"></div>
+        <div class="content" id="main-content">
+            </div>
 
         <div class="nav-wrapper">
-            <nav>
-                <div class="nav-icon active" id="btn-home" onclick="mostrarInicio()"><i class="ph ph-house-simple"></i></div>
-                <div class="nav-icon" id="btn-archivador" onclick="cargarTodoElCloset()"><i class="ph ph-archive"></i></div>
-            </nav>
-            <label for="cam-input" class="cam-trigger"><div class="cam-inner"><i class="ph ph-camera"></i></div></label>
+            <i class="ph ph-house-simple nav-icon active" id="btn-home" onclick="mostrarInicio()"></i>
+            <label for="cam-input" style="background:white; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-top:-30px; border:5px solid var(--verde-oliva)">
+                <i class="ph ph-camera" style="font-size:30px; color:var(--verde-oscuro)"></i>
+            </label>
+            <i class="ph ph-archive nav-icon" id="btn-archivador" onclick="cargarTodoElCloset()"></i>
             <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="enviarAStudio(this)">
         </div>
     </div>
 
-    <div id="studio-container">
-        <iframe id="studio-iframe" src=""></iframe>
-    </div>
-
-    <div id="modal-custom" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-title" id="custom-title">Título</div>
-            <div class="modal-text" id="custom-text">Mensaje.</div>
-            <div class="modal-btns">
-                <button class="btn-modal btn-secundario" id="btn-modal-cancel">Cancelar</button>
-                <button class="btn-modal btn-primario" id="btn-modal-confirm">Aceptar</button>
-            </div>
-        </div>
-    </div>
+    <div id="studio-container"><iframe id="studio-iframe" src=""></iframe></div>
 
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        let accessToken = localStorage.getItem('drive_token'), tokenClient, categoriaActual = '';
-        let intervalSlider;
+        const SCOPES = 'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file';
+        
+        let accessToken = localStorage.getItem('drive_token');
+        let tokenClient;
+        let categoriaActual = '';
 
-        // --- LÓGICA DE DRIVE (LECTURA REAL) ---
-        async function cargarPrendas(esTodoElCloset = false) {
-            clearInterval(intervalSlider);
+        // 1. INICIALIZAR GOOGLE API CORRECATMENTE
+        function startGoogle() {
+            gapi.load('client', async () => {
+                await gapi.client.init({
+                    clientId: CLIENT_ID,
+                    scope: SCOPES,
+                });
+                // Cargar el módulo de Drive específicamente
+                await gapi.client.load('drive', 'v3');
+                
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID,
+                    scope: SCOPES,
+                    callback: (tokenResponse) => {
+                        if (tokenResponse.access_token) {
+                            accessToken = tokenResponse.access_token;
+                            localStorage.setItem('drive_token', accessToken);
+                            actualizarEstadoDrive(true);
+                            cargarTodoElCloset();
+                        }
+                    },
+                });
+
+                if (accessToken) actualizarEstadoDrive(true);
+            });
+        }
+
+        function actualizarEstadoDrive(conectado) {
+            const btn = document.getElementById('auth-btn');
+            const label = document.getElementById('drive-label');
+            if (conectado) {
+                btn.classList.add('vinculado');
+                label.innerText = "CONECTADO";
+            } else {
+                btn.classList.remove('vinculado');
+                label.innerText = "DESCONECTADO";
+            }
+        }
+
+        function manejarDrive() {
+            if (accessToken) {
+                if(confirm("¿Cerrar sesión de Drive?")) {
+                    accessToken = null;
+                    localStorage.removeItem('drive_token');
+                    actualizarEstadoDrive(false);
+                }
+            } else {
+                tokenClient.requestAccessToken();
+            }
+        }
+
+        // 2. CARGAR PRENDAS DESDE DRIVE
+        async function cargarPrendas(esTodo = false) {
             const content = document.getElementById('main-content');
-            
             if (!accessToken) {
-                content.innerHTML = `<div style="color:white; text-align:center; padding:50px; opacity:0.6; font-size:12px;">VINCULA DRIVE PARA VER TU CLOSET</div>`;
+                content.innerHTML = `<div style="color:white; text-align:center; padding-top:50px; opacity:0.6">CONECTA DRIVE PARA VER TU ROPA</div>`;
                 return;
             }
 
             content.innerHTML = `
-                <div style="padding: 10px 0;">
-                    <h2 style="color: white; font-size: 12px; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2px;">
-                        ${esTodoElCloset ? 'MI CLOSET COMPLETO' : categoriaActual}
-                    </h2>
-                    <div id="grid-prendas" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: white; opacity: 0.5;">
-                            <i class="ph ph-circle-notched-bold" style="font-size: 30px; animation: spin 1s linear infinite;"></i>
-                        </div>
+                <h2 style="color:white; font-size:12px; letter-spacing:3px; text-transform:uppercase; margin-bottom:20px">
+                    ${esTodo ? 'Mi Closet' : categoriaActual}
+                </h2>
+                <div id="grid-prendas">
+                    <div style="grid-column:1/-1; text-align:center; color:white; padding:50px">
+                        <i class="ph ph-circle-notched" style="font-size:30px; animation: spin 1s linear infinite"></i>
                     </div>
                 </div>`;
 
             try {
-                // 1. Buscar carpeta KINU
-                let q = "name = 'KINU' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
-                let res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, {
-                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                // Buscamos la carpeta KINU primero
+                let response = await gapi.client.drive.files.list({
+                    q: "name = 'KINU' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+                    fields: 'files(id)'
                 });
-                let data = await res.json();
-                
-                if (!data.files || data.files.length === 0) {
-                    mostrarVacio(); return;
+
+                let folders = response.result.files;
+                if (folders.length === 0) {
+                    mostrarVacio();
+                    return;
                 }
 
-                const folderId = data.files[0].id;
-                
-                // 2. Buscar archivos (filtrar por nombre de categoría si no es "todo")
-                let fileQ = `'${folderId}' in parents and trashed = false`;
-                if (!esTodoElCloset && categoriaActual) {
-                    fileQ += ` and name contains '${categoriaActual.toLowerCase()}'`;
+                let folderId = folders[0].id;
+                let query = `'${folderId}' in parents and trashed = false`;
+                if (!esTodo && categoriaActual) {
+                    query += ` and name contains '${categoriaActual.toLowerCase()}'`;
                 }
 
-                let resFiles = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(fileQ)}&fields=files(id,name,thumbnailLink)&pageSize=100`, {
-                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                let fileRes = await gapi.client.drive.files.list({
+                    q: query,
+                    fields: 'files(id, name, thumbnailLink)',
+                    pageSize: 50
                 });
-                let dataFiles = await resFiles.json();
 
+                let files = fileRes.result.files;
                 const grid = document.getElementById('grid-prendas');
                 grid.innerHTML = '';
 
-                if (!dataFiles.files || dataFiles.files.length === 0) {
-                    mostrarVacio(); return;
+                if (!files || files.length === 0) {
+                    mostrarVacio();
+                    return;
                 }
 
-                dataFiles.files.forEach(file => {
-                    const card = document.createElement('div');
-                    card.style.cssText = "background: var(--arena-claro); border-radius: 20px; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; padding: 15px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.1);";
-                    
+                files.forEach(file => {
+                    const div = document.createElement('div');
+                    div.className = 'prenda-card';
+                    // Reemplazamos s220 por s500 para mejor calidad de imagen
                     const imgUrl = file.thumbnailLink ? file.thumbnailLink.replace('s220', 's500') : '';
-                    card.innerHTML = `
-                        <img src="${imgUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-                        <div style="position: absolute; bottom: 8px; background: white; padding: 3px 10px; border-radius: 10px; font-size: 7px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase;">
-                            ${file.name.split('-')[0]}
-                        </div>`;
-                    grid.appendChild(card);
+                    div.innerHTML = `<img src="${imgUrl}"><span style="position:absolute; bottom:10px; font-size:7px; font-weight:900; color:var(--verde-oscuro); background:white; padding:2px 8px; border-radius:10px">${file.name.split('-')[0]}</span>`;
+                    grid.appendChild(div);
                 });
 
             } catch (err) {
-                content.innerHTML = `<div style="color:white; text-align:center; padding:50px; opacity:0.6;">ERROR DE CONEXIÓN</div>`;
+                console.error(err);
+                content.innerHTML = `<div style="color:white; text-align:center; padding-top:50px">Error al cargar Drive</div>`;
             }
         }
 
         function mostrarVacio() {
             document.getElementById('grid-prendas').innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.4); font-size: 10px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 25px;">
-                    <i class="ph ph-sparkle" style="font-size: 28px; margin-bottom: 12px; display: block; width: 100%;"></i>
-                    NO HAY PRENDAS AQUÍ
+                <div style="grid-column:1/-1; text-align:center; color:white; opacity:0.3; padding:50px; border:1px dashed rgba(255,255,255,0.2); border-radius:30px">
+                    <i class="ph ph-sparkle" style="font-size:30px"></i><br><small>SIN PRENDAS AQUÍ</small>
                 </div>`;
         }
 
-        // --- COMUNICACIÓN STUDIO ---
-        window.addEventListener("message", (e) => {
-            if (e.data.type === 'GUARDAR_PRENDA') {
-                cerrarStudio();
-                mostrarPopup({ titulo: "¡Éxito!", texto: "Prenda guardada." });
-                categoriaActual = e.data.categoria.toUpperCase();
-                renderCats();
-                cargarPrendas();
-            }
-            if (e.data.type === 'CERRAR_STUDIO') cerrarStudio();
-        });
+        // 3. UI Y NAVEGACIÓN
+        function renderCats() {
+            const container = document.getElementById('main-cats');
+            const cats = [
+                {n:'Superior', i:'ph-t-shirt'}, {n:'Inferior', i:'ph-pants'}, 
+                {n:'Abrigos', i:'ph-hoodie'}, {n:'Calzado', i:'ph-sneaker'}, 
+                {n:'Bolsos', i:'ph-handbag'}, {n:'Accesorios', i:'ph-watch'}
+            ];
+            container.innerHTML = '';
+            cats.forEach(c => {
+                const div = document.createElement('div');
+                div.className = `cat-item ${c.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
+                div.onclick = () => { 
+                    categoriaActual = c.n.toUpperCase(); 
+                    renderCats(); 
+                    cargarPrendas(false); 
+                };
+                div.innerHTML = `<div class="cat-circle"><i class="ph ${c.i}"></i></div><span class="cat-label">${c.n}</span>`;
+                container.appendChild(div);
+            });
+        }
 
-        function cerrarStudio() {
-            document.getElementById('studio-container').style.display = 'none';
-            document.getElementById('studio-iframe').src = "";
+        function mostrarInicio() {
+            categoriaActual = '';
+            renderCats();
+            document.getElementById('main-content').innerHTML = `
+                <div style="background:var(--arena-claro); border-radius:30px; padding:30px; text-align:center; color:var(--verde-oscuro)">
+                    <h3 style="margin:0; font-size:14px; font-weight:900">BIENVENIDO A KINU</h3>
+                    <p style="font-size:11px; opacity:0.7">Toma una foto para empezar a organizar tu closet inteligente.</p>
+                </div>`;
+        }
+
+        function cargarTodoElCloset() {
+            categoriaActual = '';
+            renderCats();
+            cargarPrendas(true);
         }
 
         function enviarAStudio(input) {
@@ -249,105 +264,19 @@
             }
         }
 
-        // --- NAVEGACIÓN Y OTROS ---
-        function mostrarInicio() {
-            clearInterval(intervalSlider);
-            categoriaActual = ''; renderCats();
-            document.getElementById('btn-home').classList.add('active');
-            document.getElementById('btn-archivador').classList.remove('active');
-            document.getElementById('main-content').innerHTML = `
-                <div class="onboarding-container">
-                    <div class="slider-wrapper" id="slider-home">
-                        <div class="step-card">
-                            <div class="step-media"><video src="v1.mp4" autoplay loop muted playsinline></video></div>
-                            <h3>1. Digitaliza</h3><p>Toma una foto y elimina el fondo.</p>
-                        </div>
-                        <div class="step-card">
-                            <div class="step-media"><video src="v2.mp4" autoplay loop muted playsinline></video></div>
-                            <h3>2. Clasifica</h3><p>Organiza por categorías.</p>
-                        </div>
-                    </div>
-                </div>`;
-            iniciarAutoSlider();
-        }
+        // Escuchar cierre de studio
+        window.addEventListener("message", (e) => {
+            if (e.data.type === 'CERRAR_STUDIO' || e.data.type === 'GUARDAR_PRENDA') {
+                document.getElementById('studio-container').style.display = 'none';
+                document.getElementById('studio-iframe').src = "";
+                if(e.data.type === 'GUARDAR_PRENDA') cargarTodoElCloset();
+            }
+        });
 
-        function cargarTodoElCloset() {
-            categoriaActual = ''; renderCats(); cargarPrendas(true);
-            document.getElementById('btn-home').classList.remove('active');
-            document.getElementById('btn-archivador').classList.add('active');
-        }
-
-        function renderCats() {
-            const container = document.getElementById('main-cats'); container.innerHTML = '';
-            const cats = ['Superior', 'Inferior', 'Abrigos', 'Calzado', 'Vestidos', 'Bolsos', 'Accesorios'];
-            const icons = ['ph-t-shirt', 'ph-pants', 'ph-hoodie', 'ph-sneaker', 'ph-dress', 'ph-handbag', 'ph-watch'];
-            
-            cats.forEach((n, i) => {
-                const div = document.createElement('div');
-                div.className = `cat-item ${n.toUpperCase() === categoriaActual ? 'active' : ''}`;
-                div.onclick = () => { 
-                    if(!accessToken) { manejarDrive(); return; }
-                    categoriaActual = n.toUpperCase(); renderCats(); cargarPrendas();
-                };
-                div.innerHTML = `<div class="cat-circle"><i class="ph ${icons[i]}"></i></div><span class="cat-label">${n}</span>`;
-                container.appendChild(div);
-            });
-        }
-
-        function manejarDrive() {
-            if (accessToken) {
-                mostrarPopup({
-                    titulo: "Cerrar Sesión", texto: "¿Desvincular Drive?", confirmarText: "SÍ",
-                    onConfirm: () => {
-                        accessToken = null; localStorage.removeItem('drive_token');
-                        document.getElementById('auth-btn').classList.remove('vinculado');
-                        document.getElementById('drive-label').innerText = "SIN VINCULAR";
-                    }
-                });
-            } else { tokenClient.requestAccessToken(); }
-        }
-
-        function mostrarPopup({titulo, texto, confirmarText = "Ok", onConfirm}) {
-            const m = document.getElementById('modal-custom');
-            document.getElementById('custom-title').innerText = titulo;
-            document.getElementById('custom-text').innerText = texto;
-            const bC = document.getElementById('btn-modal-confirm');
-            bC.innerText = confirmarText;
-            m.style.display = 'flex';
-            setTimeout(() => m.classList.add('active'), 10);
-            bC.onclick = () => { m.classList.remove('active'); setTimeout(()=>m.style.display='none',300); if(onConfirm) onConfirm(); };
-            document.getElementById('btn-modal-cancel').onclick = () => { m.classList.remove('active'); setTimeout(()=>m.style.display='none',300); };
-        }
-
-        function startGoogle() {
-            gapi.load('client', () => {
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID, scope: SCOPES,
-                    callback: (r) => {
-                        if (r.access_token) {
-                            accessToken = r.access_token;
-                            localStorage.setItem('drive_token', accessToken);
-                            document.getElementById('auth-btn').classList.add('vinculado');
-                            document.getElementById('drive-label').innerText = "CONECTADO";
-                        }
-                    }
-                });
-                if(accessToken) {
-                    document.getElementById('auth-btn').classList.add('vinculado');
-                    document.getElementById('drive-label').innerText = "CONECTADO";
-                }
-            });
-        }
-
-        function iniciarAutoSlider() {
-            const s = document.getElementById('slider-home'); let i = 0;
-            intervalSlider = setInterval(() => {
-                i = (i + 1) % 2;
-                if(s) s.scrollTo({ left: (s.querySelector('.step-card').clientWidth + 20) * i, behavior: 'smooth' });
-            }, 4000);
-        }
-
-        window.onload = () => { renderCats(); mostrarInicio(); startGoogle(); };
+        window.onload = () => { 
+            startGoogle(); 
+            mostrarInicio(); 
+        };
     </script>
 </body>
 </html>

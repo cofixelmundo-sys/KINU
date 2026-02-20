@@ -35,6 +35,7 @@
         .drive-btn { background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; outline: none; }
         .drive-btn img { width: 26px; height: auto; opacity: 0.35; animation: pulse-drive 2s infinite ease-in-out; }
         .drive-btn.vinculado img { opacity: 1 !important; animation: none !important; transform: scale(1) !important; }
+        
         @keyframes pulse-drive {
             0% { transform: scale(0.9); opacity: 0.3; }
             50% { transform: scale(1.15); opacity: 0.7; }
@@ -76,6 +77,13 @@
         .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { font-size: 42px; color: var(--verde-oscuro); }
+
+        /* Estilo para el contenedor de prendas */
+        .clothes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px 0; }
+        
+        /* Studio Overlay */
+        #studio-overlay { position: fixed; inset: 0; background: var(--verde-oliva); z-index: 10000; display: none; }
+        iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
@@ -106,11 +114,15 @@
         <div class="nav-wrapper">
             <nav>
                 <div class="nav-icon active" id="btn-home" onclick="mostrarInicio()"><i class="ph ph-house-simple"></i></div>
-                <div class="nav-icon" id="btn-archivador" onclick="cargarTodoElCloset()"><i class="ph ph-archive"></i></div>
+                <div class="nav-icon" id="btn-archivador"><i class="ph ph-archive"></i></div>
             </nav>
-            <label for="cam-input" class="cam-trigger"><div class="cam-inner"><i class="ph ph-camera"></i></div></label>
-            <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="enviarAStudio(this)">
+            <div class="cam-trigger" onclick="validarYAbrirCamara()"><div class="cam-inner"><i class="ph ph-camera"></i></div></div>
+            <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="abrirStudio(this)">
         </div>
+    </div>
+
+    <div id="studio-overlay">
+        <iframe src="photo_studio.html" id="studio-iframe"></iframe>
     </div>
 
     <div id="modal-custom" class="modal-overlay">
@@ -152,16 +164,86 @@
             });
         }
 
-        function enviarAStudio(input) {
+        // Nueva función para mostrar prendas (soluciona el error de categorías vacías)
+        function cargarPrendas() {
+            clearInterval(intervalSlider);
+            const content = document.getElementById('main-content');
+            content.innerHTML = `
+                <div style="text-align: center; color: white; padding-top: 20px;">
+                    <h2 style="font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">${categoriaActual}</h2>
+                    <div id="grid-prendas" class="clothes-grid">
+                        <p style="grid-column: span 2; opacity: 0.6; font-size: 11px;">Buscando prendas en tu Drive...</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCats() {
+            const container = document.getElementById('main-cats'); container.innerHTML = '';
+            const categorias = [
+                {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
+                {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
+                {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}, 
+                {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
+            ];
+            categorias.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
+                div.onclick = () => { 
+                    if(!accessToken) { 
+                        mostrarPopup({
+                            titulo: "Vincular Drive",
+                            texto: "Para ver tus prendas de " + cat.n + ", primero vincula tu cuenta.",
+                            confirmarText: "VINCULAR",
+                            onConfirm: () => tokenClient.requestAccessToken()
+                        });
+                        return; 
+                    }
+                    categoriaActual = cat.n.toUpperCase(); 
+                    renderCats();
+                    cargarPrendas(); 
+                };
+                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function validarYAbrirCamara() {
+            if (!accessToken) {
+                mostrarPopup({
+                    titulo: "Vincular Drive",
+                    texto: "Vincula KINU para quitar el fondo y guardar tus fotos automáticamente.",
+                    confirmarText: "VINCULAR",
+                    onConfirm: () => tokenClient.requestAccessToken()
+                });
+            } else {
+                document.getElementById('cam-input').click();
+            }
+        }
+
+        function abrirStudio(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     sessionStorage.setItem('imagen_para_procesar', e.target.result);
-                    window.location.href = 'photo_studio.html';
+                    document.getElementById('studio-overlay').style.display = 'block';
+                    document.getElementById('studio-iframe').contentWindow.location.reload();
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
+        // Listener para mensajes de photo_studio.html
+        window.addEventListener("message", (e) => {
+            if (e.data.type === 'CERRAR_STUDIO') {
+                document.getElementById('studio-overlay').style.display = 'none';
+            }
+            if (e.data.type === 'GUARDAR_PRENDA') {
+                document.getElementById('studio-overlay').style.display = 'none';
+                mostrarPopup({ titulo: "¡Éxito!", texto: "Prenda guardada en " + e.data.categoria });
+                // Aquí se podría refrescar la categoría actual si es la que estaba abierta
+            }
+        });
 
         async function actualizarClima() {
             try {
@@ -179,27 +261,6 @@
             } catch(e) { document.getElementById('temp-text').innerText = "--°"; }
         }
 
-        function renderCats() {
-            const container = document.getElementById('main-cats'); container.innerHTML = '';
-            const categorias = [
-                {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
-                {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
-                {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}, 
-                {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
-            ];
-            categorias.forEach(cat => {
-                const div = document.createElement('div');
-                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
-                div.onclick = () => { 
-                    if(!accessToken) { manejarDrive(); return; }
-                    categoriaActual = cat.n.toUpperCase(); renderCats();
-                    cargarPrendas(false); 
-                };
-                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
-                container.appendChild(div);
-            });
-        }
-
         function manejarDrive() {
             if (accessToken) {
                 mostrarPopup({
@@ -210,6 +271,7 @@
                         accessToken = null; localStorage.removeItem('drive_token');
                         document.getElementById('auth-btn').classList.remove('vinculado');
                         document.getElementById('drive-label').innerText = "SIN VINCULAR";
+                        mostrarInicio();
                     }
                 });
             } else { 
@@ -224,6 +286,8 @@
 
         function mostrarInicio() {
             clearInterval(intervalSlider);
+            categoriaActual = '';
+            renderCats();
             document.getElementById('main-content').innerHTML = `
                 <div class="onboarding-container">
                     <div class="slider-wrapper" id="slider-home">

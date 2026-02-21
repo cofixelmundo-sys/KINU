@@ -44,41 +44,43 @@
 
         .content { flex: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
         
-        /* CUADRÍCULA DE PRENDAS */
-        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 100px; }
-        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; aspect-ratio: 1/1; position: relative; overflow: hidden; }
-        .prenda-card img { width: 100%; height: 80%; object-fit: contain; }
-        .prenda-card span { color: white; font-size: 8px; font-weight: 800; text-transform: uppercase; margin-top: auto; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* CUADRÍCULA Y SELECCIÓN */
+        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 120px; }
+        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; aspect-ratio: 1/1; position: relative; overflow: hidden; border: 2px solid transparent; }
+        .prenda-card.selected { border-color: white; background: rgba(255,255,255,0.2); }
+        .prenda-card img { width: 100%; height: 80%; object-fit: contain; pointer-events: none; }
+        .prenda-card span { color: white; font-size: 8px; font-weight: 800; text-transform: uppercase; margin-top: auto; text-align: center; }
+        .select-badge { position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; background: white; border-radius: 50%; display: none; align-items: center; justify-content: center; color: var(--verde-oscuro); font-size: 10px; }
+        .prenda-card.selected .select-badge { display: flex; }
 
-        .onboarding-container { display: flex; flex-direction: column; align-items: center; padding-top: 15px; }
-        .slider-wrapper { width: 100%; display: flex; gap: 20px; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
-        .step-card { min-width: 85%; max-height: 320px; background: var(--arena-claro); border-radius: 30px; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; scroll-snap-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
-        .step-media { width: 140px; height: 140px; margin-bottom: 10px; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.05); }
-        .step-media video { width: 100%; height: 100%; object-fit: cover; }
-        .step-card h3 { font-size: 16px; font-weight: 800; color: var(--verde-oscuro); margin: 5px 0; text-transform: uppercase; }
-        .step-card p { font-size: 11px; color: #666; line-height: 1.4; margin: 0; }
+        /* BARRA MULTI-ACCIÓN */
+        .multi-action-bar { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); background: var(--verde-oscuro); padding: 10px 20px; border-radius: 30px; display: flex; gap: 20px; align-items: center; z-index: 1000; box-shadow: 0 8px 25px rgba(0,0,0,0.4); opacity: 0; pointer-events: none; }
+        .multi-action-bar.active { opacity: 1; pointer-events: auto; }
+        .multi-btn { color: white; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
+        .multi-btn i { font-size: 20px; }
+        .multi-btn span { font-size: 7px; font-weight: 800; text-transform: uppercase; }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); padding: 20px; }
-        .modal-content { background: var(--arena-claro); border-radius: 30px; width: 100%; max-width: 340px; padding: 30px; text-align: center; transform: translateY(20px); opacity: 0; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .modal-overlay.active .modal-content { transform: translateY(0); opacity: 1; }
-
+        /* NAVEGACIÓN */
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
         nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .nav-icon { color: white; font-size: 22px; opacity: 0.4; cursor: pointer; }
         .nav-icon.active { opacity: 1; }
-        .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
         .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .cam-inner i { font-size: 42px; color: var(--verde-oscuro); }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); }
+        .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 340px; padding: 30px; text-align: center; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     <div class="main-container">
         <header>
             <div class="header-info-box">
-                <i id="clima-icon" class="ph ph-sun" style="font-size: 22px; color: white"></i>
+                <i class="ph ph-sun" style="font-size: 22px; color: white"></i>
                 <span class="info-main-text" id="temp-text">--°</span>
-                <span class="info-sub-text" id="ciudad-text">CARGANDO...</span>
+                <span class="info-sub-text">MONTEVIDEO</span>
             </div>
             <div class="header-center">
                 <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
@@ -95,6 +97,13 @@
         <div class="filter-scroll" id="main-cats"></div>
         <div class="content" id="main-content"></div>
 
+        <div class="multi-action-bar" id="multi-bar">
+            <div id="multi-count" style="background:white; color:var(--verde-oscuro); padding:2px 8px; border-radius:8px; font-size:10px; font-weight:900;">0</div>
+            <div class="multi-btn" onclick="abrirSelectorMover()"><i class="ph ph-arrows-left-right"></i><span>Mover</span></div>
+            <div class="multi-btn" style="color: #ff8a8a;" onclick="confirmarBorrado()"><i class="ph ph-trash"></i><span>Borrar</span></div>
+            <div class="multi-btn" onclick="cancelarSeleccion()"><i class="ph ph-x"></i><span>Cerrar</span></div>
+        </div>
+
         <div class="nav-wrapper">
             <nav>
                 <div class="nav-icon active" id="btn-home" onclick="mostrarInicio()"><i class="ph ph-house-simple"></i></div>
@@ -106,40 +115,23 @@
     </div>
 
     <div id="modal-custom" class="modal-overlay">
-        <div class="modal-content">
-            <div id="custom-title" style="font-size: 14px; font-weight: 900; color: var(--verde-oscuro); text-transform: uppercase; margin-bottom: 12px;">Título</div>
-            <div id="custom-text" style="font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 25px;">Mensaje.</div>
-            <div style="display: flex; gap: 10px;">
-                <button id="btn-modal-cancel" style="flex: 1; padding: 16px; border-radius: 18px; border: none; font-size: 10px; font-weight: 800; text-transform: uppercase; background: var(--arena-boton); color: var(--verde-oscuro);">Cancelar</button>
-                <button id="btn-modal-confirm" style="flex: 1; padding: 16px; border-radius: 18px; border: none; font-size: 10px; font-weight: 800; text-transform: uppercase; background: var(--verde-oscuro); color: white;">Aceptar</button>
-            </div>
-        </div>
+        <div class="modal-content" id="modal-dinamico-content"></div>
     </div>
 
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let accessToken = localStorage.getItem('drive_token'), tokenClient, categoriaActual = '';
-        let intervalSlider;
+        let timerPulsacion, modoSeleccion = false, seleccionados = [];
 
-        // --- GESTIÓN DE DRIVE Y CARPETAS ---
-        async function obtenerOCrearCarpeta(n) {
-            const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { 
-                headers: { 'Authorization': 'Bearer ' + accessToken } 
-            });
-            const d = await r.json();
-            if(d.files && d.files[0]) return d.files[0].id;
+        const categorias = [
+            {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
+            {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
+            {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}, 
+            {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
+        ];
 
-            const res = await fetch('https://www.googleapis.com/drive/v3/files', { 
-                method: 'POST', 
-                headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) 
-            });
-            const f = await res.json();
-            return f.id;
-        }
-
+        // --- LÓGICA DE SELECCIÓN Y CARGA ---
         async function cargarPrendas(todo = false) {
             if(!accessToken) return;
             const content = document.getElementById('main-content');
@@ -156,39 +148,117 @@
                 });
                 const data = await res.json();
                 
-                if (data.files && data.files.length > 0) {
-                    data.files.forEach(f => {
-                        const card = document.createElement('div');
-                        card.className = 'prenda-card';
-                        let partes = f.name.replace('.png','').split('_');
-                        let nombre = partes.slice(2, partes.length - 1).join(' ') || "PRENDA";
-                        
-                        card.innerHTML = `
-                            <img src="${f.thumbnailLink.replace('=s220','=s500')}">
-                            <span>${nombre}</span>
-                        `;
-                        grid.appendChild(card);
-                    });
-                } else {
-                    grid.innerHTML = `<p style="color: white; opacity: 0.5; grid-column: 1/-1; text-align: center; font-size: 10px; margin-top: 40px;">CARPETA VACÍA</p>`;
-                }
+                data.files?.forEach(f => {
+                    const card = document.createElement('div');
+                    card.className = 'prenda-card';
+                    let partes = f.name.replace('.png','').split('_');
+                    let nombre = partes.slice(2, partes.length - 1).join(' ') || "PRENDA";
+                    
+                    card.innerHTML = `<div class="select-badge"><i class="ph ph-check"></i></div><img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombre}</span>`;
+                    
+                    // Eventos para detectar pulsación larga
+                    card.onmousedown = card.ontouchstart = (e) => {
+                        timerPulsacion = setTimeout(() => {
+                            modoSeleccion = true;
+                            toggleSeleccion(f, card);
+                        }, 600);
+                    };
+                    card.onmouseup = card.ontouchend = () => clearTimeout(timerPulsacion);
+                    card.onclick = () => { if(modoSeleccion) toggleSeleccion(f, card); };
+
+                    grid.appendChild(card);
+                });
             } catch(e) { console.error(e); }
         }
 
+        function toggleSeleccion(f, el) {
+            const idx = seleccionados.findIndex(s => s.id === f.id);
+            if(idx > -1) {
+                seleccionados.splice(idx, 1);
+                el.classList.remove('selected');
+            } else {
+                seleccionados.push(f);
+                el.classList.add('selected');
+            }
+            document.getElementById('multi-count').innerText = seleccionados.length;
+            document.getElementById('multi-bar').classList.add('active');
+            if(seleccionados.length === 0) cancelarSeleccion();
+        }
+
+        function cancelarSeleccion() {
+            modoSeleccion = false;
+            seleccionados = [];
+            document.querySelectorAll('.prenda-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('multi-bar').classList.remove('active');
+        }
+
+        // --- ACCIONES DE ARCHIVO ---
+        async function ejecutarMover(nuevaCat) {
+            cerrarModales();
+            const promesas = seleccionados.map(file => {
+                let partes = file.name.split('_');
+                partes[1] = nuevaCat.toUpperCase();
+                return fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: partes.join('_') })
+                });
+            });
+            await Promise.all(promesas);
+            cancelarSeleccion();
+            cargarPrendas(categoriaActual === '');
+        }
+
+        async function ejecutarBorrado() {
+            cerrarModales();
+            const promesas = seleccionados.map(file => fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, {
+                method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken }
+            }));
+            await Promise.all(promesas);
+            cancelarSeleccion();
+            cargarPrendas(categoriaActual === '');
+        }
+
+        // --- UI Y MODALES ESTÉTICOS ---
+        function abrirSelectorMover() {
+            let html = `<div style="font-weight:900; color:var(--verde-oscuro); margin-bottom:20px; text-transform:uppercase;">Mover a...</div><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">`;
+            categorias.forEach(c => {
+                html += `<button onclick="ejecutarMover('${c.n}')" style="background:var(--arena-boton); border:none; padding:12px 5px; border-radius:15px; display:flex; flex-direction:column; align-items:center; gap:5px;">
+                    <i class="ph ${c.i}" style="font-size:20px;"></i><span style="font-size:8px; font-weight:800;">${c.n}</span>
+                </button>`;
+            });
+            html += `</div><button onclick="cerrarModales()" style="margin-top:20px; font-size:10px; font-weight:800; opacity:0.5;">CANCELAR</button>`;
+            mostrarModalDinamico(html);
+        }
+
+        function confirmarBorrado() {
+            const html = `
+                <i class="ph ph-trash" style="font-size:40px; color:var(--rojo-borrar); margin-bottom:15px; display:block;"></i>
+                <div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; margin-bottom:25px;">¿Eliminar ${seleccionados.length} prendas?</div>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton);">NO</button>
+                    <button onclick="ejecutarBorrado()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--rojo-borrar); color:white;">BORRAR</button>
+                </div>`;
+            mostrarModalDinamico(html);
+        }
+
+        function mostrarModalDinamico(html) {
+            document.getElementById('modal-dinamico-content').innerHTML = html;
+            document.getElementById('modal-custom').style.display = 'flex';
+        }
+
+        function cerrarModales() { document.getElementById('modal-custom').style.display = 'none'; }
+
+        // --- FUNCIONES BASE (RENDER Y DRIVE) ---
         function renderCats() {
             const container = document.getElementById('main-cats'); container.innerHTML = '';
-            const categorias = [
-                {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
-                {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
-                {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}, 
-                {n: 'Interior', i: 'ph-heart-straight'}, {n: 'Joyas', i: 'ph-sketch-logo'}, {n: 'Colaboro', i: 'ph-handshake'}
-            ];
             categorias.forEach(cat => {
                 const div = document.createElement('div');
                 div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
                 div.onclick = () => { 
-                    if(!accessToken) { manejarDrive(); return; }
-                    categoriaActual = cat.n.toUpperCase(); renderCats();
+                    if(!accessToken) { tokenClient.requestAccessToken(); return; }
+                    categoriaActual = cat.n.toUpperCase(); 
+                    renderCats(); 
                     document.getElementById('btn-home').classList.remove('active');
                     document.getElementById('btn-archivador').classList.remove('active');
                     cargarPrendas(false); 
@@ -198,79 +268,36 @@
             });
         }
 
-        // --- NAVEGACIÓN Y OTROS ---
         function mostrarInicio() {
-            clearInterval(intervalSlider);
-            categoriaActual = '';
-            document.getElementById('btn-archivador').classList.remove('active');
+            categoriaActual = ''; renderCats();
             document.getElementById('btn-home').classList.add('active');
-            renderCats();
+            document.getElementById('btn-archivador').classList.remove('active');
             document.getElementById('main-content').innerHTML = `
-                <div class="onboarding-container">
-                    <div class="slider-wrapper" id="slider-home">
-                        <div class="step-card"><div class="step-media"><video src="v1.mp4" autoplay loop muted playsinline></video></div><h3>1. Digitaliza</h3><p>Toma una foto. La IA eliminará el fondo.</p></div>
-                        <div class="step-card"><div class="step-media"><video src="v2.mp4" autoplay loop muted playsinline></video></div><h3>2. Clasifica</h3><p>Organiza tu ropa por categorías.</p></div>
-                        <div class="step-card"><div class="step-media"><video src="v3.mp4" autoplay loop muted playsinline></video></div><h3>3. Inspira</h3><p>Arma outfits increíbles.</p></div>
-                    </div>
+                <div style="display:flex; flex-direction:column; align-items:center; padding-top:40px; color:white; text-align:center;">
+                    <i class="ph ph-sparkle" style="font-size:50px; margin-bottom:20px; opacity:0.3;"></i>
+                    <h2 style="font-weight:900; text-transform:uppercase; font-size:14px; letter-spacing:2px;">Bienvenido al Closet AI</h2>
+                    <p style="font-size:10px; opacity:0.7; max-width:200px; line-height:1.6;">Toca una categoría para ver tu ropa o usa la cámara para agregar algo nuevo.</p>
                 </div>`;
-            iniciarAutoSlider();
         }
 
         function cargarTodoElCloset() {
-            categoriaActual = '';
+            categoriaActual = ''; renderCats();
             document.getElementById('btn-home').classList.remove('active');
             document.getElementById('btn-archivador').classList.add('active');
-            renderCats();
             cargarPrendas(true);
         }
 
-        function iniciarAutoSlider() {
-            const slider = document.getElementById('slider-home');
-            let idx = 0;
-            intervalSlider = setInterval(() => {
-                idx = (idx + 1) % 3;
-                if(slider) {
-                    const w = slider.querySelector('.step-card').clientWidth + 20;
-                    slider.scrollTo({ left: w * idx, behavior: 'smooth' });
-                }
-            }, 4000);
-        }
-
-        function manejarDrive() {
-            if (accessToken) {
-                mostrarPopup("Cerrar Sesión", "¿Deseas desvincular tu cuenta?", () => {
-                    accessToken = null; localStorage.removeItem('drive_token');
-                    document.getElementById('auth-btn').classList.remove('vinculado');
-                    document.getElementById('drive-label').innerText = "SIN VINCULAR";
-                });
-            } else { tokenClient.requestAccessToken(); }
-        }
-
-        function mostrarPopup(titulo, texto, onConfirm) {
-            const modal = document.getElementById('modal-custom');
-            document.getElementById('custom-title').innerText = titulo;
-            document.getElementById('custom-text').innerText = texto;
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
-            document.getElementById('btn-modal-confirm').onclick = () => { cerrarModales(); if(onConfirm) onConfirm(); };
-            document.getElementById('btn-modal-cancel').onclick = cerrarModales;
-        }
-
-        function cerrarModales() {
-            const modal = document.getElementById('modal-custom');
-            modal.classList.remove('active');
-            setTimeout(() => modal.style.display = 'none', 300);
-        }
-
-        function enviarAStudio(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    sessionStorage.setItem('imagen_para_procesar', e.target.result);
-                    window.location.href = 'photo_studio.html';
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
+        async function obtenerOCrearCarpeta(n) {
+            const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+            const d = await r.json();
+            if(d.files?.[0]) return d.files[0].id;
+            const res = await fetch('https://www.googleapis.com/drive/v3/files', { 
+                method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' })
+            });
+            const f = await res.json();
+            return f.id;
         }
 
         function startGoogle() {
@@ -278,12 +305,11 @@
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID, scope: SCOPES,
                     callback: (r) => {
-                        if (r.access_token) {
-                            accessToken = r.access_token;
-                            localStorage.setItem('drive_token', accessToken);
-                            document.getElementById('auth-btn').classList.add('vinculado');
-                            document.getElementById('drive-label').innerText = "CONECTADO";
-                        }
+                        accessToken = r.access_token;
+                        localStorage.setItem('drive_token', accessToken);
+                        document.getElementById('auth-btn').classList.add('vinculado');
+                        document.getElementById('drive-label').innerText = "CONECTADO";
+                        location.reload();
                     }
                 });
                 if(accessToken) {
@@ -293,16 +319,18 @@
             });
         }
 
-        async function actualizarClima() {
-            try {
-                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.16&current_weather=true');
-                const data = await res.json();
-                document.getElementById('temp-text').innerText = Math.round(data.current_weather.temperature) + '°';
-                document.getElementById('ciudad-text').innerText = "MONTEVIDEO";
-            } catch(e) {}
+        function enviarAStudio(input) {
+            if (input.files?.[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    sessionStorage.setItem('imagen_para_procesar', e.target.result);
+                    window.location.href = 'photo_studio.html';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         }
 
-        window.onload = () => { mostrarInicio(); startGoogle(); actualizarClima(); };
+        window.onload = () => { mostrarInicio(); startGoogle(); };
     </script>
 </body>
 </html>

@@ -44,12 +44,11 @@
         };
 
         window.enviarAKinu = () => {
-            const nombre = document.getElementById('input-nombre').value.trim();
+            const nombre = document.getElementById('input-nombre').value.trim() || "PRENDA";
             if (!categoriaSeleccionada) return alert("Selecciona una categoría");
-            if (!nombre) return alert("Escribe un nombre");
 
             const btn = document.getElementById('btn-save');
-            btn.innerText = "PROCESANDO...";
+            btn.innerText = "GUARDANDO...";
             btn.disabled = true;
 
             // Enviamos la URL de la imagen (blob de Gradio) al index
@@ -60,15 +59,6 @@
                 imagenUrl: document.getElementById('preview').src
             }, '*');
         };
-
-        // Escuchar si el index reporta un error para reactivar el botón
-        window.addEventListener("message", (e) => {
-            if (e.data.type === 'ERROR_GUARDADO') {
-                const btn = document.getElementById('btn-save');
-                btn.innerText = "Aceptar y Clasificar";
-                btn.disabled = false;
-            }
-        });
 
         window.onload = conectarIA;
     </script>

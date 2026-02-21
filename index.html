@@ -15,7 +15,15 @@
             --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
-        * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; user-select: none; }
+        /* BLOQUEO DE MENÚS CONTEXTUALES Y SELECCIÓN */
+        * { 
+            box-sizing: border-box; 
+            transition: all 0.2s ease; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none; 
+            -webkit-user-select: none;
+            -webkit-touch-callout: none; /* Bloquea el menú de copiar/guardar en iOS */
+        }
 
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
@@ -33,7 +41,9 @@
         .drive-btn img { width: 26px; height: auto; opacity: 0.35; }
         .drive-btn.vinculado img { opacity: 1; }
         
-        .filter-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
+        .filter-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; scroll-behavior: smooth; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; opacity: 0.4; cursor: pointer; }
         .cat-item.active { opacity: 1; transform: scale(1.05); }
         .cat-circle { width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
@@ -47,7 +57,10 @@
         .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 120px; }
         .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; aspect-ratio: 1/1; position: relative; overflow: hidden; border: 2px solid transparent; }
         .prenda-card.selected { border-color: white; background: rgba(255,255,255,0.2); }
-        .prenda-card img { width: 100%; height: 80%; object-fit: contain; pointer-events: none; }
+        
+        /* Evita que la imagen sea "agarrada" por el navegador */
+        .prenda-card img { width: 100%; height: 80%; object-fit: contain; pointer-events: none; -webkit-user-drag: none; }
+        
         .prenda-card span { color: white; font-size: 8px; font-weight: 800; text-transform: uppercase; margin-top: auto; text-align: center; }
         .select-badge { position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; background: white; border-radius: 50%; display: none; align-items: center; justify-content: center; color: var(--verde-oscuro); font-size: 10px; }
         .prenda-card.selected .select-badge { display: flex; }
@@ -70,9 +83,7 @@
         .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 340px; padding: 30px; text-align: center; }
     </style>
 </head>
-<body oncontextmenu="return false;">
-
-    <div class="main-container">
+<body oncontextmenu="return false;"> <div class="main-container">
         <header>
             <div class="header-info-box">
                 <i class="ph ph-sun" style="font-size: 22px; color: white"></i>
@@ -131,56 +142,75 @@
             {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}
         ];
 
-        // --- ESCUCHAR AL PHOTO STUDIO ---
         window.addEventListener("message", async (e) => {
-            if (e.data.type === 'CERRAR_STUDIO') {
-                document.getElementById('modal-studio').style.display = 'none';
-            }
+            if (e.data.type === 'CERRAR_STUDIO') document.getElementById('modal-studio').style.display = 'none';
             if (e.data.type === 'GUARDAR_PRENDA') {
                 try {
-                    if (!accessToken) return alert("Drive no vinculado");
                     await subirADrive(e.data.imagenUrl, e.data.categoria, e.data.nombre);
                     document.getElementById('modal-studio').style.display = 'none';
-                    // Actualizar categoría y cargar
-                    categoriaActual = e.data.categoria.toUpperCase();
-                    renderCats();
-                    document.getElementById('btn-home').classList.remove('active');
-                    cargarPrendas(false);
+                    // Activar categoría y centrarla
+                    seleccionarCategoria(e.data.categoria.toUpperCase());
                 } catch (err) { alert("Error al guardar"); }
             }
         });
 
+        function seleccionarCategoria(catNombre) {
+            categoriaActual = catNombre;
+            renderCats();
+            
+            // Lógica para centrar la categoría en el scroll
+            setTimeout(() => {
+                const activeEl = document.querySelector('.cat-item.active');
+                if (activeEl) {
+                    activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+            }, 100);
+
+            document.getElementById('btn-home').classList.remove('active');
+            cargarPrendas(false);
+        }
+
+        function renderCats() {
+            const container = document.getElementById('main-cats'); container.innerHTML = '';
+            categorias.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
+                div.onclick = () => { 
+                    if(!accessToken) return tokenClient.requestAccessToken();
+                    seleccionarCategoria(cat.n.toUpperCase());
+                };
+                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        // --- FUNCIONES DE DRIVE (Sin cambios) ---
         async function subirADrive(imgUrl, cat, nombre) {
             const response = await fetch(imgUrl);
             const blob = await response.blob();
             const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
             const cleanName = nombre.replace(/[^a-z0-9]/gi, '_').toUpperCase();
             const nombreArchivo = `KINU_${cat.toUpperCase()}_${cleanName}_${Date.now()}.png`;
-
             const metadata = { name: nombreArchivo, parents: [folderId], mimeType: 'image/png' };
             const formData = new FormData();
             formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             formData.append('file', blob);
-
             await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                 method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken }, body: formData
             });
         }
 
-        // --- LÓGICA DE PRENDAS Y SELECCIÓN ---
         async function cargarPrendas(todo = false) {
             if(!accessToken) return;
             const content = document.getElementById('main-content');
             content.innerHTML = `<div class="closet-grid" id="closet-grid"></div>`;
             const grid = document.getElementById('closet-grid');
-            
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET');
                 const filtro = todo ? "KINU_" : `KINU_${categoriaActual}_`;
                 const q = `'${folderId}' in parents and name contains '${filtro}' and trashed = false`;
                 const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
                 const data = await res.json();
-                
                 data.files?.forEach(f => {
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
@@ -213,63 +243,6 @@
             document.getElementById('multi-bar').classList.remove('active');
         }
 
-        // --- ACCIONES DE MULTI-SELECCIÓN ---
-        function abrirSelectorMover() {
-            let html = `<div style="font-weight:900; color:var(--verde-oscuro); margin-bottom:20px; text-transform:uppercase;">Mover a...</div><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">`;
-            categorias.forEach(c => {
-                html += `<button onclick="ejecutarMover('${c.n}')" style="background:var(--arena-boton); border:none; padding:12px 5px; border-radius:15px; display:flex; flex-direction:column; align-items:center; gap:5px;">
-                    <i class="ph ${c.i}" style="font-size:20px;"></i><span style="font-size:8px; font-weight:800;">${c.n}</span>
-                </button>`;
-            });
-            html += `</div><button onclick="cerrarModales()" style="margin-top:20px; font-size:10px; font-weight:800; opacity:0.5;">CANCELAR</button>`;
-            mostrarModalDinamico(html);
-        }
-
-        async function ejecutarMover(nuevaCat) {
-            cerrarModales();
-            const promesas = seleccionados.map(file => {
-                let partes = file.name.split('_'); partes[1] = nuevaCat.toUpperCase();
-                return fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, {
-                    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: partes.join('_') })
-                });
-            });
-            await Promise.all(promesas); cancelarSeleccion(); cargarPrendas(categoriaActual === '');
-        }
-
-        function confirmarBorrado() {
-            const html = `<i class="ph ph-trash" style="font-size:40px; color:var(--rojo-borrar); margin-bottom:15px; display:block;"></i>
-                <div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; margin-bottom:25px;">¿Borrar ${seleccionados.length} prendas?</div>
-                <div style="display:flex; gap:10px;">
-                    <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton);">NO</button>
-                    <button onclick="ejecutarBorrado()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--rojo-borrar); color:white;">BORRAR</button>
-                </div>`;
-            mostrarModalDinamico(html);
-        }
-
-        async function ejecutarBorrado() {
-            cerrarModales();
-            const promesas = seleccionados.map(file => fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken } }));
-            await Promise.all(promesas); cancelarSeleccion(); cargarPrendas(categoriaActual === '');
-        }
-
-        // --- NAVEGACIÓN Y CONFIG ---
-        function renderCats() {
-            const container = document.getElementById('main-cats'); container.innerHTML = '';
-            categorias.forEach(cat => {
-                const div = document.createElement('div');
-                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
-                div.onclick = () => { 
-                    if(!accessToken) return tokenClient.requestAccessToken();
-                    categoriaActual = cat.n.toUpperCase(); renderCats();
-                    document.getElementById('btn-home').classList.remove('active');
-                    cargarPrendas(false); 
-                };
-                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
-                container.appendChild(div);
-            });
-        }
-
         function mostrarInicio() {
             categoriaActual = ''; renderCats();
             document.getElementById('btn-home').classList.add('active');
@@ -294,10 +267,12 @@
             }
         }
 
+        // --- UTILIDADES ---
         function mostrarModalDinamico(html) { document.getElementById('modal-dinamico-content').innerHTML = html; document.getElementById('modal-custom').style.display = 'flex'; }
         function cerrarModales() { document.getElementById('modal-custom').style.display = 'none'; }
         async function obtenerOCrearCarpeta(n) { const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`; const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + accessToken } }); const d = await r.json(); if(d.files?.[0]) return d.files[0].id; const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) }); const f = await res.json(); return f.id; }
         function startGoogle() { gapi.load('client', () => { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: (r) => { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); location.reload(); } }); if(accessToken) { document.getElementById('auth-btn').classList.add('vinculado'); document.getElementById('drive-label').innerText = "CONECTADO"; } }); }
+        
         window.onload = () => { mostrarInicio(); startGoogle(); };
     </script>
 </body>

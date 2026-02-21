@@ -51,7 +51,6 @@
             btn.innerText = "GUARDANDO...";
             btn.disabled = true;
 
-            // Enviamos la URL de la imagen (blob de Gradio) al index
             window.parent.postMessage({
                 type: 'GUARDAR_PRENDA',
                 categoria: categoriaSeleccionada,
@@ -63,8 +62,8 @@
         window.onload = conectarIA;
     </script>
     <style>
-        body { background: #848464; font-family: sans-serif; overflow: hidden; }
-        .cat-btn { background: rgba(255,255,255,0.1); color: white; font-size: 8px; font-weight: 800; padding: 10px 4px; border-radius: 12px; text-transform: uppercase; transition: all 0.2s; }
+        body { background: #848464; font-family: sans-serif; overflow: hidden; margin: 0; }
+        .cat-btn { background: rgba(255,255,255,0.1); color: white; font-size: 9px; font-weight: 800; padding: 12px 4px; border-radius: 12px; text-transform: uppercase; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); }
         .input-kinu { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 15px; padding: 12px; font-size: 12px; width: 100%; outline: none; text-align: center; text-transform: uppercase; }
     </style>
 </head>
@@ -74,12 +73,15 @@
             <div class="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
             <p class="text-[10px] font-bold text-white uppercase tracking-widest">Quitando fondo...</p>
         </div>
+
         <div id="result" class="flex flex-col h-full hidden">
             <div class="flex-1 flex items-center justify-center p-4 min-h-[150px]">
                 <img id="preview" class="max-h-full drop-shadow-2xl object-contain">
             </div>
+
             <div class="bg-[#313628] p-5 rounded-t-[35px] shadow-2xl">
                 <input type="text" id="input-nombre" class="input-kinu mb-4" placeholder="NOMBRE (Ej: Camisa Blanca)">
+                
                 <div class="grid grid-cols-3 gap-2 mb-6">
                     <button class="cat-btn" onclick="seleccionarCat('Superior', this)">Superior</button>
                     <button class="cat-btn" onclick="seleccionarCat('Inferior', this)">Inferior</button>
@@ -91,8 +93,13 @@
                     <button class="cat-btn" onclick="seleccionarCat('Vintage', this)">Vintage</button>
                     <button class="cat-btn" onclick="seleccionarCat('Deporte', this)">Deporte</button>
                 </div>
-                <button id="btn-save" onclick="enviarAKinu()" class="w-full py-4 bg-white text-[#313628] rounded-2xl font-black uppercase text-[11px] mb-2 active:scale-95 transition-all">Aceptar y Clasificar</button>
-                <button onclick="window.parent.postMessage({type:'CERRAR_STUDIO'}, '*')" class="w-full text-[9px] text-white/50 font-bold uppercase py-2">Cancelar</button>
+
+                <button id="btn-save" onclick="enviarAKinu()" class="w-full py-4 bg-white text-[#313628] rounded-2xl font-black uppercase text-[11px] mb-2 active:scale-95 transition-all">
+                    Aceptar y Clasificar
+                </button>
+                <button onclick="window.parent.postMessage({type:'CERRAR_STUDIO'}, '*')" class="w-full text-[9px] text-white/50 font-bold uppercase py-2">
+                    Cancelar
+                </button>
             </div>
         </div>
     </div>

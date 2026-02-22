@@ -77,6 +77,10 @@
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); }
         .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 340px; padding: 30px; text-align: center; }
+
+        /* Estilos Formulario Colaboro */
+        .form-kinu { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .form-kinu input { background: white; border: none; padding: 12px; border-radius: 12px; font-size: 11px; outline: none; font-weight: 600; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -105,7 +109,14 @@
 
         <div class="multi-action-bar" id="multi-bar">
             <div id="multi-count" style="background:white; color:var(--verde-oscuro); padding:2px 8px; border-radius:8px; font-size:10px; font-weight:900;">0</div>
-            <div class="multi-btn" onclick="abrirSelectorMover()"><i class="ph ph-arrows-left-right"></i><span>Mover</span></div>
+            
+            <div id="btn-mover-container" class="multi-btn" onclick="abrirSelectorMover()">
+                <i class="ph ph-arrows-left-right"></i><span>Mover</span>
+            </div>
+            <div id="btn-envio-container" class="multi-btn" onclick="abrirPlanillaEnvio()" style="display:none;">
+                <i class="ph ph-truck"></i><span>Coordinar</span>
+            </div>
+
             <div class="multi-btn" style="color: #ff8a8a;" onclick="confirmarBorrado()"><i class="ph ph-trash"></i><span>Borrar</span></div>
             <div class="multi-btn" onclick="cancelarSeleccion()"><i class="ph ph-x"></i><span>Cerrar</span></div>
         </div>
@@ -204,7 +215,18 @@
             const idx = seleccionados.findIndex(s => s.id === f.id);
             if(idx > -1) { seleccionados.splice(idx, 1); el.classList.remove('selected'); } 
             else { seleccionados.push(f); el.classList.add('selected'); }
+            
             document.getElementById('multi-count').innerText = seleccionados.length;
+            
+            // Lógica para mostrar botón Coordinar o Mover
+            if (categoriaActual === 'COLABORO') {
+                document.getElementById('btn-mover-container').style.display = 'none';
+                document.getElementById('btn-envio-container').style.display = 'flex';
+            } else {
+                document.getElementById('btn-mover-container').style.display = 'flex';
+                document.getElementById('btn-envio-container').style.display = 'none';
+            }
+
             if(seleccionados.length > 0) document.getElementById('multi-bar').classList.add('active');
             else cancelarSeleccion();
         }
@@ -213,6 +235,32 @@
             modoSeleccion = false; seleccionados = [];
             document.querySelectorAll('.prenda-card').forEach(c => c.classList.remove('selected'));
             document.getElementById('multi-bar').classList.remove('active');
+        }
+
+        // --- PLANILLA COLABORO ---
+        function abrirPlanillaEnvio() {
+            const html = `
+                <i class="ph ph-truck" style="font-size:35px; color:var(--verde-oscuro); margin-bottom:10px; display:block;"></i>
+                <div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:12px;">Datos de Envío</div>
+                <p style="font-size:9px; opacity:0.6; margin-bottom:15px;">Completa para coordinar la colecta de ${seleccionados.length} prendas.</p>
+                <div class="form-kinu">
+                    <input type="text" id="form-nombre" placeholder="NOMBRE COMPLETO">
+                    <input type="text" id="form-direccion" placeholder="DIRECCIÓN DE RECOLECCIÓN">
+                    <input type="tel" id="form-tel" placeholder="TELÉFONO DE CONTACTO">
+                    <input type="text" id="form-horario" placeholder="HORARIO PREFERIDO">
+                </div>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro); font-size:10px;">CANCELAR</button>
+                    <button onclick="enviarPlanilla()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; font-size:10px;">ENVIAR</button>
+                </div>`;
+            mostrarModalDinamico(html);
+        }
+
+        function enviarPlanilla() {
+            // Aquí iría la lógica para enviar a un Google Sheet o API
+            alert("Solicitud de envío recibida. KINU se contactará contigo.");
+            cerrarModales();
+            cancelarSeleccion();
         }
 
         async function ejecutarBorrado() {

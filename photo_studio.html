@@ -46,11 +46,9 @@
         window.enviarAKinu = () => {
             const nombre = document.getElementById('input-nombre').value.trim() || "PRENDA";
             if (!categoriaSeleccionada) return alert("Selecciona una categoría");
-
             const btn = document.getElementById('btn-save');
             btn.innerText = "GUARDANDO...";
             btn.disabled = true;
-
             window.parent.postMessage({
                 type: 'GUARDAR_PRENDA',
                 categoria: categoriaSeleccionada,
@@ -80,7 +78,7 @@
             </div>
 
             <div class="bg-[#313628] p-5 rounded-t-[35px] shadow-2xl">
-                <input type="text" id="input-nombre" class="input-kinu mb-4" placeholder="NOMBRE (Ej: Camisa Blanca)">
+                <input type="text" id="input-nombre" class="input-kinu mb-4" placeholder="NOMBRE PRENDA">
                 
                 <div class="grid grid-cols-3 gap-2 mb-6">
                     <button class="cat-btn" onclick="seleccionarCat('Superior', this)">Superior</button>
@@ -88,13 +86,17 @@
                     <button class="cat-btn" onclick="seleccionarCat('Abrigos', this)">Abrigos</button>
                     <button class="cat-btn" onclick="seleccionarCat('Calzado', this)">Calzado</button>
                     <button class="cat-btn" onclick="seleccionarCat('Vestidos', this)">Vestidos</button>
+                    <button class="cat-btn" onclick="seleccionarCat('Trajes', this)">Trajes</button>
+                    <button class="cat-btn" onclick="seleccionarCat('Bañadores', this)">Bañadores</button>
                     <button class="cat-btn" onclick="seleccionarCat('Bolsos', this)">Bolsos</button>
                     <button class="cat-btn" onclick="seleccionarCat('Accesorios', this)">Accesorios</button>
                     <button class="cat-btn" onclick="seleccionarCat('Vintage', this)">Vintage</button>
                     <button class="cat-btn" onclick="seleccionarCat('Deporte', this)">Deporte</button>
+                    <button class="cat-btn" onclick="seleccionarCat('Joyas', this)">Joyas</button>
+                    <button class="cat-btn" onclick="seleccionarCat('Colaboro', this)">Colaboro</button>
                 </div>
 
-                <button id="btn-save" onclick="enviarAKinu()" class="w-full py-4 bg-white text-[#313628] rounded-2xl font-black uppercase text-[11px] mb-2 active:scale-95 transition-all">
+                <button id="btn-save" onclick="enviarAKinu()" class="w-full py-4 bg-white text-[#313628] rounded-2xl font-black uppercase text-[11px] mb-2">
                     Aceptar y Clasificar
                 </button>
                 <button onclick="window.parent.postMessage({type:'CERRAR_STUDIO'}, '*')" class="w-full text-[9px] text-white/50 font-bold uppercase py-2">

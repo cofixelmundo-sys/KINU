@@ -15,7 +15,6 @@
             --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
-        /* Bloqueo de acciones nativas del navegador al mantener presionado */
         * { 
             box-sizing: border-box; 
             transition: all 0.2s ease; 
@@ -85,7 +84,7 @@
     <div class="main-container">
         <header>
             <div class="header-info-box">
-                <i class="ph ph-sun" style="font-size: 22px; color: white"></i>
+                <i id="clima-icon" class="ph ph-sun" style="font-size: 22px; color: white"></i>
                 <span class="info-main-text" id="temp-text">--°</span>
                 <span class="info-sub-text">MONTEVIDEO</span>
             </div>
@@ -135,76 +134,78 @@
         let accessToken = localStorage.getItem('drive_token'), tokenClient, categoriaActual = '';
         let timerPulsacion, modoSeleccion = false, seleccionados = [];
 
+        // CATEGORÍAS RECUPERADAS (SIN INTERIOR NI HOGAR/MASCOTAS)
         const categorias = [
-            {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
-            {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Bolsos', i: 'ph-handbag'},
-            {n: 'Accesorios', i: 'ph-watch'}, {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}
+            {n: 'Superior', i: 'ph-t-shirt'}, 
+            {n: 'Inferior', i: 'ph-pants'}, 
+            {n: 'Abrigos', i: 'ph-hoodie'}, 
+            {n: 'Calzado', i: 'ph-sneaker'}, 
+            {n: 'Vestidos', i: 'ph-dress'}, 
+            {n: 'Trajes', i: 'ph-briefcase'},
+            {n: 'Bañadores', i: 'ph-waves'},
+            {n: 'Bolsos', i: 'ph-handbag'},
+            {n: 'Accesorios', i: 'ph-watch'}, 
+            {n: 'Vintage', i: 'ph-hourglass-high'}, 
+            {n: 'Deporte', i: 'ph-barbell'},
+            {n: 'Joyas', i: 'ph-sketch-logo'}, 
+            {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
-        // ESCUCHA DEL STUDIO
         window.addEventListener("message", async (e) => {
             if (e.data.type === 'CERRAR_STUDIO') {
                 document.getElementById('modal-studio').style.display = 'none';
+                document.getElementById('iframe-studio').src = 'about:blank';
             }
             if (e.data.type === 'GUARDAR_PRENDA') {
                 try {
                     const token = localStorage.getItem('drive_token');
-                    if (!token) return alert("Drive no vinculado");
+                    if (!token) return;
                     await subirADrive(e.data.imagenUrl, e.data.categoria, e.data.nombre, token);
                     document.getElementById('modal-studio').style.display = 'none';
+                    document.getElementById('iframe-studio').src = 'about:blank';
                     seleccionarCategoria(e.data.categoria.toUpperCase());
-                } catch (err) { alert("Error al guardar"); }
+                } catch (err) { console.error(err); }
             }
         });
 
-        // SUBIDA A DRIVE
         async function subirADrive(imgUrl, cat, nombre, token) {
             const response = await fetch(imgUrl);
             const blob = await response.blob();
             const folderId = await obtenerOCrearCarpeta('KINU_CLOSET', token);
             const cleanName = nombre.replace(/[^a-z0-9]/gi, '_').toUpperCase();
             const nombreArchivo = `KINU_${cat.toUpperCase()}_${cleanName}_${Date.now()}.png`;
-
             const metadata = { name: nombreArchivo, parents: [folderId], mimeType: 'image/png' };
             const formData = new FormData();
             formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             formData.append('file', blob);
-
             await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                 method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData
             });
         }
 
-        // CARGA DE PRENDAS
         async function cargarPrendas(todo = false) {
             const token = localStorage.getItem('drive_token');
             if(!token) return;
             const grid = document.getElementById('main-content');
             grid.innerHTML = `<div class="closet-grid" id="closet-grid"></div>`;
             const container = document.getElementById('closet-grid');
-            
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET', token);
                 const filtro = todo ? "KINU_" : `KINU_${categoriaActual}_`;
                 const q = `'${folderId}' in parents and name contains '${filtro}' and trashed = false`;
                 const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, { headers: { 'Authorization': 'Bearer ' + token } });
                 const data = await res.json();
-                
                 if(!data.files || data.files.length === 0) {
-                    container.innerHTML = `<p style="color:white; opacity:0.4; font-size:10px; grid-column:1/-1; text-align:center; margin-top:50px;">ESTÁ VACÍO</p>`;
+                    container.innerHTML = `<p style="color:white; opacity:0.4; font-size:10px; grid-column:1/-1; text-align:center; margin-top:50px;">VACÍO</p>`;
                     return;
                 }
-
                 data.files.forEach(f => {
                     const card = document.createElement('div');
                     card.className = 'prenda-card';
                     let partes = f.name.replace('.png','').split('_');
                     let nombre = partes.slice(2, partes.length - 1).join(' ') || "PRENDA";
                     card.innerHTML = `<div class="select-badge"><i class="ph ph-check"></i></div><img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombre}</span>`;
-                    
-                    card.onmousedown = card.ontouchstart = (e) => {
-                        timerPulsacion = setTimeout(() => { modoSeleccion = true; toggleSeleccion(f, card); }, 600);
-                    };
+                    card.onmousedown = card.ontouchstart = () => { timerPulsacion = setTimeout(() => { modoSeleccion = true; toggleSeleccion(f, card); }, 600); };
                     card.onmouseup = card.ontouchend = () => clearTimeout(timerPulsacion);
                     card.onclick = () => { if(modoSeleccion) toggleSeleccion(f, card); };
                     container.appendChild(card);
@@ -212,7 +213,6 @@
             } catch(e) {}
         }
 
-        // NAVEGACIÓN Y SELECCIÓN
         function seleccionarCategoria(catNombre) {
             categoriaActual = catNombre;
             renderCats();
@@ -250,7 +250,6 @@
             document.getElementById('multi-bar').classList.remove('active');
         }
 
-        // ACCIONES MULTI
         async function ejecutarBorrado() {
             cerrarModales();
             const token = localStorage.getItem('drive_token');
@@ -276,7 +275,6 @@
             seleccionarCategoria(nuevaCat.toUpperCase());
         }
 
-        // UI HELPERS
         function abrirSelectorMover() {
             let html = `<div style="font-weight:900; color:var(--verde-oscuro); margin-bottom:20px; text-transform:uppercase; font-size:12px;">Mover a...</div><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">`;
             categorias.forEach(c => {
@@ -293,13 +291,7 @@
 
         function mostrarModalDinamico(html) { document.getElementById('modal-dinamico-content').innerHTML = html; document.getElementById('modal-custom').style.display = 'flex'; }
         function cerrarModales() { document.getElementById('modal-custom').style.display = 'none'; }
-        
-        function mostrarInicio() {
-            categoriaActual = ''; renderCats();
-            document.getElementById('btn-home').classList.add('active');
-            document.getElementById('main-content').innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; padding-top:40px; color:white; text-align:center;"><i class="ph ph-sparkle" style="font-size:50px; opacity:0.3; margin-bottom:20px;"></i><h2 style="font-weight:900; font-size:14px;">KINU SMART CLOSET</h2><p style="font-size:10px; opacity:0.7;">Escanea tu ropa para empezar.</p></div>`;
-        }
-
+        function mostrarInicio() { categoriaActual = ''; renderCats(); document.getElementById('btn-home').classList.add('active'); document.getElementById('main-content').innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; padding-top:40px; color:white; text-align:center;"><i class="ph ph-sparkle" style="font-size:50px; opacity:0.3; margin-bottom:20px;"></i><h2 style="font-weight:900; font-size:14px;">KINU SMART CLOSET</h2><p style="font-size:10px; opacity:0.7;">Escanea tu ropa para empezar.</p></div>`; }
         function cargarTodoElCloset() { categoriaActual = ''; renderCats(); document.getElementById('btn-home').classList.remove('active'); cargarPrendas(true); }
 
         function enviarAStudio(input) {
@@ -320,33 +312,19 @@
             const d = await r.json();
             if(d.files?.[0]) return d.files[0].id;
             const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) });
-            const f = await res.json();
-            return f.id;
+            const f = await res.json(); return f.id;
         }
 
         function manejarDrive() { tokenClient.requestAccessToken(); }
-
         function startGoogle() {
             gapi.load('client', () => {
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID, scope: SCOPES,
-                    callback: (r) => {
-                        if (r.access_token) {
-                            accessToken = r.access_token;
-                            localStorage.setItem('drive_token', accessToken);
-                            document.getElementById('auth-btn').classList.add('vinculado');
-                            document.getElementById('drive-label').innerText = "CONECTADO";
-                            location.reload();
-                        }
-                    }
+                    callback: (r) => { if (r.access_token) { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); location.reload(); } }
                 });
-                if(accessToken) {
-                    document.getElementById('auth-btn').classList.add('vinculado');
-                    document.getElementById('drive-label').innerText = "CONECTADO";
-                }
+                if(accessToken) { document.getElementById('auth-btn').classList.add('vinculado'); document.getElementById('drive-label').innerText = "CONECTADO"; }
             });
         }
-
         window.onload = () => { mostrarInicio(); startGoogle(); };
     </script>
 </body>

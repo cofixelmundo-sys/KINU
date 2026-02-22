@@ -61,13 +61,10 @@
         .select-badge { position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; background: white; border-radius: 50%; display: none; align-items: center; justify-content: center; color: var(--verde-oscuro); font-size: 10px; }
         .prenda-card.selected .select-badge { display: flex; }
 
-        /* BARRA FIJA */
         .multi-action-bar { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); background: var(--verde-oscuro); padding: 10px 20px; border-radius: 30px; display: flex; gap: 15px; align-items: center; z-index: 1000; box-shadow: 0 8px 25px rgba(0,0,0,0.4); white-space: nowrap; }
         .multi-btn { color: white; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
         .multi-btn i { font-size: 20px; }
         .multi-btn span { font-size: 7px; font-weight: 800; text-transform: uppercase; }
-        
-        /* ESTADO INACTIVO */
         .multi-btn.disabled { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
 
         .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
@@ -80,7 +77,6 @@
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); }
         .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 340px; padding: 30px; text-align: center; }
-
         .form-kinu { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .form-kinu input { background: white; border: none; padding: 12px; border-radius: 12px; font-size: 11px; outline: none; font-weight: 600; }
     </style>
@@ -111,22 +107,10 @@
 
         <div class="multi-action-bar" id="multi-bar">
             <div id="multi-count" style="background:white; color:var(--verde-oscuro); padding:2px 8px; border-radius:8px; font-size:10px; font-weight:900;">0</div>
-            
-            <div id="btn-mover-container" class="multi-btn disabled" onclick="abrirSelectorMover()">
-                <i class="ph ph-arrows-left-right"></i><span>Mover</span>
-            </div>
-            
-            <div id="btn-envio-container" class="multi-btn disabled" onclick="abrirPlanillaEnvio()">
-                <i class="ph ph-truck"></i><span>Coordina Envío</span>
-            </div>
-
-            <div id="btn-borrar-container" class="multi-btn disabled" style="color: #ff8a8a;" onclick="confirmarBorrado()">
-                <i class="ph ph-trash"></i><span>Borrar</span>
-            </div>
-            
-            <div id="btn-cerrar-container" class="multi-btn disabled" onclick="cancelarSeleccion()">
-                <i class="ph ph-x"></i><span>Cerrar</span>
-            </div>
+            <div id="btn-mover-container" class="multi-btn disabled" onclick="abrirSelectorMover()"><i class="ph ph-arrows-left-right"></i><span>Mover</span></div>
+            <div id="btn-envio-container" class="multi-btn disabled" onclick="abrirPlanillaEnvio()"><i class="ph ph-truck"></i><span>Coordina Envío</span></div>
+            <div id="btn-borrar-container" class="multi-btn disabled" style="color: #ff8a8a;" onclick="confirmarBorrado()"><i class="ph ph-trash"></i><span>Borrar</span></div>
+            <div id="btn-cerrar-container" class="multi-btn disabled" onclick="cancelarSeleccion()"><i class="ph ph-x"></i><span>Cerrar</span></div>
         </div>
 
         <div class="nav-wrapper">
@@ -139,13 +123,8 @@
         </div>
     </div>
 
-    <div id="modal-studio" class="modal-overlay" style="padding:0;">
-        <iframe id="iframe-studio" src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe>
-    </div>
-
-    <div id="modal-custom" class="modal-overlay">
-        <div class="modal-content" id="modal-dinamico-content"></div>
-    </div>
+    <div id="modal-studio" class="modal-overlay" style="padding:0;"><iframe id="iframe-studio" src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe></div>
+    <div id="modal-custom" class="modal-overlay"><div class="modal-content" id="modal-dinamico-content"></div></div>
 
     <script>
         const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
@@ -161,36 +140,50 @@
             {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
+        // --- DRIVE CORE ---
+        function startGoogle() {
+            gapi.load('client', () => {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID, scope: SCOPES,
+                    callback: (r) => { if (r.access_token) { localStorage.setItem('drive_token', r.access_token); location.reload(); } }
+                });
+                if(accessToken) {
+                    document.getElementById('auth-btn').classList.add('vinculado');
+                    document.getElementById('drive-label').innerText = "CONECTADO";
+                }
+            });
+        }
+
+        async function obtenerOCrearCarpeta(n, token) {
+            const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + token } });
+            const d = await r.json();
+            if(d.files?.[0]) return d.files[0].id;
+            const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) });
+            const f = await res.json(); return f.id;
+        }
+
+        // --- SELECCIÓN Y BARRA ---
         function toggleSeleccion(f, el) {
             const idx = seleccionados.findIndex(s => s.id === f.id);
             if(idx > -1) { seleccionados.splice(idx, 1); el.classList.remove('selected'); } 
             else { seleccionados.push(f); el.classList.add('selected'); }
-            
             actualizarInterfazBarra();
         }
 
         function actualizarInterfazBarra() {
             const count = seleccionados.length;
             document.getElementById('multi-count').innerText = count;
-
             const btnMover = document.getElementById('btn-mover-container');
             const btnEnvio = document.getElementById('btn-envio-container');
             const btnBorrar = document.getElementById('btn-borrar-container');
             const btnCerrar = document.getElementById('btn-cerrar-container');
 
             if(count > 0) {
-                btnMover.classList.remove('disabled');
-                btnBorrar.classList.remove('disabled');
-                btnCerrar.classList.remove('disabled');
-                
-                // Solo activamos Coordina Envío si estamos en COLABORO
-                if (categoriaActual === 'COLABORO') {
-                    btnEnvio.classList.remove('disabled');
-                } else {
-                    btnEnvio.classList.add('disabled');
-                }
+                [btnMover, btnBorrar, btnCerrar].forEach(b => b.classList.remove('disabled'));
+                if (categoriaActual === 'COLABORO') btnEnvio.classList.remove('disabled');
+                else btnEnvio.classList.add('disabled');
             } else {
-                // Si no hay nada seleccionado, todo inactivo excepto quizás el contador en 0
                 [btnMover, btnEnvio, btnBorrar, btnCerrar].forEach(b => b.classList.add('disabled'));
             }
         }
@@ -201,31 +194,7 @@
             actualizarInterfazBarra();
         }
 
-        function seleccionarCategoria(catNombre) { 
-            categoriaActual = catNombre; 
-            renderCats(); 
-            cancelarSeleccion(); // Al cambiar de categoría limpiamos selección
-            setTimeout(() => {
-                const activeEl = document.querySelector('.cat-item.active');
-                if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-            }, 100);
-            document.getElementById('btn-home').classList.remove('active'); 
-            cargarPrendas(false); 
-        }
-
-        function renderCats() {
-            const container = document.getElementById('main-cats'); container.innerHTML = '';
-            categorias.forEach(cat => {
-                const div = document.createElement('div');
-                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
-                div.onclick = () => { if(!accessToken) { advertenciaVinculacion(); return; } seleccionarCategoria(cat.n.toUpperCase()); };
-                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
-                container.appendChild(div);
-            });
-        }
-
-        // --- Resto de funciones del archivo original (abrirPlanillaEnvio, cargarPrendas, etc.) ---
-        
+        // --- NAVEGACIÓN Y CARGA ---
         async function cargarPrendas(todo = false) {
             if(!accessToken) return;
             const grid = document.getElementById('main-content');
@@ -253,42 +222,75 @@
             } catch(e) {}
         }
 
+        function seleccionarCategoria(catNombre) { 
+            categoriaActual = catNombre; 
+            renderCats(); 
+            cancelarSeleccion();
+            setTimeout(() => {
+                const activeEl = document.querySelector('.cat-item.active');
+                if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }, 100);
+            document.getElementById('btn-home').classList.remove('active'); 
+            cargarPrendas(false); 
+        }
+
+        function renderCats() {
+            const container = document.getElementById('main-cats'); container.innerHTML = '';
+            categorias.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
+                div.onclick = () => { if(!accessToken) { advertenciaVinculacion(); return; } seleccionarCategoria(cat.n.toUpperCase()); };
+                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        // --- MODALES Y ACCIONES ---
         function abrirPlanillaEnvio() {
-            const html = `
-                <i class="ph ph-truck" style="font-size:35px; color:var(--verde-oscuro); margin-bottom:10px; display:block;"></i>
-                <div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:12px;">Datos de Envío</div>
-                <p style="font-size:9px; opacity:0.6; margin-bottom:15px;">Completa para coordinar la colecta de ${seleccionados.length} prendas.</p>
-                <div class="form-kinu">
-                    <input type="text" id="form-nombre" placeholder="NOMBRE COMPLETO">
-                    <input type="text" id="form-direccion" placeholder="DIRECCIÓN DE RECOLECCIÓN">
-                    <input type="tel" id="form-tel" placeholder="TELÉFONO DE CONTACTO">
-                    <input type="text" id="form-horario" placeholder="HORARIO PREFERIDO">
-                </div>
-                <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro); font-size:10px;">CANCELAR</button>
-                    <button onclick="enviarPlanilla()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; font-size:10px;">ENVIAR</button>
-                </div>`;
+            const html = `<i class="ph ph-truck" style="font-size:35px; color:var(--verde-oscuro); margin-bottom:10px; display:block;"></i><div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:12px;">Datos de Envío</div><p style="font-size:9px; opacity:0.6; margin-bottom:15px;">Completa para coordinar la colecta de ${seleccionados.length} prendas.</p><div class="form-kinu"><input type="text" id="form-nombre" placeholder="NOMBRE COMPLETO"><input type="text" id="form-direccion" placeholder="DIRECCIÓN DE RECOLECCIÓN"><input type="tel" id="form-tel" placeholder="TELÉFONO DE CONTACTO"><input type="text" id="form-horario" placeholder="HORARIO PREFERIDO"></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro); font-size:10px;">CANCELAR</button><button onclick="alert('Solicitud enviada')" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; font-size:10px;">ENVIAR</button></div>`;
             mostrarModalDinamico(html);
         }
 
-        function mostrarModalDinamico(html) { document.getElementById('modal-dinamico-content').innerHTML = html; document.getElementById('modal-custom').style.display = 'flex'; }
-        function cerrarModales() { document.getElementById('modal-custom').style.display = 'none'; }
+        function abrirSelectorMover() {
+            let html = `<div style="font-weight:900; color:var(--verde-oscuro); margin-bottom:20px; text-transform:uppercase; font-size:12px;">Mover a...</div><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">`;
+            categorias.forEach(c => { html += `<button onclick="ejecutarMover('${c.n}')" style="background:var(--arena-boton); border:none; padding:12px 5px; border-radius:15px; display:flex; flex-direction:column; align-items:center; gap:5px;"><i class="ph ${c.i}" style="font-size:20px; color:var(--verde-oscuro);"></i><span style="font-size:8px; font-weight:800; color:var(--verde-oscuro);">${c.n}</span></button>`; });
+            html += `</div>`; mostrarModalDinamico(html);
+        }
+
+        async function ejecutarMover(nuevaCat) {
+            cerrarModales(); const token = accessToken;
+            const promesas = seleccionados.map(file => {
+                let partes = file.name.split('_'); partes[1] = nuevaCat.toUpperCase();
+                return fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: partes.join('_') }) });
+            });
+            await Promise.all(promesas); seleccionarCategoria(nuevaCat.toUpperCase());
+        }
+
+        function confirmarBorrado() {
+            const html = `<i class="ph ph-trash" style="font-size:40px; color:var(--rojo-borrar); margin-bottom:15px; display:block;"></i><div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; margin-bottom:25px;">¿Borrar ${seleccionados.length} prendas?</div><div style="display:flex; gap:10px;"><button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro);">NO</button><button onclick="ejecutarBorrado()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--rojo-borrar); color:white;">BORRAR</button></div>`;
+            mostrarModalDinamico(html);
+        }
+
+        async function ejecutarBorrado() {
+            cerrarModales(); const token = accessToken;
+            const promesas = seleccionados.map(file => fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }));
+            await Promise.all(promesas); cargarPrendas(categoriaActual === ''); cancelarSeleccion();
+        }
+
+        function toggleDrive() {
+            if (accessToken) {
+                const html = `<i class="ph ph-warning-circle" style="font-size:40px; color:var(--verde-oscuro); margin-bottom:15px; display:block;"></i><div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; margin-bottom:20px;">¿Desvincular Drive?</div><div style="display:flex; gap:10px;"><button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro);">NO</button><button onclick="desvincularDrive()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white;">SÍ</button></div>`;
+                mostrarModalDinamico(html);
+            } else { tokenClient.requestAccessToken(); }
+        }
+        function desvincularDrive() { localStorage.removeItem('drive_token'); location.reload(); }
+        function advertenciaVinculacion() { const html = `<i class="ph ph-cloud-slash" style="font-size:45px; color:var(--verde-oscuro); margin-bottom:15px; display:block;"></i><div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:14px;">Acceso restringido</div><p style="font-size:10px; color:var(--verde-oscuro); opacity:0.7; margin: 10px 0 20px;">VINCULA TU DRIVE PARA VER TU CLOSET.</p><button onclick="cerrarModales()" style="width:100%; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; text-transform:uppercase; font-size:11px;">ENTENDIDO</button>`; mostrarModalDinamico(html); }
         function mostrarInicio() { categoriaActual = ''; renderCats(); document.getElementById('btn-home').classList.add('active'); document.getElementById('main-content').innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; padding-top:40px; color:white; text-align:center;"><i class="ph ph-sparkle" style="font-size:50px; opacity:0.3; margin-bottom:20px;"></i><h2 style="font-weight:900; font-size:14px;">KINU SMART CLOSET</h2></div>`; cancelarSeleccion(); }
         function cargarTodoElCloset() { if(!accessToken) return advertenciaVinculacion(); categoriaActual = ''; renderCats(); document.getElementById('btn-home').classList.remove('active'); cargarPrendas(true); cancelarSeleccion(); }
+        function mostrarModalDinamico(html) { document.getElementById('modal-dinamico-content').innerHTML = html; document.getElementById('modal-custom').style.display = 'flex'; }
+        function cerrarModales() { document.getElementById('modal-custom').style.display = 'none'; }
+        function enviarAStudio(input) { if(!accessToken) return advertenciaVinculacion(); if (input.files?.[0]) { const reader = new FileReader(); reader.onload = (e) => { sessionStorage.setItem('imagen_para_procesar', e.target.result); document.getElementById('modal-studio').style.display = 'flex'; document.getElementById('iframe-studio').src = 'photo_studio.html'; }; reader.readAsDataURL(input.files[0]); } }
 
-        // Inicialización de Google y Window Load...
-        function startGoogle() {
-            gapi.load('client', () => {
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID, scope: SCOPES,
-                    callback: (r) => { if (r.access_token) { localStorage.setItem('drive_token', r.access_token); location.reload(); } }
-                });
-                if(accessToken) {
-                    document.getElementById('auth-btn').classList.add('vinculado');
-                    document.getElementById('drive-label').innerText = "CONECTADO";
-                }
-            });
-        }
         window.onload = () => { startGoogle(); mostrarInicio(); };
     </script>
 </body>

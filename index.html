@@ -267,27 +267,28 @@
         function confirmarEnvioColaboro() {
             const nombre = document.getElementById('form-nombre').value;
             const direccion = document.getElementById('form-direccion').value;
-            const tel = document.getElementById('form-tel').value;
+            const telUser = document.getElementById('form-tel').value; // Número ingresado por el usuario
             const horario = document.getElementById('form-horario').value;
 
-            // Construir mensaje para WhatsApp
-            const numWpp = "59895315510"; // Pon aquí tu número (ej: 59899123456)
+            // Número de destino fijo de KINU
+            const numKinu = "59892199199"; 
+            
             let msg = `*NUEVA SOLICITUD DE RECOLECCIÓN KINU*\n\n`;
             msg += `*Nombre:* ${nombre}\n`;
             msg += `*Dirección:* ${direccion}\n`;
-            msg += `*Teléfono:* ${tel}\n`;
+            msg += `*Teléfono:* ${telUser}\n`;
             msg += `*Horario:* ${horario}\n`;
             msg += `*Cantidad de prendas:* ${seleccionados.length}\n\n`;
             msg += `_Enviado desde mi Smart Closet_`;
 
-            const url = `https://api.whatsapp.com/send?phone=${numWpp}&text=${encodeURIComponent(msg)}`;
+            const url = `https://api.whatsapp.com/send?phone=${numKinu}&text=${encodeURIComponent(msg)}`;
             window.open(url, '_blank');
 
             const htmlExito = `
                 <i class="ph ph-check-circle" style="font-size:45px; color:var(--verde-oscuro); margin-bottom:15px; display:block;"></i>
                 <div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:14px;">¡Solicitud Enviada!</div>
                 <p style="font-size:10px; color:var(--verde-oscuro); opacity:0.7; margin: 10px 0 25px;">
-                    HEMOS ABIERTO EL CHAT DE WHATSAPP.<br>KINU SE CONTACTARÁ CONTIGO A LA BREVEDAD.
+                    HEMOS ABIERTO EL CHAT CON KINU.<br>TE CONTACTAREMOS A TU NÚMERO (${telUser}) A LA BREVEDAD.
                 </p>
                 <button onclick="cerrarModales(); cancelarSeleccion();" style="width:100%; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; text-transform:uppercase; font-size:11px;">ENTENDIDO</button>
             `;

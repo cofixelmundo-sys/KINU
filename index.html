@@ -247,8 +247,33 @@
 
         // --- MODALES Y ACCIONES ---
         function abrirPlanillaEnvio() {
-            const html = `<i class="ph ph-truck" style="font-size:35px; color:var(--verde-oscuro); margin-bottom:10px; display:block;"></i><div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:12px;">Datos de Envío</div><p style="font-size:9px; opacity:0.6; margin-bottom:15px;">Completa para coordinar la colecta de ${seleccionados.length} prendas.</p><div class="form-kinu"><input type="text" id="form-nombre" placeholder="NOMBRE COMPLETO"><input type="text" id="form-direccion" placeholder="DIRECCIÓN DE RECOLECCIÓN"><input type="tel" id="form-tel" placeholder="TELÉFONO DE CONTACTO"><input type="text" id="form-horario" placeholder="HORARIO PREFERIDO"></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro); font-size:10px;">CANCELAR</button><button onclick="alert('Solicitud enviada')" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; font-size:10px;">ENVIAR</button></div>`;
+            const html = `
+                <i class="ph ph-truck" style="font-size:35px; color:var(--verde-oscuro); margin-bottom:10px; display:block;"></i>
+                <div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:12px;">Datos de Envío</div>
+                <p style="font-size:9px; opacity:0.6; margin-bottom:15px;">Completa para coordinar la colecta de ${seleccionados.length} prendas.</p>
+                <div class="form-kinu">
+                    <input type="text" id="form-nombre" placeholder="NOMBRE COMPLETO">
+                    <input type="text" id="form-direccion" placeholder="DIRECCIÓN DE RECOLECCIÓN">
+                    <input type="tel" id="form-tel" placeholder="TELÉFONO DE CONTACTO">
+                    <input type="text" id="form-horario" placeholder="HORARIO PREFERIDO">
+                </div>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro); font-size:10px;">CANCELAR</button>
+                    <button onclick="confirmarEnvioColaboro()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; font-size:10px;">ENVIAR</button>
+                </div>`;
             mostrarModalDinamico(html);
+        }
+
+        function confirmarEnvioColaboro() {
+            const htmlExito = `
+                <i class="ph ph-check-circle" style="font-size:45px; color:var(--verde-oscuro); margin-bottom:15px; display:block;"></i>
+                <div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:14px;">¡Solicitud Enviada!</div>
+                <p style="font-size:10px; color:var(--verde-oscuro); opacity:0.7; margin: 10px 0 25px;">
+                    HEMOS RECIBIDO TU PEDIDO.<br>KINU SE CONTACTARÁ CONTIGO A LA BREVEDAD.
+                </p>
+                <button onclick="cerrarModales(); cancelarSeleccion();" style="width:100%; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; text-transform:uppercase; font-size:11px;">ENTENDIDO</button>
+            `;
+            mostrarModalDinamico(htmlExito);
         }
 
         function abrirSelectorMover() {

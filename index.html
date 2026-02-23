@@ -79,6 +79,7 @@
         .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 340px; padding: 30px; text-align: center; }
         .form-kinu { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .form-kinu input { background: white; border: none; padding: 12px; border-radius: 12px; font-size: 11px; outline: none; font-weight: 600; }
+        .form-kinu input.error { border: 1px solid var(--rojo-borrar); background: #fff5f5; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -250,12 +251,12 @@
             const html = `
                 <i class="ph ph-truck" style="font-size:35px; color:var(--verde-oscuro); margin-bottom:10px; display:block;"></i>
                 <div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:12px;">Datos de Envío</div>
-                <p style="font-size:9px; opacity:0.6; margin-bottom:15px;">Completa para coordinar la colecta de ${seleccionados.length} prendas.</p>
+                <p style="font-size:9px; opacity:0.6; margin-bottom:15px;">Completa los campos obligatorios para coordinar.</p>
                 <div class="form-kinu">
-                    <input type="text" id="form-nombre" placeholder="NOMBRE COMPLETO">
-                    <input type="text" id="form-direccion" placeholder="DIRECCIÓN DE RECOLECCIÓN">
-                    <input type="tel" id="form-tel" placeholder="TELÉFONO DE CONTACTO">
-                    <input type="text" id="form-horario" placeholder="HORARIO PREFERIDO">
+                    <input type="text" id="form-nombre" placeholder="NOMBRE COMPLETO (OBLIGATORIO)">
+                    <input type="text" id="form-direccion" placeholder="DIRECCIÓN RECOLECCIÓN (OBLIGATORIO)">
+                    <input type="tel" id="form-tel" placeholder="TELÉFONO CONTACTO (OBLIGATORIO)">
+                    <input type="text" id="form-horario" placeholder="HORARIO PREFERIDO (OPCIONAL)">
                 </div>
                 <div style="display:flex; gap:10px; margin-top:20px;">
                     <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro); font-size:10px;">CANCELAR</button>
@@ -265,21 +266,33 @@
         }
 
         function confirmarEnvioColaboro() {
-            const nombre = document.getElementById('form-nombre').value;
-            const direccion = document.getElementById('form-direccion').value;
-            const telUser = document.getElementById('form-tel').value; // Número ingresado por el usuario
-            const horario = document.getElementById('form-horario').value;
+            const inpNombre = document.getElementById('form-nombre');
+            const inpDireccion = document.getElementById('form-direccion');
+            const inpTel = document.getElementById('form-tel');
+            const horario = document.getElementById('form-horario').value || "A coordinar";
 
-            // Número de destino fijo de KINU
+            // Validación de campos obligatorios
+            let error = false;
+            [inpNombre, inpDireccion, inpTel].forEach(inp => {
+                if(!inp.value.trim()){ inp.classList.add('error'); error = true; }
+                else { inp.classList.remove('error'); }
+            });
+
+            if(error) return; // Detener si faltan datos
+
+            // Número de destino KINU
             const numKinu = "59892199199"; 
             
-            let msg = `*NUEVA SOLICITUD DE RECOLECCIÓN KINU*\n\n`;
-            msg += `*Nombre:* ${nombre}\n`;
-            msg += `*Dirección:* ${direccion}\n`;
-            msg += `*Teléfono:* ${telUser}\n`;
-            msg += `*Horario:* ${horario}\n`;
-            msg += `*Cantidad de prendas:* ${seleccionados.length}\n\n`;
-            msg += `_Enviado desde mi Smart Closet_`;
+            // Mensaje con "Logo" (Emoji representativo) al inicio
+            let msg = `✨ *KINU SMART CLOSET* ✨\n`;
+            msg += `----------------------------\n`;
+            msg += `*SOLICITUD DE RECOLECCIÓN*\n\n`;
+            msg += `👤 *Nombre:* ${inpNombre.value}\n`;
+            msg += `📍 *Dirección:* ${inpDireccion.value}\n`;
+            msg += `📞 *Teléfono:* ${inpTel.value}\n`;
+            msg += `⏰ *Horario:* ${horario}\n`;
+            msg += `👕 *Prendas:* ${seleccionados.length}\n\n`;
+            msg += `_Solicitud generada desde la App._`;
 
             const url = `https://api.whatsapp.com/send?phone=${numKinu}&text=${encodeURIComponent(msg)}`;
             window.open(url, '_blank');
@@ -288,7 +301,7 @@
                 <i class="ph ph-check-circle" style="font-size:45px; color:var(--verde-oscuro); margin-bottom:15px; display:block;"></i>
                 <div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:14px;">¡Solicitud Enviada!</div>
                 <p style="font-size:10px; color:var(--verde-oscuro); opacity:0.7; margin: 10px 0 25px;">
-                    HEMOS ABIERTO EL CHAT CON KINU.<br>TE CONTACTAREMOS A TU NÚMERO (${telUser}) A LA BREVEDAD.
+                    SE HA ABIERTO EL CHAT DE WHATSAPP.<br>NOS CONTACTAREMOS CONTIGO A LA BREVEDAD.
                 </p>
                 <button onclick="cerrarModales(); cancelarSeleccion();" style="width:100%; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; text-transform:uppercase; font-size:11px;">ENTENDIDO</button>
             `;

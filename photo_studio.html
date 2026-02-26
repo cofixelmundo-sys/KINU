@@ -17,7 +17,10 @@
                 app = await client(SPACE_ID);
                 const img = sessionStorage.getItem('imagen_para_procesar');
                 if (img) procesarImagen(img);
-            } catch (e) { setTimeout(conectarIA, 2000); }
+            } catch (e) { 
+                console.error("Error conectando con la IA:", e);
+                setTimeout(conectarIA, 2000); 
+            }
         }
 
         async function procesarImagen(base64) {
@@ -25,34 +28,46 @@
                 document.getElementById('loading').style.display = 'flex';
                 const blob = await fetch(base64).then(r => r.blob());
                 const result = await app.predict("/predict", [blob]);
+                
                 if (result.data?.[0]?.url) {
                     document.getElementById('preview').src = result.data[0].url;
                     document.getElementById('loading').style.display = 'none';
-                    document.getElementById('result').classList.remove('hidden');
+                    document.getElementById('editor-ui').classList.remove('opacity-0');
                 }
-            } catch (e) { window.parent.postMessage({ type: 'CERRAR_STUDIO' }, '*'); }
+            } catch (e) {
+                console.error("Error procesando imagen:", e);
+                alert("No pudimos procesar la imagen. Inténtalo de nuevo.");
+                window.parent.postMessage({type:'CERRAR_STUDIO'}, '*');
+            }
         }
 
-        window.seleccionarCat = (cat, btn) => {
-            categoriaSeleccionada = cat.toUpperCase();
+        window.seleccionarCat = (cat, el) => {
+            categoriaSeleccionada = cat;
             document.querySelectorAll('.cat-btn').forEach(b => {
-                b.style.background = 'rgba(255,255,255,0.1)';
-                b.style.color = 'white';
+                b.classList.remove('bg-white', 'text-[#313628]');
+                b.classList.add('bg-white/10', 'text-white');
             });
-            btn.style.background = 'white';
-            btn.style.color = '#313628';
+            el.classList.remove('bg-white/10', 'text-white');
+            el.classList.add('bg-white', 'text-[#313628]');
         };
 
         window.enviarAKinu = () => {
             const nombre = document.getElementById('input-nombre').value.trim() || "PRENDA";
-            if (!categoriaSeleccionada) return alert("Selecciona una categoría");
+            if (!categoriaSeleccionada) {
+                alert("Por favor, selecciona una categoría.");
+                return;
+            }
+            
             const btn = document.getElementById('btn-save');
             btn.innerText = "GUARDANDO...";
             btn.disabled = true;
+            btn.style.opacity = "0.5";
+
+            // Enviamos el mensaje al index.html
             window.parent.postMessage({
                 type: 'GUARDAR_PRENDA',
-                categoria: categoriaSeleccionada,
-                nombre: nombre,
+                categoria: categoriaSeleccionada.toUpperCase(),
+                nombre: nombre.toUpperCase(),
                 imagenUrl: document.getElementById('preview').src
             }, '*');
         };
@@ -60,50 +75,58 @@
         window.onload = conectarIA;
     </script>
     <style>
-        body { background: #848464; font-family: sans-serif; overflow: hidden; margin: 0; }
-        .cat-btn { background: rgba(255,255,255,0.1); color: white; font-size: 9px; font-weight: 800; padding: 12px 4px; border-radius: 12px; text-transform: uppercase; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); }
-        .input-kinu { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 15px; padding: 12px; font-size: 12px; width: 100%; outline: none; text-align: center; text-transform: uppercase; }
+        body { background-color: #848464; font-family: -apple-system, sans-serif; overflow: hidden; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        #preview { filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2)); }
     </style>
 </head>
-<body class="h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-[360px] h-[95vh] bg-[#313628]/20 rounded-[40px] overflow-hidden backdrop-blur-lg border border-white/20 flex flex-col relative">
-        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-[#848464] z-50">
-            <div class="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
-            <p class="text-[10px] font-bold text-white uppercase tracking-widest">Quitando fondo...</p>
+<body class="p-6 flex flex-col h-screen text-white">
+
+    <div id="loading" class="fixed inset-0 z-50 bg-[#848464] flex flex-col items-center justify-center space-y-4">
+        <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+        <p class="text-[10px] font-black uppercase tracking-[3px]">Procesando con IA</p>
+    </div>
+
+    <div id="editor-ui" class="flex flex-col h-full opacity-0 transition-opacity duration-500">
+        <div class="flex-1 flex items-center justify-center p-4">
+            <img id="preview" class="max-h-full max-w-full object-contain rounded-2xl">
         </div>
 
-        <div id="result" class="flex flex-col h-full hidden">
-            <div class="flex-1 flex items-center justify-center p-4 min-h-[150px]">
-                <img id="preview" class="max-h-full drop-shadow-2xl object-contain">
+        <div class="space-y-6 pb-4">
+            <div>
+                <label class="text-[9px] font-black uppercase tracking-wider opacity-60 ml-2">Nombre de la Prenda</label>
+                <input id="input-nombre" type="text" placeholder="Ej: CAMISA LINO" 
+                    class="w-full bg-white/10 border-none rounded-2xl p-4 mt-2 text-sm font-bold placeholder:text-white/30 focus:ring-2 focus:ring-white/50 outline-none">
             </div>
 
-            <div class="bg-[#313628] p-5 rounded-t-[35px] shadow-2xl">
-                <input type="text" id="input-nombre" class="input-kinu mb-4" placeholder="NOMBRE PRENDA">
-                
-                <div class="grid grid-cols-3 gap-2 mb-6">
-                    <button class="cat-btn" onclick="seleccionarCat('Superior', this)">Superior</button>
-                    <button class="cat-btn" onclick="seleccionarCat('Inferior', this)">Inferior</button>
-                    <button class="cat-btn" onclick="seleccionarCat('Abrigos', this)">Abrigos</button>
-                    <button class="cat-btn" onclick="seleccionarCat('Calzado', this)">Calzado</button>
-                    <button class="cat-btn" onclick="seleccionarCat('Vestidos', this)">Vestidos</button>
-                    <button class="cat-btn" onclick="seleccionarCat('Trajes', this)">Trajes</button>
-                    <button class="cat-btn" onclick="seleccionarCat('Bañadores', this)">Bañadores</button>
-                    <button class="cat-btn" onclick="seleccionarCat('Bolsos', this)">Bolsos</button>
-                    <button class="cat-btn" onclick="seleccionarCat('Accesorios', this)">Accesorios</button>
-                    <button class="cat-btn" onclick="seleccionarCat('Vintage', this)">Vintage</button>
-                    <button class="cat-btn" onclick="seleccionarCat('Deporte', this)">Deporte</button>
-                    <button class="cat-btn" onclick="seleccionarCat('Joyas', this)">Joyas</button>
-                    <button class="cat-btn" onclick="seleccionarCat('Colaboro', this)">Colaboro</button>
+            <div>
+                <label class="text-[9px] font-black uppercase tracking-wider opacity-60 ml-2">Categoría</label>
+                <div class="flex gap-2 overflow-x-auto no-scrollbar py-2">
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Superior', this)">Superior</button>
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Inferior', this)">Inferior</button>
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Abrigos', this)">Abrigos</button>
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Calzado', this)">Calzado</button>
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Vestidos', this)">Vestidos</button>
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Trajes', this)">Trajes</button>
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Bañadores', this)">Bañadores</button>
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Bolsos', this)">Bolsos</button>
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Accesorios', this)">Accesorios</button>
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Vintage', this)">Vintage</button>
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Deporte', this)">Deporte</button>
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Joyas', this)">Joyas</button>
+                    <button class="cat-btn shrink-0 px-5 py-3 rounded-xl bg-white/10 text-[10px] font-bold uppercase" onclick="seleccionarCat('Colaboro', this)">Colaboro</button>
                 </div>
-
-                <button id="btn-save" onclick="enviarAKinu()" class="w-full py-4 bg-white text-[#313628] rounded-2xl font-black uppercase text-[11px] mb-2">
-                    Aceptar y Clasificar
-                </button>
-                <button onclick="window.parent.postMessage({type:'CERRAR_STUDIO'}, '*')" class="w-full text-[9px] text-white/50 font-bold uppercase py-2">
-                    Cancelar
-                </button>
             </div>
+
+            <button id="btn-save" onclick="enviarAKinu()" class="w-full py-4 bg-white text-[#313628] rounded-2xl font-black uppercase text-[11px] shadow-lg active:scale-95 transition-transform">
+                Aceptar y Clasificar
+            </button>
+            
+            <button onclick="window.parent.postMessage({type:'CERRAR_STUDIO'}, '*')" class="w-full text-[9px] text-white/50 font-bold uppercase py-2 tracking-widest">
+                Cancelar y Volver
+            </button>
         </div>
     </div>
+
 </body>
 </html>

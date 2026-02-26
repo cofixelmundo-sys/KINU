@@ -16,222 +16,315 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
-        body { background-color: var(--arena-claro); color: var(--verde-oscuro); overflow-x: hidden; }
-
-        /* Navigation */
-        nav {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);
-            padding: 15px 30px; border-radius: 40px; display: flex; gap: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05); z-index: 1000;
+        body {
+            background-color: var(--arena-claro);
+            color: var(--verde-oscuro);
+            min-height: 100vh;
+            padding-bottom: 100px;
         }
-        .nav-icon { font-size: 24px; cursor: pointer; transition: 0.3s; color: var(--verde-oliva); }
-        .nav-icon:hover { transform: translateY(-5px); color: var(--verde-oscuro); }
 
-        /* Header */
-        header { padding: 40px 20px; text-align: center; }
-        .logo { font-weight: 900; letter-spacing: 5px; font-size: 24px; margin-bottom: 5px; }
-        .subtitle { font-size: 10px; font-weight: 500; opacity: 0.6; }
-
-        /* Closet Grid */
-        #closet-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 20px; padding: 20px; max-width: 1000px; margin: 0 auto 100px;
+        header {
+            padding: 40px 20px;
+            text-align: center;
         }
-        .item-card {
-            background: var(--blanco); border-radius: 25px; padding: 15px;
-            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+
+        .logo {
+            font-weight: 900;
+            letter-spacing: 5px;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 10px;
+            font-weight: 500;
+            opacity: 0.6;
+            letter-spacing: 2px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding: 10px 20px;
+        }
+
+        .tab {
+            background: var(--arena-boton);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
             transition: 0.3s;
+            white-space: nowrap;
         }
-        .item-card img { width: 100%; border-radius: 15px; margin-bottom: 10px; }
-        .item-card p { font-size: 10px; font-weight: 800; text-transform: uppercase; }
 
-        /* Modal / Studio Container */
-        #studio-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--arena-claro); z-index: 2000; display: none;
+        .tab.active {
+            background: var(--verde-oscuro);
+            color: white;
         }
-        #studio-container.active { display: block; }
-        iframe { width: 100%; height: 100%; border: none; }
 
-        /* Chat Styles */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(45, 58, 47, 0.4); backdrop-filter: blur(5px);
-            display: none; justify-content: center; align-items: center; z-index: 3000;
+        #closet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+            padding: 0 20px;
+            max-width: 1000px;
+            margin: 0 auto;
         }
-        .chat-container {
-            width: 90%; max-width: 400px; height: 70vh; background: var(--arena-claro);
-            border-radius: 35px; overflow: hidden; display: flex; flex-direction: column;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+
+        .item-card {
+            background: var(--blanco);
+            border-radius: 25px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
         }
-        .chat-header { background: var(--verde-oscuro); color: white; padding: 20px; text-align: center; font-size: 12px; font-weight: 800; }
-        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 12px 16px; border-radius: 20px; font-size: 13px; max-width: 85%; line-height: 1.4; }
-        .msg-user { align-self: flex-end; background: var(--verde-oliva); color: white; border-bottom-right-radius: 4px; }
-        .msg-ai { align-self: flex-start; background: var(--arena-boton); color: var(--verde-oscuro); border-bottom-left-radius: 4px; }
-        .chat-input-area { padding: 20px; background: white; display: flex; gap: 10px; }
-        .chat-input-area input { flex: 1; border: none; background: var(--arena-claro); padding: 12px 20px; border-radius: 25px; outline: none; }
-        .chat-send { background: var(--verde-oscuro); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+
+        .item-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: contain;
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+
+        .item-card p {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        nav {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 40px;
+            display: flex;
+            gap: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: var(--verde-oliva);
+        }
+
+        .nav-icon:hover {
+            transform: translateY(-5px);
+            color: var(--verde-oscuro);
+        }
+
+        #modal-studio {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--arena-claro);
+            z-index: 1000;
+            display: none;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
     </style>
 </head>
 <body>
 
     <header>
         <div class="logo">KINU</div>
-        <div class="subtitle">SMART CLOSET & AI ASSISTANT</div>
+        <div class="subtitle">SMART CLOSET</div>
     </header>
 
-    <div id="closet-grid">
-        </div>
+    <div class="tabs" id="category-tabs">
+        <div class="tab active" onclick="seleccionarCategoria('TODO')">TODO</div>
+        <div class="tab" onclick="seleccionarCategoria('SUPERIOR')">SUPERIOR</div>
+        <div class="tab" onclick="seleccionarCategoria('INFERIOR')">INFERIOR</div>
+        <div class="tab" onclick="seleccionarCategoria('CALZADO')">CALZADO</div>
+        <div class="tab" onclick="seleccionarCategoria('ACCESORIOS')">ACCESORIOS</div>
+        <div class="tab" onclick="seleccionarCategoria('COLABORO')">COLABORO</div>
+    </div>
+
+    <div id="closet-grid"></div>
 
     <nav>
         <div class="nav-icon" onclick="abrirStudio()"><i class="ph ph-plus-circle"></i></div>
+        <div class="nav-icon" id="btn-login" onclick="login()"><i class="ph ph-user-circle"></i></div>
         <div class="nav-icon" onclick="cargarPrendas()"><i class="ph ph-arrows-clockwise"></i></div>
-        <div class="nav-icon" onclick="abrirChat()"><i class="ph ph-sparkle"></i></div>
     </nav>
 
-    <div id="studio-container">
-        <iframe src="photo_studio.html" id="studio-iframe"></iframe>
-        <button onclick="cerrarStudio()" style="position:fixed; top:20px; right:20px; background:none; border:none; font-weight:900; cursor:pointer;">CERRAR</button>
+    <div id="modal-studio">
+        <iframe id="iframe-studio" src="about:blank"></iframe>
     </div>
 
-    <div id="modal-chat" class="modal-overlay">
-        <div class="chat-container">
-            <div class="chat-header">KINU AI ADVISOR</div>
-            <div class="chat-messages" id="chat-box">
-                <div class="msg msg-ai">Hola. He analizado tu closet. ¿En qué puedo ayudarte hoy?</div>
-            </div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Escribe tu consulta...">
-                <button class="chat-send" onclick="enviarPregunta()"><i class="ph ph-paper-plane-right"></i></button>
-            </div>
-            <button onclick="cerrarChat()" style="padding:10px; border:none; background:none; font-size:10px; opacity:0.5; cursor:pointer;">VOLVER AL CLOSET</button>
-        </div>
-    </div>
-
+    <script src="https://accounts.google.com/gsi/client"></script>
     <script>
-        // CONFIGURACIÓN
-        const CLIENT_ID = 'TU_CLIENT_ID.apps.googleusercontent.com';
-        const API_KEY_GEMINI = 'TU_GEMINI_API_KEY';
+        const CLIENT_ID = 'TU_CLIENT_ID_AQUI'; // Reemplaza con tu Client ID
         let accessToken = null;
+        let categoriaActual = 'TODO';
 
-        // --- AUTENTICACIÓN Y DRIVE ---
-        async function handleAuth() {
-            // Aquí iría tu lógica de Google Auth para obtener el accessToken
-            // Por ahora, asegúrate de tener el token activo
+        const tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: 'https://www.googleapis.com/auth/drive.file',
+            callback: (response) => {
+                accessToken = response.access_token;
+                document.getElementById('btn-login').style.color = '#4A5D4E';
+                cargarPrendas();
+            },
+        });
+
+        function login() {
+            tokenClient.requestAccessToken();
+        }
+
+        function abrirStudio() {
+            if (!accessToken) return alert("Primero inicia sesión con Google");
+            document.getElementById('modal-studio').style.display = 'block';
+            document.getElementById('iframe-studio').src = 'photo_studio.html';
+        }
+
+        // --- RECEPTOR DE MENSAJES CORREGIDO ---
+        window.addEventListener("message", async (e) => {
+            if (e.data.type === 'CERRAR_STUDIO') {
+                document.getElementById('modal-studio').style.display = 'none';
+                document.getElementById('iframe-studio').src = 'about:blank';
+            }
+            if (e.data.type === 'GUARDAR_PRENDA') {
+                try {
+                    if (!accessToken) return;
+                    
+                    // Mostrar algún feedback visual si lo deseas
+                    await subirADrive(e.data.imagenUrl, e.data.categoria, e.data.nombre, accessToken);
+                    
+                    document.getElementById('modal-studio').style.display = 'none';
+                    document.getElementById('iframe-studio').src = 'about:blank';
+                    
+                    // Recargar las prendas
+                    seleccionarCategoria(categoriaActual);
+                } catch (err) {
+                    console.error(err);
+                    alert("Error al guardar en Drive: " + err.message);
+                }
+            }
+        });
+
+        function seleccionarCategoria(cat) {
+            categoriaActual = cat;
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.toggle('active', t.innerText === cat);
+            });
+            cargarPrendas();
         }
 
         async function obtenerOCrearCarpeta(nombre, token) {
-            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${nombre}' and mimeType='application/vnd.google-apps.folder'&fields=files(id)`, {
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${nombre}' and mimeType='application/vnd.google-apps.folder' and trashed=false`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             const data = await res.json();
-            if (data.files.length > 0) return data.files[0].id;
+            if (data.files && data.files.length > 0) return data.files[0].id;
 
             const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
                 method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: nombre, mimeType: 'application/vnd.google-apps.folder' })
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: nombre,
+                    mimeType: 'application/vnd.google-apps.folder'
+                })
             });
             const folder = await createRes.json();
             return folder.id;
         }
 
+        // --- FUNCIÓN SUBIR A DRIVE CORREGIDA (MULTIPART) ---
         async function subirADrive(imgUrl, cat, nombre, token) {
-            const blob = await fetch(imgUrl).then(r => r.blob());
+            const response = await fetch(imgUrl);
+            const blob = await response.blob();
+            
             const folderId = await obtenerOCrearCarpeta('KINU_CLOSET', token);
-            const nombreArchivo = `KINU_${cat.toUpperCase()}_${nombre.replace(/ /g,'_')}_${Date.now()}.png`;
+            
+            const cleanName = nombre.replace(/[^a-z0-9]/gi, '_').toUpperCase();
+            const nombreArchivo = `KINU_${cat.toUpperCase()}_${cleanName}_${Date.now()}.png`;
 
-            const metadata = { name: nombreArchivo, parents: [folderId], mimeType: 'image/png' };
-            const form = new FormData();
-            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            form.append('file', blob);
+            const metadata = {
+                name: nombreArchivo,
+                parents: [folderId],
+                mimeType: 'image/png'
+            };
 
-            const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            const formData = new FormData();
+            formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            formData.append('file', blob);
+
+            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                 method: 'POST',
                 headers: { 'Authorization': 'Bearer ' + token },
-                body: form
+                body: formData
             });
-            return res.json();
+
+            if (!uploadRes.ok) {
+                const errorData = await uploadRes.json();
+                throw new Error(errorData.error.message);
+            }
+
+            return await uploadRes.json();
         }
 
         async function cargarPrendas() {
             if (!accessToken) return;
-            const folderId = await obtenerOCrearCarpeta('KINU_CLOSET', accessToken);
-            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,thumbnailLink)`, {
-                headers: { 'Authorization': 'Bearer ' + accessToken }
-            });
-            const data = await res.json();
             const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '';
-            
-            data.files.forEach(file => {
-                const card = document.createElement('div');
-                card.className = 'item-card';
-                card.innerHTML = `
-                    <img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="prenda">
-                    <p>${file.name.split('_')[2] || 'Prenda'}</p>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        // --- LÓGICA DEL CHAT GEMINI ---
-        async function enviarPregunta() {
-            const input = document.getElementById('chat-input');
-            const mensaje = input.value.trim();
-            if (!mensaje) return;
-
-            agregarMensaje(mensaje, 'user');
-            input.value = '';
-
-            // Obtener contexto del closet para que Gemini "sepa" qué hay
-            const folderId = await obtenerOCrearCarpeta('KINU_CLOSET', accessToken);
-            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents&fields=files(name)`, {
-                headers: { 'Authorization': 'Bearer ' + accessToken }
-            });
-            const driveData = await res.json();
-            const miRopa = driveData.files.map(f => f.name).join(', ');
+            grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; font-size: 10px; opacity: 0.5;">CARGANDO CLOSET...</p>';
 
             try {
-                const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY_GEMINI}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Actúa como KINU AI, un estilista de lujo. Mi closet tiene: ${miRopa}. Responde corto: ${mensaje}` }] }]
-                    })
+                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET', accessToken);
+                let query = `'${folderId}' in parents and trashed = false`;
+                
+                if (categoriaActual !== 'TODO') {
+                    query += ` and name contains 'KINU_${categoriaActual}_'`;
+                }
+
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,thumbnailLink)&pageSize=100`, {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
                 });
-                const dataIA = await geminiRes.json();
-                agregarMensaje(dataIA.candidates[0].content.parts[0].text, 'ai');
-            } catch (e) {
-                agregarMensaje("Lo siento, perdí la conexión con mi cerebro de moda.", 'ai');
+                const data = await res.json();
+
+                grid.innerHTML = '';
+                if (data.files && data.files.length > 0) {
+                    data.files.forEach(file => {
+                        const partes = file.name.split('_');
+                        const nombreLimpio = partes.slice(2, partes.length - 1).join(' ');
+                        
+                        const card = document.createElement('div');
+                        card.className = 'item-card';
+                        card.innerHTML = `
+                            <img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="${nombreLimpio}">
+                            <p>${nombreLimpio}</p>
+                        `;
+                        grid.appendChild(card);
+                    });
+                } else {
+                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; font-size: 10px; opacity: 0.5;">NO HAY PRENDAS EN ESTA CATEGORÍA</p>';
+                }
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; font-size: 10px; color: red;">ERROR AL CARGAR</p>';
             }
         }
-
-        function agregarMensaje(txt, tipo) {
-            const box = document.getElementById('chat-box');
-            const div = document.createElement('div');
-            div.className = `msg msg-${tipo}`;
-            div.innerText = txt;
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-        }
-
-        // --- INTERFAZ ---
-        function abrirStudio() { document.getElementById('studio-container').classList.add('active'); }
-        function cerrarStudio() { document.getElementById('studio-container').classList.remove('active'); }
-        function abrirChat() { document.getElementById('modal-chat').style.display = 'flex'; }
-        function cerrarChat() { document.getElementById('modal-chat').style.display = 'none'; }
-
-        // Escuchar al Studio
-        window.addEventListener('message', async (e) => {
-            if (e.data.type === 'GUARDAR_PRENDA') {
-                await subirADrive(e.data.imagenUrl, e.data.categoria, e.data.nombre, accessToken);
-                cerrarStudio();
-                cargarPrendas();
-            }
-        });
     </script>
 </body>
 </html>

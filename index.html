@@ -68,7 +68,6 @@
         .prenda-card img { width: 100%; height: 80%; object-fit: contain; }
         .prenda-card span { color: white; font-size: 8px; font-weight: 800; text-transform: uppercase; margin-top: auto; text-align: center; }
 
-        /* BARRA FIJA CON NUEVO BOTÓN RETIRO */
         .multi-action-bar { 
             position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); 
             background: var(--verde-oscuro); padding: 12px 20px; border-radius: 30px; 
@@ -173,24 +172,22 @@
             {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
-        // Lógica de Estado de la Barra
         function actualizarBarra() {
             const hasSelection = seleccionados.length > 0;
             const esColaboro = categoriaActual === 'COLABORO';
             
             document.getElementById('multi-count').innerText = seleccionados.length;
             
-            // Botón Mover: Se activa si hay selección y NO es Colaboro
+            // CORRECCIÓN: El botón Mover ahora funciona siempre que haya selección
             const btnMover = document.getElementById('btn-mover');
-            if(hasSelection && !esColaboro) btnMover.classList.add('enabled');
+            if(hasSelection) btnMover.classList.add('enabled');
             else btnMover.classList.remove('enabled');
 
-            // Botón Retiro: Se activa SOLO en Colaboro con selección
+            // Retiro solo se activa en Colaboro con selección
             const btnRetiro = document.getElementById('btn-retiro');
             if(hasSelection && esColaboro) btnRetiro.classList.add('enabled');
             else btnRetiro.classList.remove('enabled');
 
-            // Botón Borrar y Cancelar: Siempre se activan con selección
             const btnBorrar = document.getElementById('btn-borrar');
             const btnCancel = document.getElementById('btn-cancelar');
             if(hasSelection) {
@@ -203,39 +200,17 @@
         }
 
         function abrirPlanillaEnvio() {
-            const html = `
-                <i class="ph ph-truck" style="font-size:35px; color:var(--verde-oscuro); margin-bottom:10px; display:block;"></i>
-                <div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:12px;">Solicitar Retiro</div>
-                <p style="font-size:9px; opacity:0.6; margin-bottom:15px;">Coordinaremos la colecta de ${seleccionados.length} prendas.</p>
-                <div class="form-kinu">
-                    <input type="text" id="f-nombre" placeholder="NOMBRE COMPLETO">
-                    <input type="text" id="f-dir" placeholder="DIRECCIÓN">
-                    <input type="tel" id="f-tel" placeholder="TELÉFONO">
-                </div>
-                <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro); font-size:10px;">CANCELAR</button>
-                    <button onclick="enviarPlanilla()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; font-size:10px;">ENVIAR</button>
-                </div>`;
+            const html = `<i class="ph ph-truck" style="font-size:35px; color:var(--verde-oscuro); margin-bottom:10px; display:block;"></i><div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:12px;">Solicitar Retiro</div><p style="font-size:9px; opacity:0.6; margin-bottom:15px;">Coordinaremos la colecta de ${seleccionados.length} prendas.</p><div class="form-kinu"><input type="text" id="f-nombre" placeholder="NOMBRE COMPLETO"><input type="text" id="f-dir" placeholder="DIRECCIÓN"><input type="tel" id="f-tel" placeholder="TELÉFONO"></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro); font-size:10px;">CANCELAR</button><button onclick="enviarPlanilla()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; font-size:10px;">ENVIAR</button></div>`;
             mostrarModalDinamico(html);
         }
 
-        function enviarPlanilla() {
-            alert("Solicitud enviada. KINU se pondrá en contacto pronto.");
-            cerrarModales();
-            cancelarSeleccion();
-        }
+        function enviarPlanilla() { alert("Solicitud enviada. KINU se pondrá en contacto pronto."); cerrarModales(); cancelarSeleccion(); }
 
-        // --- COMUNICACIÓN Y DRIVE (MISMOS QUE ANTES) ---
         window.addEventListener("message", async (e) => {
             if (e.data.type === 'CERRAR_STUDIO') cerrarStudio();
             if (e.data.type === 'GUARDAR_PRENDA') {
-                if (!accessToken) {
-                    tokenClient.requestAccessToken();
-                } else {
-                    await subirADrive(e.data.imagenUrl, e.data.categoria, e.data.nombre, accessToken);
-                    cerrarStudio();
-                    seleccionarCategoria(e.data.categoria.toUpperCase());
-                }
+                if (!accessToken) { tokenClient.requestAccessToken(); } 
+                else { await subirADrive(e.data.imagenUrl, e.data.categoria, e.data.nombre, accessToken); cerrarStudio(); seleccionarCategoria(e.data.categoria.toUpperCase()); }
             }
         });
 
@@ -247,9 +222,7 @@
             const formData = new FormData();
             formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             formData.append('file', blob);
-            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData
-            });
+            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData });
         }
 
         function toggleSeleccion(f, el) {
@@ -259,11 +232,7 @@
             actualizarBarra();
         }
 
-        function cancelarSeleccion() {
-            seleccionados = []; modoSeleccion = false;
-            document.querySelectorAll('.prenda-card').forEach(c => c.classList.remove('selected'));
-            actualizarBarra();
-        }
+        function cancelarSeleccion() { seleccionados = []; modoSeleccion = false; document.querySelectorAll('.prenda-card').forEach(c => c.classList.remove('selected')); actualizarBarra(); }
 
         async function cargarPrendas(todo = false) {
             if(!accessToken) return;
@@ -290,13 +259,7 @@
             }
         }
 
-        function seleccionarCategoria(catNombre) { 
-            categoriaActual = catNombre; 
-            renderCats(); 
-            cancelarSeleccion();
-            document.getElementById('btn-home').classList.remove('active'); 
-            cargarPrendas(false); 
-        }
+        function seleccionarCategoria(catNombre) { categoriaActual = catNombre; renderCats(); cancelarSeleccion(); document.getElementById('btn-home').classList.remove('active'); cargarPrendas(false); }
 
         function renderCats() {
             const container = document.getElementById('main-cats'); container.innerHTML = '';
@@ -325,7 +288,6 @@
         function cerrarModales() { document.getElementById('modal-custom').style.display = 'none'; }
         function cerrarStudio() { document.getElementById('modal-studio').style.display = 'none'; document.getElementById('iframe-studio').src = 'about:blank'; }
         function enviarAStudio(input) { if (input.files?.[0]) { const reader = new FileReader(); reader.onload = (e) => { sessionStorage.setItem('imagen_para_procesar', e.target.result); document.getElementById('modal-studio').style.display = 'flex'; document.getElementById('iframe-studio').src = 'photo_studio.html'; }; reader.readAsDataURL(input.files[0]); } }
-        
         function toggleDrive() { tokenClient.requestAccessToken(); }
 
         function startGoogle() {

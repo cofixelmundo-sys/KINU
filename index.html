@@ -45,11 +45,11 @@
         .logo-header { width: 110px; height: auto; }
         .brand-text { color: white; letter-spacing: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
 
-        /* Contenedor de filtros con scroll suave */
-        .filter-scroll { 
-            display: flex; gap: 12px; overflow-x: auto; padding: 5px 15px 15px; 
-            scrollbar-width: none; scroll-behavior: smooth; 
-        }
+        .drive-btn { background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; outline: none; }
+        .drive-btn img { width: 26px; height: auto; opacity: 0.35; filter: grayscale(1); }
+        .drive-btn.vinculado img { opacity: 1; filter: grayscale(0); }
+        
+        .filter-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
         .filter-scroll::-webkit-scrollbar { display: none; }
         
         .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; opacity: 0.4; cursor: pointer; }
@@ -75,6 +75,7 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.4); width: 90%; max-width: 360px; justify-content: center;
         }
         
+        /* CORRECCIÓN DE BOTONES: Ahora habilitan interacción al activarse */
         .multi-btn { color: white; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; opacity: 0.2; pointer-events: none; }
         .multi-btn.enabled { opacity: 1 !important; pointer-events: auto !important; }
         .multi-btn i { font-size: 20px; }
@@ -172,51 +173,33 @@
             {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
+        // ACTUALIZACIÓN DE ESTADO DE LA BARRA (CORREGIDO)
         function actualizarBarra() {
             const hasSelection = seleccionados.length > 0;
             const esColaboro = categoriaActual === 'COLABORO';
+            
             document.getElementById('multi-count').innerText = seleccionados.length;
             
+            // Mover: Siempre que haya selección, se habilita
             const btnMover = document.getElementById('btn-mover');
             if(hasSelection) btnMover.classList.add('enabled');
             else btnMover.classList.remove('enabled');
 
+            // Retiro: Solo en Colaboro con selección
             const btnRetiro = document.getElementById('btn-retiro');
             if(hasSelection && esColaboro) btnRetiro.classList.add('enabled');
             else btnRetiro.classList.remove('enabled');
 
+            // Borrar y Limpiar: Con selección
             const btnBorrar = document.getElementById('btn-borrar');
             const btnCancel = document.getElementById('btn-cancelar');
-            if(hasSelection) { btnBorrar.classList.add('enabled'); btnCancel.classList.add('enabled'); } 
-            else { btnBorrar.classList.remove('enabled'); btnCancel.classList.remove('enabled'); }
-        }
-
-        // --- CORRECCIÓN: SELECCIONAR Y CENTRAR CATEGORÍA ---
-        function seleccionarCategoria(catNombre) { 
-            categoriaActual = catNombre; 
-            renderCats(); 
-            cancelarSeleccion();
-            document.getElementById('btn-home').classList.remove('active'); 
-            cargarPrendas(false); 
-
-            // Centrar el icono seleccionado en la barra
-            setTimeout(() => {
-                const activeEl = document.querySelector('.cat-item.active');
-                if (activeEl) {
-                    activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                }
-            }, 100);
-        }
-
-        function renderCats() {
-            const container = document.getElementById('main-cats'); container.innerHTML = '';
-            categorias.forEach(cat => {
-                const div = document.createElement('div');
-                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
-                div.onclick = () => seleccionarCategoria(cat.n.toUpperCase());
-                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
-                container.appendChild(div);
-            });
+            if(hasSelection) {
+                btnBorrar.classList.add('enabled');
+                btnCancel.classList.add('enabled');
+            } else {
+                btnBorrar.classList.remove('enabled');
+                btnCancel.classList.remove('enabled');
+            }
         }
 
         function abrirSelectorMover() {
@@ -241,7 +224,7 @@
             });
             await Promise.all(promesas);
             cancelarSeleccion();
-            seleccionarCategoria(nuevaCat.toUpperCase()); // Esto ahora también centrará el icono
+            seleccionarCategoria(nuevaCat.toUpperCase());
         }
 
         function confirmarBorrado() {
@@ -315,6 +298,19 @@
                     container.appendChild(card);
                 });
             }
+        }
+
+        function seleccionarCategoria(catNombre) { categoriaActual = catNombre; renderCats(); cancelarSeleccion(); document.getElementById('btn-home').classList.remove('active'); cargarPrendas(false); }
+
+        function renderCats() {
+            const container = document.getElementById('main-cats'); container.innerHTML = '';
+            categorias.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
+                div.onclick = () => seleccionarCategoria(cat.n.toUpperCase());
+                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
+                container.appendChild(div);
+            });
         }
 
         function mostrarInicio() { categoriaActual = ''; renderCats(); cancelarSeleccion(); document.getElementById('btn-home').classList.add('active'); document.getElementById('main-content').innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; padding-top:40px; color:white; text-align:center;"><i class="ph ph-sparkle" style="font-size:50px; opacity:0.3; margin-bottom:20px;"></i><h2 style="font-weight:900; font-size:14px;">KINU SMART CLOSET</h2></div>`; }

@@ -75,8 +75,9 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.4); width: 90%; max-width: 360px; justify-content: center;
         }
         
+        /* CORRECCIÓN DE BOTONES: Ahora habilitan interacción al activarse */
         .multi-btn { color: white; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; opacity: 0.2; pointer-events: none; }
-        .multi-btn.enabled { opacity: 1; pointer-events: auto; }
+        .multi-btn.enabled { opacity: 1 !important; pointer-events: auto !important; }
         .multi-btn i { font-size: 20px; }
         .multi-btn span { font-size: 7px; font-weight: 800; text-transform: uppercase; }
 
@@ -172,22 +173,24 @@
             {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
+        // ACTUALIZACIÓN DE ESTADO DE LA BARRA (CORREGIDO)
         function actualizarBarra() {
             const hasSelection = seleccionados.length > 0;
             const esColaboro = categoriaActual === 'COLABORO';
             
             document.getElementById('multi-count').innerText = seleccionados.length;
             
-            // CORRECCIÓN: El botón Mover ahora funciona siempre que haya selección
+            // Mover: Siempre que haya selección, se habilita
             const btnMover = document.getElementById('btn-mover');
             if(hasSelection) btnMover.classList.add('enabled');
             else btnMover.classList.remove('enabled');
 
-            // Retiro solo se activa en Colaboro con selección
+            // Retiro: Solo en Colaboro con selección
             const btnRetiro = document.getElementById('btn-retiro');
             if(hasSelection && esColaboro) btnRetiro.classList.add('enabled');
             else btnRetiro.classList.remove('enabled');
 
+            // Borrar y Limpiar: Con selección
             const btnBorrar = document.getElementById('btn-borrar');
             const btnCancel = document.getElementById('btn-cancelar');
             if(hasSelection) {
@@ -197,6 +200,44 @@
                 btnBorrar.classList.remove('enabled');
                 btnCancel.classList.remove('enabled');
             }
+        }
+
+        function abrirSelectorMover() {
+            let html = `<div style="font-weight:900; color:var(--verde-oscuro); margin-bottom:20px; text-transform:uppercase; font-size:12px;">Mover a...</div><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">`;
+            categorias.forEach(c => { 
+                html += `<button onclick="ejecutarMover('${c.n}')" style="background:var(--arena-boton); border:none; padding:12px 5px; border-radius:15px; display:flex; flex-direction:column; align-items:center; gap:5px;"><i class="ph ${c.i}" style="font-size:20px; color:var(--verde-oscuro);"></i><span style="font-size:8px; font-weight:800; color:var(--verde-oscuro);">${c.n}</span></button>`; 
+            });
+            html += `</div>`;
+            mostrarModalDinamico(html);
+        }
+
+        async function ejecutarMover(nuevaCat) {
+            cerrarModales();
+            const promesas = seleccionados.map(file => {
+                let partes = file.name.split('_');
+                partes[1] = nuevaCat.toUpperCase();
+                return fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { 
+                    method: 'PATCH', 
+                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ name: partes.join('_') }) 
+                });
+            });
+            await Promise.all(promesas);
+            cancelarSeleccion();
+            seleccionarCategoria(nuevaCat.toUpperCase());
+        }
+
+        function confirmarBorrado() {
+            const html = `<i class="ph ph-trash" style="font-size:40px; color:var(--rojo-borrar); margin-bottom:15px; display:block;"></i><div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; margin-bottom:25px;">¿Borrar ${seleccionados.length} prendas?</div><div style="display:flex; gap:10px;"><button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro);">NO</button><button onclick="ejecutarBorrado()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--rojo-borrar); color:white;">BORRAR</button></div>`;
+            mostrarModalDinamico(html);
+        }
+
+        async function ejecutarBorrado() {
+            cerrarModales();
+            const promesas = seleccionados.map(file => fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken } }));
+            await Promise.all(promesas);
+            cancelarSeleccion();
+            cargarPrendas(categoriaActual === '');
         }
 
         function abrirPlanillaEnvio() {

@@ -2,329 +2,413 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>KINU - Smart Closet</title>
+    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    
     <style>
-        :root {
-            --verde-oscuro: #2D3A2F;
-            --verde-oliva: #4A5D4E;
-            --arena-claro: #F4F1EA;
-            --arena-boton: #E8E2D5;
-            --blanco: #FFFFFF;
+        :root { 
+            --verde-oliva: #848464; --verde-oscuro: #313628; --arena-claro: #F2EFE9;
+            --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-
-        body {
-            background-color: var(--arena-claro);
-            color: var(--verde-oscuro);
-            min-height: 100vh;
-            padding-bottom: 100px;
+        * { 
+            box-sizing: border-box; 
+            transition: all 0.2s ease; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none; 
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
 
-        header {
-            padding: 40px 20px;
-            text-align: center;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
+        .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        
+        header { padding: calc(env(safe-area-inset-top) + 10px) 15px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .header-info-box { display: flex; flex-direction: column; align-items: center; min-width: 80px; }
+        .info-main-text { font-size: 16px; font-weight: 800; color: white; margin: 4px 0; }
+        .info-sub-text { font-size: 8px; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); font-weight: 700; }
+        
+        .header-center { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .logo-header { width: 110px; height: auto; }
+        .brand-text { color: white; letter-spacing: 6px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
 
-        .logo {
-            font-weight: 900;
-            letter-spacing: 5px;
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
+        .drive-btn { background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; outline: none; }
+        .drive-btn img { width: 26px; height: auto; opacity: 0.35; filter: grayscale(1); }
+        .drive-btn.vinculado img { opacity: 1; filter: grayscale(0); }
+        
+        .filter-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; scroll-behavior: smooth; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        
+        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; opacity: 0.4; cursor: pointer; }
+        .cat-item.active { opacity: 1; transform: scale(1.05); }
+        .cat-circle { width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
+        .cat-item.active .cat-circle { background: white; }
+        .cat-circle i { font-size: 26px; color: white; }
+        .cat-item.active i { color: var(--verde-oscuro); }
+        .cat-label { font-size: 8px; font-weight: 700; color: white; margin-top: 8px; text-transform: uppercase; text-align: center; }
 
-        .subtitle {
-            font-size: 10px;
-            font-weight: 500;
-            opacity: 0.6;
-            letter-spacing: 2px;
-        }
+        .content { flex: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
+        .closet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 120px; }
+        
+        .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; aspect-ratio: 1/1; position: relative; border: 2px solid transparent; }
+        .prenda-card.selected { border-color: white; background: rgba(255,255,255,0.2); }
+        .prenda-card img { width: 100%; height: 80%; object-fit: contain; pointer-events: none; }
+        .prenda-card span { color: white; font-size: 8px; font-weight: 800; text-transform: uppercase; margin-top: auto; text-align: center; }
+        .select-badge { position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; background: white; border-radius: 50%; display: none; align-items: center; justify-content: center; color: var(--verde-oscuro); font-size: 10px; }
+        .prenda-card.selected .select-badge { display: flex; }
 
-        .tabs {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            overflow-x: auto;
-            padding: 10px 20px;
-        }
+        .multi-action-bar { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); background: var(--verde-oscuro); padding: 10px 20px; border-radius: 30px; display: flex; gap: 20px; align-items: center; z-index: 1000; box-shadow: 0 8px 25px rgba(0,0,0,0.4); opacity: 0; pointer-events: none; }
+        .multi-action-bar.active { opacity: 1; pointer-events: auto; }
+        .multi-btn { color: white; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
+        .multi-btn i { font-size: 20px; }
+        .multi-btn span { font-size: 7px; font-weight: 800; text-transform: uppercase; }
 
-        .tab {
-            background: var(--arena-boton);
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.3s;
-            white-space: nowrap;
-        }
+        .nav-wrapper { position: relative; margin: 0 25px 35px; height: 50px; }
+        nav { width: 100%; height: 100%; background: var(--verde-oscuro); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
+        .nav-icon { color: white; font-size: 22px; opacity: 0.4; cursor: pointer; }
+        .nav-icon.active { opacity: 1; }
+        .cam-trigger { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: var(--verde-oliva); border-radius: 50%; border: 5px solid var(--verde-oliva); display: flex; align-items: center; justify-content: center; }
+        .cam-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .cam-inner i { font-size: 42px; color: var(--verde-oscuro); }
 
-        .tab.active {
-            background: var(--verde-oscuro);
-            color: white;
-        }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); }
+        .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 340px; padding: 30px; text-align: center; }
 
-        #closet-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 20px;
-            padding: 0 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .item-card {
-            background: var(--blanco);
-            border-radius: 25px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-        }
-
-        .item-card img {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: contain;
-            border-radius: 15px;
-            margin-bottom: 10px;
-        }
-
-        .item-card p {
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        nav {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 15px 30px;
-            border-radius: 40px;
-            display: flex;
-            gap: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            cursor: pointer;
-            transition: 0.3s;
-            color: var(--verde-oliva);
-        }
-
-        .nav-icon:hover {
-            transform: translateY(-5px);
-            color: var(--verde-oscuro);
-        }
-
-        #modal-studio {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--arena-claro);
-            z-index: 1000;
-            display: none;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+        .form-kinu { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .form-kinu input { background: white; border: none; padding: 12px; border-radius: 12px; font-size: 11px; outline: none; font-weight: 600; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
-    <header>
-        <div class="logo">KINU</div>
-        <div class="subtitle">SMART CLOSET</div>
-    </header>
+    <div class="main-container">
+        <header>
+            <div class="header-info-box">
+                <i class="ph ph-sun" style="font-size: 22px; color: white"></i>
+                <span class="info-main-text" id="temp-text">--°</span>
+                <span class="info-sub-text">MONTEVIDEO</span>
+            </div>
+            <div class="header-center">
+                <img src="https://i.imgur.com/yTIrTq2.png" class="logo-header">
+                <div class="brand-text">KINU</div>
+            </div>
+            <div class="header-info-box">
+                <button id="auth-btn" class="drive-btn" onclick="toggleDrive()">
+                    <img src="https://i.imgur.com/Go2a4Hs.png">
+                    <span class="info-sub-text" id="drive-label">SIN VINCULAR</span>
+                </button>
+            </div>
+        </header>
+        
+        <div class="filter-scroll" id="main-cats"></div>
+        <div class="content" id="main-content"></div>
 
-    <div class="tabs" id="category-tabs">
-        <div class="tab active" onclick="seleccionarCategoria('TODO')">TODO</div>
-        <div class="tab" onclick="seleccionarCategoria('SUPERIOR')">SUPERIOR</div>
-        <div class="tab" onclick="seleccionarCategoria('INFERIOR')">INFERIOR</div>
-        <div class="tab" onclick="seleccionarCategoria('CALZADO')">CALZADO</div>
-        <div class="tab" onclick="seleccionarCategoria('ACCESORIOS')">ACCESORIOS</div>
-        <div class="tab" onclick="seleccionarCategoria('COLABORO')">COLABORO</div>
+        <div class="multi-action-bar" id="multi-bar">
+            <div id="multi-count" style="background:white; color:var(--verde-oscuro); padding:2px 8px; border-radius:8px; font-size:10px; font-weight:900;">0</div>
+            
+            <div id="btn-mover-container" class="multi-btn" onclick="abrirSelectorMover()">
+                <i class="ph ph-arrows-left-right"></i><span>Mover</span>
+            </div>
+            <div id="btn-envio-container" class="multi-btn" onclick="abrirPlanillaEnvio()" style="display:none;">
+                <i class="ph ph-truck"></i><span>Coordinar</span>
+            </div>
+
+            <div class="multi-btn" style="color: #ff8a8a;" onclick="confirmarBorrado()"><i class="ph ph-trash"></i><span>Borrar</span></div>
+            <div class="multi-btn" onclick="cancelarSeleccion()"><i class="ph ph-x"></i><span>Cerrar</span></div>
+        </div>
+
+        <div class="nav-wrapper">
+            <nav>
+                <div class="nav-icon active" id="btn-home" onclick="mostrarInicio()"><i class="ph ph-house-simple"></i></div>
+                <div class="nav-icon" id="btn-archivador" onclick="cargarTodoElCloset()"><i class="ph ph-archive"></i></div>
+            </nav>
+            <label for="cam-input" class="cam-trigger"><div class="cam-inner"><i class="ph ph-camera"></i></div></label>
+            <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none" onchange="enviarAStudio(this)">
+        </div>
     </div>
 
-    <div id="closet-grid"></div>
-
-    <nav>
-        <div class="nav-icon" onclick="abrirStudio()"><i class="ph ph-plus-circle"></i></div>
-        <div class="nav-icon" id="btn-login" onclick="login()"><i class="ph ph-user-circle"></i></div>
-        <div class="nav-icon" onclick="cargarPrendas()"><i class="ph ph-arrows-clockwise"></i></div>
-    </nav>
-
-    <div id="modal-studio">
-        <iframe id="iframe-studio" src="about:blank"></iframe>
+    <div id="modal-studio" class="modal-overlay" style="padding:0;">
+        <iframe id="iframe-studio" src="about:blank" style="width:100%; height:100dvh; border:none;"></iframe>
     </div>
 
-    <script src="https://accounts.google.com/gsi/client"></script>
+    <div id="modal-custom" class="modal-overlay">
+        <div class="modal-content" id="modal-dinamico-content"></div>
+    </div>
+
     <script>
-        const CLIENT_ID = 'TU_CLIENT_ID_AQUI'; // Reemplaza con tu Client ID
-        let accessToken = null;
-        let categoriaActual = 'TODO';
+        const CLIENT_ID = '83530287409-75d2h2pveelqfq83lma5o0i986boutg0.apps.googleusercontent.com';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+        let accessToken = localStorage.getItem('drive_token'), tokenClient, categoriaActual = '';
+        let timerPulsacion, modoSeleccion = false, seleccionados = [];
 
-        const tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: CLIENT_ID,
-            scope: 'https://www.googleapis.com/auth/drive.file',
-            callback: (response) => {
-                accessToken = response.access_token;
-                document.getElementById('btn-login').style.color = '#4A5D4E';
-                cargarPrendas();
-            },
-        });
+        const categorias = [
+            {n: 'Superior', i: 'ph-t-shirt'}, {n: 'Inferior', i: 'ph-pants'}, {n: 'Abrigos', i: 'ph-hoodie'}, 
+            {n: 'Calzado', i: 'ph-sneaker'}, {n: 'Vestidos', i: 'ph-dress'}, {n: 'Trajes', i: 'ph-briefcase'},
+            {n: 'Bañadores', i: 'ph-waves'}, {n: 'Bolsos', i: 'ph-handbag'}, {n: 'Accesorios', i: 'ph-watch'}, 
+            {n: 'Vintage', i: 'ph-hourglass-high'}, {n: 'Deporte', i: 'ph-barbell'}, {n: 'Joyas', i: 'ph-sketch-logo'}, 
+            {n: 'Colaboro', i: 'ph-handshake'}
+        ];
 
-        function login() {
-            tokenClient.requestAccessToken();
-        }
-
-        function abrirStudio() {
-            if (!accessToken) return alert("Primero inicia sesión con Google");
-            document.getElementById('modal-studio').style.display = 'block';
-            document.getElementById('iframe-studio').src = 'photo_studio.html';
-        }
-
-        // --- RECEPTOR DE MENSAJES CORREGIDO ---
+        // Lógica de mensajes mejorada para asegurar el guardado
         window.addEventListener("message", async (e) => {
             if (e.data.type === 'CERRAR_STUDIO') {
-                document.getElementById('modal-studio').style.display = 'none';
-                document.getElementById('iframe-studio').src = 'about:blank';
+                cerrarStudio();
             }
             if (e.data.type === 'GUARDAR_PRENDA') {
                 try {
-                    if (!accessToken) return;
-                    
-                    // Mostrar algún feedback visual si lo deseas
-                    await subirADrive(e.data.imagenUrl, e.data.categoria, e.data.nombre, accessToken);
-                    
-                    document.getElementById('modal-studio').style.display = 'none';
-                    document.getElementById('iframe-studio').src = 'about:blank';
-                    
-                    // Recargar las prendas
-                    seleccionarCategoria(categoriaActual);
-                } catch (err) {
-                    console.error(err);
-                    alert("Error al guardar en Drive: " + err.message);
+                    // Si el token no existe, lo solicitamos antes de subir
+                    if (!accessToken) {
+                        tokenClient.callback = async (resp) => {
+                            if (resp.access_token) {
+                                accessToken = resp.access_token;
+                                localStorage.setItem('drive_token', accessToken);
+                                await procesarGuardadoFinal(e.data);
+                            }
+                        };
+                        tokenClient.requestAccessToken();
+                    } else {
+                        await procesarGuardadoFinal(e.data);
+                    }
+                } catch (err) { 
+                    console.error("Error al guardar:", err);
+                    alert("Error de conexión con Drive. Inténtalo de nuevo.");
                 }
             }
         });
 
-        function seleccionarCategoria(cat) {
-            categoriaActual = cat;
-            document.querySelectorAll('.tab').forEach(t => {
-                t.classList.toggle('active', t.innerText === cat);
-            });
-            cargarPrendas();
+        async function procesarGuardadoFinal(datos) {
+            await subirADrive(datos.imagenUrl, datos.categoria, datos.nombre, accessToken);
+            cerrarStudio();
+            seleccionarCategoria(datos.categoria.toUpperCase());
         }
 
-        async function obtenerOCrearCarpeta(nombre, token) {
-            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${nombre}' and mimeType='application/vnd.google-apps.folder' and trashed=false`, {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            const data = await res.json();
-            if (data.files && data.files.length > 0) return data.files[0].id;
-
-            const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: nombre,
-                    mimeType: 'application/vnd.google-apps.folder'
-                })
-            });
-            const folder = await createRes.json();
-            return folder.id;
+        function cerrarStudio() {
+            document.getElementById('modal-studio').style.display = 'none';
+            document.getElementById('iframe-studio').src = 'about:blank';
         }
 
-        // --- FUNCIÓN SUBIR A DRIVE CORREGIDA (MULTIPART) ---
         async function subirADrive(imgUrl, cat, nombre, token) {
             const response = await fetch(imgUrl);
             const blob = await response.blob();
-            
             const folderId = await obtenerOCrearCarpeta('KINU_CLOSET', token);
-            
             const cleanName = nombre.replace(/[^a-z0-9]/gi, '_').toUpperCase();
             const nombreArchivo = `KINU_${cat.toUpperCase()}_${cleanName}_${Date.now()}.png`;
-
-            const metadata = {
-                name: nombreArchivo,
-                parents: [folderId],
-                mimeType: 'image/png'
-            };
-
+            const metadata = { name: nombreArchivo, parents: [folderId], mimeType: 'image/png' };
             const formData = new FormData();
             formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             formData.append('file', blob);
 
-            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + token },
-                body: formData
+            const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData
             });
 
-            if (!uploadRes.ok) {
-                const errorData = await uploadRes.json();
-                throw new Error(errorData.error.message);
+            // Si el token expiró (401), forzamos renovación y reintento
+            if (res.status === 401) {
+                localStorage.removeItem('drive_token');
+                accessToken = null;
+                throw new Error("Token expirado");
             }
-
-            return await uploadRes.json();
         }
 
-        async function cargarPrendas() {
-            if (!accessToken) return;
-            const grid = document.getElementById('closet-grid');
-            grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; font-size: 10px; opacity: 0.5;">CARGANDO CLOSET...</p>';
-
+        async function cargarPrendas(todo = false) {
+            if(!accessToken) return;
+            const grid = document.getElementById('main-content');
+            grid.innerHTML = `<div class="closet-grid" id="closet-grid"></div>`;
+            const container = document.getElementById('closet-grid');
             try {
                 const folderId = await obtenerOCrearCarpeta('KINU_CLOSET', accessToken);
-                let query = `'${folderId}' in parents and trashed = false`;
+                const filtro = todo ? "KINU_" : `KINU_${categoriaActual}_`;
+                const q = `'${folderId}' in parents and name contains '${filtro}' and trashed = false`;
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
                 
-                if (categoriaActual !== 'TODO') {
-                    query += ` and name contains 'KINU_${categoriaActual}_'`;
-                }
-
-                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,thumbnailLink)&pageSize=100`, {
-                    headers: { 'Authorization': 'Bearer ' + accessToken }
-                });
+                if (res.status === 401) { desvincularDrive(); return; }
+                
                 const data = await res.json();
-
-                grid.innerHTML = '';
-                if (data.files && data.files.length > 0) {
-                    data.files.forEach(file => {
-                        const partes = file.name.split('_');
-                        const nombreLimpio = partes.slice(2, partes.length - 1).join(' ');
-                        
+                if(data.files) {
+                    data.files.forEach(f => {
                         const card = document.createElement('div');
-                        card.className = 'item-card';
-                        card.innerHTML = `
-                            <img src="${file.thumbnailLink.replace('=s220', '=s500')}" alt="${nombreLimpio}">
-                            <p>${nombreLimpio}</p>
-                        `;
-                        grid.appendChild(card);
+                        card.className = 'prenda-card';
+                        let partes = f.name.replace('.png','').split('_');
+                        let nombre = partes.slice(2, partes.length - 1).join(' ') || "PRENDA";
+                        card.innerHTML = `<div class="select-badge"><i class="ph ph-check"></i></div><img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombre}</span>`;
+                        card.onmousedown = card.ontouchstart = () => { timerPulsacion = setTimeout(() => { modoSeleccion = true; toggleSeleccion(f, card); }, 600); };
+                        card.onmouseup = card.ontouchend = () => clearTimeout(timerPulsacion);
+                        card.onclick = () => { if(modoSeleccion) toggleSeleccion(f, card); };
+                        container.appendChild(card);
                     });
-                } else {
-                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; font-size: 10px; opacity: 0.5;">NO HAY PRENDAS EN ESTA CATEGORÍA</p>';
                 }
-            } catch (err) {
-                console.error(err);
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; font-size: 10px; color: red;">ERROR AL CARGAR</p>';
+            } catch(e) {}
+        }
+
+        function toggleSeleccion(f, el) {
+            const idx = seleccionados.findIndex(s => s.id === f.id);
+            if(idx > -1) { seleccionados.splice(idx, 1); el.classList.remove('selected'); } 
+            else { seleccionados.push(f); el.classList.add('selected'); }
+            
+            document.getElementById('multi-count').innerText = seleccionados.length;
+            
+            if (categoriaActual === 'COLABORO') {
+                document.getElementById('btn-mover-container').style.display = 'none';
+                document.getElementById('btn-envio-container').style.display = 'flex';
+            } else {
+                document.getElementById('btn-mover-container').style.display = 'flex';
+                document.getElementById('btn-envio-container').style.display = 'none';
+            }
+
+            if(seleccionados.length > 0) document.getElementById('multi-bar').classList.add('active');
+            else cancelarSeleccion();
+        }
+
+        function cancelarSeleccion() {
+            modoSeleccion = false; seleccionados = [];
+            document.querySelectorAll('.prenda-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('multi-bar').classList.remove('active');
+        }
+
+        function abrirPlanillaEnvio() {
+            const html = `
+                <i class="ph ph-truck" style="font-size:35px; color:var(--verde-oscuro); margin-bottom:10px; display:block;"></i>
+                <div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:12px;">Datos de Envío</div>
+                <p style="font-size:9px; opacity:0.6; margin-bottom:15px;">Completa para coordinar la colecta de ${seleccionados.length} prendas.</p>
+                <div class="form-kinu">
+                    <input type="text" id="form-nombre" placeholder="NOMBRE COMPLETO">
+                    <input type="text" id="form-direccion" placeholder="DIRECCIÓN DE RECOLECCIÓN">
+                    <input type="tel" id="form-tel" placeholder="TELÉFONO DE CONTACTO">
+                    <input type="text" id="form-horario" placeholder="HORARIO PREFERIDO">
+                </div>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro); font-size:10px;">CANCELAR</button>
+                    <button onclick="enviarPlanilla()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; font-size:10px;">ENVIAR</button>
+                </div>`;
+            mostrarModalDinamico(html);
+        }
+
+        function enviarPlanilla() {
+            alert("Solicitud de envío recibida. KINU se contactará contigo.");
+            cerrarModales();
+            cancelarSeleccion();
+        }
+
+        async function ejecutarBorrado() {
+            cerrarModales();
+            const token = accessToken;
+            const promesas = seleccionados.map(file => fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }));
+            await Promise.all(promesas);
+            cancelarSeleccion();
+            cargarPrendas(categoriaActual === '');
+        }
+
+        async function ejecutarMover(nuevaCat) {
+            cerrarModales();
+            const token = accessToken;
+            const promesas = seleccionados.map(file => {
+                let partes = file.name.split('_');
+                partes[1] = nuevaCat.toUpperCase();
+                return fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, {
+                    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: partes.join('_') })
+                });
+            });
+            await Promise.all(promesas);
+            cancelarSeleccion();
+            seleccionarCategoria(nuevaCat.toUpperCase());
+        }
+
+        function toggleDrive() {
+            if (accessToken) {
+                const html = `<i class="ph ph-warning-circle" style="font-size:40px; color:var(--verde-oscuro); margin-bottom:15px; display:block;"></i><div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; margin-bottom:20px;">¿Desvincular Drive?</div><div style="display:flex; gap:10px;"><button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro);">NO</button><button onclick="desvincularDrive()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white;">SÍ</button></div>`;
+                mostrarModalDinamico(html);
+            } else { tokenClient.requestAccessToken(); }
+        }
+
+        function desvincularDrive() { localStorage.removeItem('drive_token'); location.reload(); }
+
+        function advertenciaVinculacion() {
+            const html = `<i class="ph ph-cloud-slash" style="font-size:45px; color:var(--verde-oscuro); margin-bottom:15px; display:block;"></i><div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:14px;">Acceso restringido</div><p style="font-size:10px; color:var(--verde-oscuro); opacity:0.7; margin: 10px 0 20px;">VINCULA TU DRIVE PARA VER TU CLOSET.</p><button onclick="cerrarModales()" style="width:100%; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; text-transform:uppercase; font-size:11px;">ENTENDIDO</button>`;
+            mostrarModalDinamico(html);
+        }
+
+        function abrirSelectorMover() {
+            let html = `<div style="font-weight:900; color:var(--verde-oscuro); margin-bottom:20px; text-transform:uppercase; font-size:12px;">Mover a...</div><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">`;
+            categorias.forEach(c => {
+                html += `<button onclick="ejecutarMover('${c.n}')" style="background:var(--arena-boton); border:none; padding:12px 5px; border-radius:15px; display:flex; flex-direction:column; align-items:center; gap:5px;"><i class="ph ${c.i}" style="font-size:20px; color:var(--verde-oscuro);"></i><span style="font-size:8px; font-weight:800; color:var(--verde-oscuro);">${c.n}</span></button>`;
+            });
+            html += `</div>`;
+            mostrarModalDinamico(html);
+        }
+
+        function confirmarBorrado() {
+            const html = `<i class="ph ph-trash" style="font-size:40px; color:var(--rojo-borrar); margin-bottom:15px; display:block;"></i><div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; margin-bottom:25px;">¿Borrar ${seleccionados.length} prendas?</div><div style="display:flex; gap:10px;"><button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro);">NO</button><button onclick="ejecutarBorrado()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--rojo-borrar); color:white;">BORRAR</button></div>`;
+            mostrarModalDinamico(html);
+        }
+
+        function renderCats() {
+            const container = document.getElementById('main-cats'); container.innerHTML = '';
+            categorias.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = `cat-item ${cat.n.toUpperCase() === categoriaActual ? 'active' : ''}`;
+                div.onclick = () => { if(!accessToken) { advertenciaVinculacion(); return; } seleccionarCategoria(cat.n.toUpperCase()); };
+                div.innerHTML = `<div class="cat-circle"><i class="ph ${cat.i}"></i></div><span class="cat-label">${cat.n}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function seleccionarCategoria(catNombre) { 
+            categoriaActual = catNombre; 
+            renderCats(); 
+            setTimeout(() => {
+                const activeEl = document.querySelector('.cat-item.active');
+                if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }, 100);
+            document.getElementById('btn-home').classList.remove('active'); 
+            cargarPrendas(false); 
+        }
+
+        function mostrarInicio() { categoriaActual = ''; renderCats(); document.getElementById('btn-home').classList.add('active'); document.getElementById('main-content').innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; padding-top:40px; color:white; text-align:center;"><i class="ph ph-sparkle" style="font-size:50px; opacity:0.3; margin-bottom:20px;"></i><h2 style="font-weight:900; font-size:14px;">KINU SMART CLOSET</h2></div>`; }
+        function cargarTodoElCloset() { if(!accessToken) return advertenciaVinculacion(); categoriaActual = ''; renderCats(); document.getElementById('btn-home').classList.remove('active'); cargarPrendas(true); }
+        
+        function enviarAStudio(input) {
+            if(!accessToken) return advertenciaVinculacion();
+            if (input.files?.[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    sessionStorage.setItem('imagen_para_procesar', e.target.result);
+                    document.getElementById('modal-studio').style.display = 'flex';
+                    document.getElementById('iframe-studio').src = 'photo_studio.html';
+                };
+                reader.readAsDataURL(input.files[0]);
             }
         }
+
+        async function obtenerOCrearCarpeta(n, token) {
+            const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+            const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + token } });
+            const d = await r.json();
+            if(d.files?.[0]) return d.files[0].id;
+            const res = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n, mimeType: 'application/vnd.google-apps.folder' }) });
+            const f = await res.json(); return f.id;
+        }
+
+        function mostrarModalDinamico(html) { document.getElementById('modal-dinamico-content').innerHTML = html; document.getElementById('modal-custom').style.display = 'flex'; }
+        function cerrarModales() { document.getElementById('modal-custom').style.display = 'none'; }
+
+        function startGoogle() {
+            gapi.load('client', () => {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID, scope: SCOPES,
+                    callback: (r) => { if (r.access_token) { accessToken = r.access_token; localStorage.setItem('drive_token', accessToken); location.reload(); } }
+                });
+                if(accessToken) {
+                    document.getElementById('auth-btn').classList.add('vinculado');
+                    document.getElementById('drive-label').innerText = "CONECTADO";
+                }
+            });
+        }
+
+        window.onload = () => { startGoogle(); mostrarInicio(); };
     </script>
 </body>
 </html>

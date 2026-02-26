@@ -15,9 +15,25 @@
             --arena-boton: #E5E1D5; --rojo-borrar: #D64545;
         }
 
-        * { box-sizing: border-box; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; user-select: none; }
+        /* BLOQUEO DE NAVEGADOR */
+        * { 
+            box-sizing: border-box; 
+            transition: all 0.2s ease; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none !important; 
+            -webkit-user-select: none !important;
+            -webkit-touch-callout: none !important;
+        }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--verde-oliva); margin: 0; height: 100dvh; width: 100%; overflow: hidden; position: fixed; }
+        img { pointer-events: none; -webkit-user-drag: none; }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: var(--verde-oliva); 
+            margin: 0; height: 100dvh; width: 100%; 
+            overflow: hidden; position: fixed; 
+        }
+
         .main-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
         
         header { padding: calc(env(safe-area-inset-top) + 10px) 15px 10px; display: flex; justify-content: space-between; align-items: center; }
@@ -49,29 +65,19 @@
         
         .prenda-card { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; aspect-ratio: 1/1; position: relative; border: 2px solid transparent; }
         .prenda-card.selected { border-color: white; background: rgba(255,255,255,0.2); }
-        .prenda-card img { width: 100%; height: 80%; object-fit: contain; pointer-events: none; }
+        .prenda-card img { width: 100%; height: 80%; object-fit: contain; }
         .prenda-card span { color: white; font-size: 8px; font-weight: 800; text-transform: uppercase; margin-top: auto; text-align: center; }
 
-        /* BARRA FIJA CORREGIDA */
+        /* BARRA FIJA CON NUEVO BOTÓN RETIRO */
         .multi-action-bar { 
-            position: fixed; 
-            bottom: 92px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            background: var(--verde-oscuro); 
-            padding: 12px 25px; 
-            border-radius: 30px; 
-            display: flex; 
-            gap: 25px; 
-            align-items: center; 
-            z-index: 1000; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-            opacity: 1; /* Siempre visible */
-            pointer-events: auto;
+            position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); 
+            background: var(--verde-oscuro); padding: 12px 20px; border-radius: 30px; 
+            display: flex; gap: 18px; align-items: center; z-index: 1000; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4); width: 90%; max-width: 360px; justify-content: center;
         }
         
-        .multi-btn { color: white; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; opacity: 0.5; }
-        .multi-btn.active { opacity: 1; } /* Solo se ilumina si hay selección */
+        .multi-btn { color: white; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; opacity: 0.2; pointer-events: none; }
+        .multi-btn.enabled { opacity: 1; pointer-events: auto; }
         .multi-btn i { font-size: 20px; }
         .multi-btn span { font-size: 7px; font-weight: 800; text-transform: uppercase; }
 
@@ -86,9 +92,12 @@
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(8px); }
         .modal-content { background: var(--arena-claro); border-radius: 35px; width: 90%; max-width: 340px; padding: 30px; text-align: center; }
+        
+        .form-kinu { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .form-kinu input { background: white; border: none; padding: 12px; border-radius: 12px; font-size: 11px; outline: none; font-weight: 600; color: var(--verde-oscuro); }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;" oncopy="return false;" onselectstart="return false;">
 
     <div class="main-container">
         <header>
@@ -115,12 +124,18 @@
         <div class="multi-action-bar" id="multi-bar">
             <div id="multi-count" style="background:white; color:var(--verde-oscuro); padding:2px 8px; border-radius:8px; font-size:10px; font-weight:900;">0</div>
             
-            <div id="btn-mover" class="multi-btn" onclick="validarAccion(abrirSelectorMover)">
+            <div id="btn-mover" class="multi-btn" onclick="abrirSelectorMover()">
                 <i class="ph ph-arrows-left-right"></i><span>Mover</span>
             </div>
-            <div id="btn-borrar" class="multi-btn" style="color: #ff8a8a;" onclick="validarAccion(confirmarBorrado)">
+
+            <div id="btn-retiro" class="multi-btn" onclick="abrirPlanillaEnvio()">
+                <i class="ph ph-truck"></i><span>Retiro</span>
+            </div>
+
+            <div id="btn-borrar" class="multi-btn" style="color: #ff8a8a;" onclick="confirmarBorrado()">
                 <i class="ph ph-trash"></i><span>Borrar</span>
             </div>
+            
             <div id="btn-cancelar" class="multi-btn" onclick="cancelarSeleccion()">
                 <i class="ph ph-x"></i><span>Limpiar</span>
             </div>
@@ -158,34 +173,71 @@
             {n: 'Colaboro', i: 'ph-handshake'}
         ];
 
+        // Lógica de Estado de la Barra
+        function actualizarBarra() {
+            const hasSelection = seleccionados.length > 0;
+            const esColaboro = categoriaActual === 'COLABORO';
+            
+            document.getElementById('multi-count').innerText = seleccionados.length;
+            
+            // Botón Mover: Se activa si hay selección y NO es Colaboro
+            const btnMover = document.getElementById('btn-mover');
+            if(hasSelection && !esColaboro) btnMover.classList.add('enabled');
+            else btnMover.classList.remove('enabled');
+
+            // Botón Retiro: Se activa SOLO en Colaboro con selección
+            const btnRetiro = document.getElementById('btn-retiro');
+            if(hasSelection && esColaboro) btnRetiro.classList.add('enabled');
+            else btnRetiro.classList.remove('enabled');
+
+            // Botón Borrar y Cancelar: Siempre se activan con selección
+            const btnBorrar = document.getElementById('btn-borrar');
+            const btnCancel = document.getElementById('btn-cancelar');
+            if(hasSelection) {
+                btnBorrar.classList.add('enabled');
+                btnCancel.classList.add('enabled');
+            } else {
+                btnBorrar.classList.remove('enabled');
+                btnCancel.classList.remove('enabled');
+            }
+        }
+
+        function abrirPlanillaEnvio() {
+            const html = `
+                <i class="ph ph-truck" style="font-size:35px; color:var(--verde-oscuro); margin-bottom:10px; display:block;"></i>
+                <div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; font-size:12px;">Solicitar Retiro</div>
+                <p style="font-size:9px; opacity:0.6; margin-bottom:15px;">Coordinaremos la colecta de ${seleccionados.length} prendas.</p>
+                <div class="form-kinu">
+                    <input type="text" id="f-nombre" placeholder="NOMBRE COMPLETO">
+                    <input type="text" id="f-dir" placeholder="DIRECCIÓN">
+                    <input type="tel" id="f-tel" placeholder="TELÉFONO">
+                </div>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro); font-size:10px;">CANCELAR</button>
+                    <button onclick="enviarPlanilla()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--verde-oscuro); color:white; font-size:10px;">ENVIAR</button>
+                </div>`;
+            mostrarModalDinamico(html);
+        }
+
+        function enviarPlanilla() {
+            alert("Solicitud enviada. KINU se pondrá en contacto pronto.");
+            cerrarModales();
+            cancelarSeleccion();
+        }
+
+        // --- COMUNICACIÓN Y DRIVE (MISMOS QUE ANTES) ---
         window.addEventListener("message", async (e) => {
             if (e.data.type === 'CERRAR_STUDIO') cerrarStudio();
             if (e.data.type === 'GUARDAR_PRENDA') {
                 if (!accessToken) {
-                    tokenClient.callback = async (resp) => {
-                        if (resp.access_token) {
-                            accessToken = resp.access_token;
-                            localStorage.setItem('drive_token', accessToken);
-                            await procesarGuardadoFinal(e.data);
-                        }
-                    };
                     tokenClient.requestAccessToken();
                 } else {
-                    await procesarGuardadoFinal(e.data);
+                    await subirADrive(e.data.imagenUrl, e.data.categoria, e.data.nombre, accessToken);
+                    cerrarStudio();
+                    seleccionarCategoria(e.data.categoria.toUpperCase());
                 }
             }
         });
-
-        async function procesarGuardadoFinal(datos) {
-            await subirADrive(datos.imagenUrl, datos.categoria, datos.nombre, accessToken);
-            cerrarStudio();
-            seleccionarCategoria(datos.categoria.toUpperCase());
-        }
-
-        function cerrarStudio() {
-            document.getElementById('modal-studio').style.display = 'none';
-            document.getElementById('iframe-studio').src = 'about:blank';
-        }
 
         async function subirADrive(imgUrl, cat, nombre, token) {
             const response = await fetch(imgUrl);
@@ -204,30 +256,13 @@
             const idx = seleccionados.findIndex(s => s.id === f.id);
             if(idx > -1) { seleccionados.splice(idx, 1); el.classList.remove('selected'); } 
             else { seleccionados.push(f); el.classList.add('selected'); }
-            
-            actualizarEstadoBarra();
-        }
-
-        function actualizarEstadoBarra() {
-            const count = seleccionados.length;
-            document.getElementById('multi-count').innerText = count;
-            const btns = ['btn-mover', 'btn-borrar', 'btn-cancelar'];
-            btns.forEach(id => {
-                const el = document.getElementById(id);
-                if(count > 0) el.classList.add('active');
-                else el.classList.remove('active');
-            });
-        }
-
-        function validarAccion(fn) {
-            if(seleccionados.length > 0) fn();
+            actualizarBarra();
         }
 
         function cancelarSeleccion() {
-            seleccionados = [];
-            modoSeleccion = false;
+            seleccionados = []; modoSeleccion = false;
             document.querySelectorAll('.prenda-card').forEach(c => c.classList.remove('selected'));
-            actualizarEstadoBarra();
+            actualizarBarra();
         }
 
         async function cargarPrendas(todo = false) {
@@ -235,60 +270,32 @@
             const grid = document.getElementById('main-content');
             grid.innerHTML = `<div class="closet-grid" id="closet-grid"></div>`;
             const container = document.getElementById('closet-grid');
-            try {
-                const folderId = await obtenerOCrearCarpeta('KINU_CLOSET', accessToken);
-                const filtro = todo ? "KINU_" : `KINU_${categoriaActual}_`;
-                const q = `'${folderId}' in parents and name contains '${filtro}' and trashed = false`;
-                const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
-                const data = await res.json();
-                if(data.files) {
-                    data.files.forEach(f => {
-                        const card = document.createElement('div');
-                        card.className = 'prenda-card';
-                        let partes = f.name.replace('.png','').split('_');
-                        let nombre = partes.slice(2, partes.length - 1).join(' ') || "PRENDA";
-                        card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombre}</span>`;
-                        
-                        card.onmousedown = card.ontouchstart = () => { timerPulsacion = setTimeout(() => { modoSeleccion = true; toggleSeleccion(f, card); }, 600); };
-                        card.onmouseup = card.ontouchend = () => clearTimeout(timerPulsacion);
-                        card.onclick = () => { if(modoSeleccion) toggleSeleccion(f, card); };
-                        container.appendChild(card);
-                    });
-                }
-            } catch(e) {}
+            const folderId = await obtenerOCrearCarpeta('KINU_CLOSET', accessToken);
+            const filtro = todo ? "KINU_" : `KINU_${categoriaActual}_`;
+            const q = `'${folderId}' in parents and name contains '${filtro}' and trashed = false`;
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,thumbnailLink)`, { headers: { 'Authorization': 'Bearer ' + accessToken } });
+            const data = await res.json();
+            if(data.files) {
+                data.files.forEach(f => {
+                    const card = document.createElement('div');
+                    card.className = 'prenda-card';
+                    let partes = f.name.replace('.png','').split('_');
+                    let nombre = partes.slice(2, partes.length - 1).join(' ') || "PRENDA";
+                    card.innerHTML = `<img src="${f.thumbnailLink.replace('=s220','=s500')}"><span>${nombre}</span>`;
+                    card.onmousedown = card.ontouchstart = () => { timerPulsacion = setTimeout(() => { modoSeleccion = true; toggleSeleccion(f, card); }, 600); };
+                    card.onmouseup = card.ontouchend = () => clearTimeout(timerPulsacion);
+                    card.onclick = () => { if(modoSeleccion) toggleSeleccion(f, card); };
+                    container.appendChild(card);
+                });
+            }
         }
 
-        // --- FUNCIONES DE MODALES Y DRIVE (SIN CAMBIOS) ---
-        function abrirSelectorMover() {
-            let html = `<div style="font-weight:900; color:var(--verde-oscuro); margin-bottom:20px; text-transform:uppercase; font-size:12px;">Mover a...</div><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">`;
-            categorias.forEach(c => { html += `<button onclick="ejecutarMover('${c.n}')" style="background:var(--arena-boton); border:none; padding:12px 5px; border-radius:15px; display:flex; flex-direction:column; align-items:center; gap:5px;"><i class="ph ${c.i}" style="font-size:20px; color:var(--verde-oscuro);"></i><span style="font-size:8px; font-weight:800; color:var(--verde-oscuro);">${c.n}</span></button>`; });
-            html += `</div>`;
-            mostrarModalDinamico(html);
-        }
-
-        async function ejecutarMover(nuevaCat) {
-            cerrarModales();
-            const promesas = seleccionados.map(file => {
-                let partes = file.name.split('_');
-                partes[1] = nuevaCat.toUpperCase();
-                return fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: partes.join('_') }) });
-            });
-            await Promise.all(promesas);
+        function seleccionarCategoria(catNombre) { 
+            categoriaActual = catNombre; 
+            renderCats(); 
             cancelarSeleccion();
-            seleccionarCategoria(nuevaCat.toUpperCase());
-        }
-
-        function confirmarBorrado() {
-            const html = `<i class="ph ph-trash" style="font-size:40px; color:var(--rojo-borrar); margin-bottom:15px; display:block;"></i><div style="font-weight:900; color:var(--verde-oscuro); text-transform:uppercase; margin-bottom:25px;">¿Borrar ${seleccionados.length} prendas?</div><div style="display:flex; gap:10px;"><button onclick="cerrarModales()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--arena-boton); color:var(--verde-oscuro);">NO</button><button onclick="ejecutarBorrado()" style="flex:1; padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--rojo-borrar); color:white;">BORRAR</button></div>`;
-            mostrarModalDinamico(html);
-        }
-
-        async function ejecutarBorrado() {
-            cerrarModales();
-            const promesas = seleccionados.map(file => fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken } }));
-            await Promise.all(promesas);
-            cancelarSeleccion();
-            cargarPrendas(categoriaActual === '');
+            document.getElementById('btn-home').classList.remove('active'); 
+            cargarPrendas(false); 
         }
 
         function renderCats() {
@@ -302,22 +309,9 @@
             });
         }
 
-        function seleccionarCategoria(catNombre) { categoriaActual = catNombre; renderCats(); document.getElementById('btn-home').classList.remove('active'); cargarPrendas(false); }
-        function mostrarInicio() { categoriaActual = ''; renderCats(); document.getElementById('btn-home').classList.add('active'); document.getElementById('main-content').innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; padding-top:40px; color:white; text-align:center;"><i class="ph ph-sparkle" style="font-size:50px; opacity:0.3; margin-bottom:20px;"></i><h2 style="font-weight:900; font-size:14px;">KINU SMART CLOSET</h2></div>`; }
-        function cargarTodoElCloset() { categoriaActual = ''; renderCats(); document.getElementById('btn-home').classList.remove('active'); cargarPrendas(true); }
+        function mostrarInicio() { categoriaActual = ''; renderCats(); cancelarSeleccion(); document.getElementById('btn-home').classList.add('active'); document.getElementById('main-content').innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; padding-top:40px; color:white; text-align:center;"><i class="ph ph-sparkle" style="font-size:50px; opacity:0.3; margin-bottom:20px;"></i><h2 style="font-weight:900; font-size:14px;">KINU SMART CLOSET</h2></div>`; }
+        function cargarTodoElCloset() { categoriaActual = ''; renderCats(); cancelarSeleccion(); document.getElementById('btn-home').classList.remove('active'); cargarPrendas(true); }
         
-        function enviarAStudio(input) {
-            if (input.files?.[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    sessionStorage.setItem('imagen_para_procesar', e.target.result);
-                    document.getElementById('modal-studio').style.display = 'flex';
-                    document.getElementById('iframe-studio').src = 'photo_studio.html';
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
         async function obtenerOCrearCarpeta(n, token) {
             const q = `name = '${n}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
             const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': 'Bearer ' + token } });
@@ -329,6 +323,10 @@
 
         function mostrarModalDinamico(html) { document.getElementById('modal-dinamico-content').innerHTML = html; document.getElementById('modal-custom').style.display = 'flex'; }
         function cerrarModales() { document.getElementById('modal-custom').style.display = 'none'; }
+        function cerrarStudio() { document.getElementById('modal-studio').style.display = 'none'; document.getElementById('iframe-studio').src = 'about:blank'; }
+        function enviarAStudio(input) { if (input.files?.[0]) { const reader = new FileReader(); reader.onload = (e) => { sessionStorage.setItem('imagen_para_procesar', e.target.result); document.getElementById('modal-studio').style.display = 'flex'; document.getElementById('iframe-studio').src = 'photo_studio.html'; }; reader.readAsDataURL(input.files[0]); } }
+        
+        function toggleDrive() { tokenClient.requestAccessToken(); }
 
         function startGoogle() {
             gapi.load('client', () => {
